@@ -1,8 +1,12 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()"
       class="bg-white border border-slate-200 rounded-xl p-6 space-y-5">
   <div>
-    <h3 class="font-semibold text-slate-900">Nuevo cliente</h3>
-    <p class="text-sm text-slate-500">Registra un cliente del negocio.</p>
+    <h3 class="font-semibold text-slate-900">
+      @if (isEdit()) { Editar cliente } @else { Nuevo cliente }
+    </h3>
+    <p class="text-sm text-slate-500">
+      @if (isEdit()) { Modifica los datos del cliente. } @else { Registra un cliente del negocio. }
+    </p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -39,9 +43,9 @@
     <button type="submit" [disabled]="form.invalid || submitting()"
             class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg transition">
       @if (submitting()) {
-        Creando…
+        @if (isEdit()) { Guardando… } @else { Creando… }
       } @else {
-        Crear cliente
+        @if (isEdit()) { Guardar cambios } @else { Crear cliente }
       }
     </button>
   </div>

@@ -52,5 +52,8 @@
       (cancel)="closeForm()" />
   }
 
-  <app-caja-sales-list [sales]="sales()" [loading]="loading()" />
+  <app-caja-sales-list
+    [sales]="sales()"
+    [loading]="loading()"
+    (cancel)="handleCancel($event)" />
 </div>

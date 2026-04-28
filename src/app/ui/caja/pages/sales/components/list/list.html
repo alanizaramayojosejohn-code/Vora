@@ -16,11 +16,15 @@
           <th class="text-right px-6 py-3 font-medium text-slate-700">Cant.</th>
           <th class="text-right px-6 py-3 font-medium text-slate-700">Monto</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Fecha</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Estado</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         @for (sale of sales(); track sale.id) {
-          <tr class="hover:bg-slate-50">
+          <tr class="hover:bg-slate-50"
+              [class.opacity-60]="sale.cancelled_at"
+              [class.line-through]="sale.cancelled_at">
             <td class="px-6 py-3">
               <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
                     [class.bg-sky-100]="sale.type === 'product'"
@@ -41,6 +45,21 @@
             <td class="px-6 py-3 text-right font-mono text-slate-700">{{ sale.quantity }}</td>
             <td class="px-6 py-3 text-right font-mono text-slate-900">{{ sale.amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
             <td class="px-6 py-3 text-slate-500">{{ sale.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-6 py-3">
+              @if (sale.cancelled_at) {
+                <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-red-100 text-red-800">Cancelada</span>
+              } @else {
+                <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Activa</span>
+              }
+            </td>
+            <td class="px-6 py-3 text-right">
+              @if (!sale.cancelled_at) {
+                <button type="button" (click)="cancel.emit(sale)"
+                        class="text-red-700 hover:underline text-sm font-medium">Cancelar</button>
+              } @else {
+                <span class="text-slate-400 text-sm">—</span>
+              }
+            </td>
           </tr>
         }
       </tbody>

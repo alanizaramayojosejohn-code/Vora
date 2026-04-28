@@ -14,6 +14,7 @@
           <th class="text-left px-6 py-3 font-medium text-slate-700">Tipo</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">ID</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Creado</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
@@ -29,6 +30,12 @@
             </td>
             <td class="px-6 py-3 text-xs text-slate-500 font-mono">{{ business.id }}</td>
             <td class="px-6 py-3 text-slate-500">{{ business.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-6 py-3 text-right space-x-3">
+              <button type="button" (click)="edit.emit(business)"
+                      class="text-emerald-700 hover:underline text-sm font-medium">Editar</button>
+              <button type="button" (click)="remove.emit(business)"
+                      class="text-red-700 hover:underline text-sm font-medium">Borrar</button>
+            </td>
           </tr>
         }
       </tbody>

@@ -17,6 +17,7 @@
           <th class="text-right px-6 py-3 font-medium text-slate-700">Sesiones</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Servicios</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Alta</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
@@ -47,6 +48,12 @@
               }
             </td>
             <td class="px-6 py-3 text-slate-500">{{ plan.created_at | date: 'dd/MM/yyyy' }}</td>
+            <td class="px-6 py-3 text-right space-x-3">
+              <button type="button" (click)="edit.emit(plan)"
+                      class="text-emerald-700 hover:underline text-sm font-medium">Editar</button>
+              <button type="button" (click)="remove.emit(plan)"
+                      class="text-red-700 hover:underline text-sm font-medium">Borrar</button>
+            </td>
           </tr>
         }
       </tbody>

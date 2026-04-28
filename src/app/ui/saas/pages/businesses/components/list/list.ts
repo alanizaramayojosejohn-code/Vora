@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Business } from '../../../../../../models/business.model';
 
@@ -12,4 +12,6 @@ import { Business } from '../../../../../../models/business.model';
 export class BusinessesListComponent {
   readonly businesses = input.required<Business[]>();
   readonly loading = input<boolean>(false);
+  readonly edit = output<Business>();
+  readonly remove = output<Business>();
 }

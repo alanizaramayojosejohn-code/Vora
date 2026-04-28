@@ -11,6 +11,11 @@ export interface CreateBusinessWithAdminInput {
   services: string[];
 }
 
+export interface UpdateBusinessInput {
+  name: string;
+  type: BusinessType;
+}
+
 @Injectable({ providedIn: 'root' })
 export class BusinessService {
   private readonly client = inject(SupabaseService).client;
@@ -28,5 +33,24 @@ export class BusinessService {
     });
     if (error) throw error;
     return data as string;
+  }
+
+  async updateBusiness(id: string, input: UpdateBusinessInput): Promise<void> {
+    const { error } = await this.client
+      .from('businesses')
+      .update({ name: input.name, type: input.type })
+      .eq('id', id);
+    if (error) throw error;
+  }
+
+  // Hard delete con cascade: borra TODO lo asociado al business
+  // (profiles, clients, products, sales, plans, memberships, attendance...).
+  // El UI debe pedir confirmación explícita antes de invocarlo.
+  async deleteBusiness(id: string): Promise<void> {
+    const { error } = await this.client
+      .from('businesses')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   }
 }

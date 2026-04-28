@@ -4,23 +4,31 @@
       <h2 class="text-2xl font-bold text-slate-900">Usuarios del negocio</h2>
       <p class="text-slate-600 text-sm">Cajas y administradores con acceso al panel.</p>
     </div>
-    <button (click)="toggleForm()"
-            class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition">
-      @if (showForm()) {
+    @if (showForm()) {
+      <button (click)="closeForm()"
+              class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition">
         Cerrar formulario
-      } @else {
+      </button>
+    } @else {
+      <button (click)="openCreate()"
+              class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition">
         Nuevo usuario
-      }
-    </button>
+      </button>
+    }
   </div>
 
   @if (showForm()) {
     <app-admin-users-form
+      [value]="editing()"
       [submitting]="submitting()"
       [errorMessage]="formError()"
       (submitForm)="handleSubmit($event)"
-      (cancel)="toggleForm()" />
+      (cancel)="closeForm()" />
   }
 
-  <app-admin-users-list [users]="users()" [loading]="loading()" />
+  <app-admin-users-list
+    [users]="users()"
+    [loading]="loading()"
+    (edit)="openEdit($event)"
+    (remove)="handleDelete($event)" />
 </div>

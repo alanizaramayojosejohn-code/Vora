@@ -14,6 +14,7 @@
           <th class="text-left px-6 py-3 font-medium text-slate-700">CI</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Rol</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Alta</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
@@ -33,6 +34,16 @@
               </span>
             </td>
             <td class="px-6 py-3 text-slate-500">{{ user.created_at | date: 'dd/MM/yyyy' }}</td>
+            <td class="px-6 py-3 text-right space-x-3">
+              @if (user.role !== 'super_admin') {
+                <button type="button" (click)="edit.emit(user)"
+                        class="text-emerald-700 hover:underline text-sm font-medium">Editar</button>
+                <button type="button" (click)="remove.emit(user)"
+                        class="text-red-700 hover:underline text-sm font-medium">Borrar</button>
+              } @else {
+                <span class="text-slate-400 text-sm">—</span>
+              }
+            </td>
           </tr>
         }
       </tbody>

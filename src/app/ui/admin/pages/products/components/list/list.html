@@ -17,6 +17,7 @@
           <th class="text-right px-6 py-3 font-medium text-slate-700">Stock</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Proveedor</th>
           <th class="text-left px-6 py-3 font-medium text-slate-700">Alta</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
@@ -34,6 +35,12 @@
             </td>
             <td class="px-6 py-3 text-slate-600">{{ product.provider ?? '—' }}</td>
             <td class="px-6 py-3 text-slate-500">{{ product.created_at | date: 'dd/MM/yyyy' }}</td>
+            <td class="px-6 py-3 text-right space-x-3">
+              <button type="button" (click)="edit.emit(product)"
+                      class="text-emerald-700 hover:underline text-sm font-medium">Editar</button>
+              <button type="button" (click)="remove.emit(product)"
+                      class="text-red-700 hover:underline text-sm font-medium">Eliminar</button>
+            </td>
           </tr>
         }
       </tbody>

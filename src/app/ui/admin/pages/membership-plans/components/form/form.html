@@ -1,7 +1,9 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()"
       class="bg-white border border-slate-200 rounded-xl p-6 space-y-5">
   <div>
-    <h3 class="font-semibold text-slate-900">Nuevo plan</h3>
+    <h3 class="font-semibold text-slate-900">
+      @if (isEdit()) { Editar plan } @else { Nuevo plan }
+    </h3>
     <p class="text-sm text-slate-500">Define duración, precio y los servicios incluidos.</p>
   </div>
 
@@ -82,9 +84,9 @@
     <button type="submit" [disabled]="form.invalid || submitting()"
             class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg transition">
       @if (submitting()) {
-        Creando…
+        @if (isEdit()) { Guardando… } @else { Creando… }
       } @else {
-        Crear plan
+        @if (isEdit()) { Guardar cambios } @else { Crear plan }
       }
     </button>
   </div>
