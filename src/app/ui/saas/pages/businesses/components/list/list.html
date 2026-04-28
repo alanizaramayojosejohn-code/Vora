@@ -1,0 +1,37 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (businesses().length === 0) {
+    <div class="px-6 py-12 text-center">
+      <p class="text-slate-500">Aún no hay negocios registrados.</p>
+      <p class="text-sm text-slate-400 mt-1">Crea el primero con el botón "Nuevo negocio".</p>
+    </div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Nombre</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Tipo</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">ID</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Creado</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (business of businesses(); track business.id) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3 font-medium text-slate-900">{{ business.name }}</td>
+            <td class="px-6 py-3">
+              @if (business.type === 'gym') {
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">Gimnasio</span>
+              } @else {
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-100 text-sky-800">POS</span>
+              }
+            </td>
+            <td class="px-6 py-3 text-xs text-slate-500 font-mono">{{ business.id }}</td>
+            <td class="px-6 py-3 text-slate-500">{{ business.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

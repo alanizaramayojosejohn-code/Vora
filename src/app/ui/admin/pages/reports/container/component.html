@@ -1,0 +1,19 @@
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-8">
+  <div>
+    <h2 class="text-2xl font-bold text-slate-900">Reports</h2>
+    @if (isGym()) {
+      <p class="text-slate-600 text-sm">Resumen del negocio: ingresos, membresías vigentes y productos con stock bajo.</p>
+    } @else {
+      <p class="text-slate-600 text-sm">Resumen del negocio: ingresos y productos con stock bajo.</p>
+    }
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <app-admin-reports-monthly-income [rows]="monthly()" [loading]="loading()" />
+    <app-admin-reports-daily-income [rows]="daily()" [loading]="loading()" />
+    @if (isGym()) {
+      <app-admin-reports-active-memberships [rows]="active()" [loading]="loading()" />
+    }
+    <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
+  </div>
+</div>

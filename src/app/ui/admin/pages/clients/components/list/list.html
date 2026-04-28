@@ -1,0 +1,31 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (clients().length === 0) {
+    <div class="px-6 py-12 text-center">
+      <p class="text-slate-500">Aún no hay clientes registrados.</p>
+      <p class="text-sm text-slate-400 mt-1">Crea el primero con el botón "Nuevo cliente".</p>
+    </div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">CI</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Nombre</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Teléfono</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Alta</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (client of clients(); track client.id) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3 font-mono text-slate-700">{{ client.ci }}</td>
+            <td class="px-6 py-3 font-medium text-slate-900">{{ client.name }}</td>
+            <td class="px-6 py-3 text-slate-600">{{ client.phone ?? '—' }}</td>
+            <td class="px-6 py-3 text-slate-500">{{ client.created_at | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

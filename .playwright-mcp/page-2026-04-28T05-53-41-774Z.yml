@@ -1,0 +1,28 @@
+- generic [ref=e121]:
+  - banner [ref=e122]:
+    - generic [ref=e123]:
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - heading "SaasGym" [level=1] [ref=e126]
+          - generic [ref=e127]: Admin
+        - navigation [ref=e128]:
+          - link "Inicio" [ref=e129] [cursor=pointer]:
+            - /url: /admin/home
+          - link "Clientes" [ref=e130] [cursor=pointer]:
+            - /url: /admin/clients
+          - link "Productos" [ref=e131] [cursor=pointer]:
+            - /url: /admin/products
+          - link "Usuarios" [ref=e132] [cursor=pointer]:
+            - /url: /admin/users
+          - link "Ventas" [ref=e133] [cursor=pointer]:
+            - /url: /caja/sales
+          - link "Reports" [ref=e134] [cursor=pointer]:
+            - /url: /admin/reports
+      - generic [ref=e135]:
+        - generic [ref=e136]: Jose ·admin
+        - button "Salir" [ref=e137]
+  - main [ref=e138]:
+    - generic [ref=e140]:
+      - heading "Panel de administración" [level=2] [ref=e141]
+      - paragraph [ref=e142]: Aquí gestionarás clientes, productos, membresías, usuarios y reports.
+      - paragraph [ref=e143]: "Pendiente: clients, products, membership-plans, users, reports."

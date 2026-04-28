@@ -1,0 +1,49 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (sales().length === 0) {
+    <div class="px-6 py-12 text-center">
+      <p class="text-slate-500">Aún no hay ventas registradas.</p>
+      <p class="text-sm text-slate-400 mt-1">Registra la primera con los botones de arriba.</p>
+    </div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Tipo</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Detalle</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Cliente</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Cant.</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Monto</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Fecha</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (sale of sales(); track sale.id) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3">
+              <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                    [class.bg-sky-100]="sale.type === 'product'"
+                    [class.text-sky-800]="sale.type === 'product'"
+                    [class.bg-emerald-100]="sale.type === 'membership'"
+                    [class.text-emerald-800]="sale.type === 'membership'">
+                {{ sale.type === 'product' ? 'Producto' : 'Membresía' }}
+              </span>
+            </td>
+            <td class="px-6 py-3 font-medium text-slate-900">
+              @if (sale.type === 'product') {
+                {{ sale.product_name ?? '—' }}
+              } @else {
+                {{ sale.plan_name ?? '—' }}
+              }
+            </td>
+            <td class="px-6 py-3 text-slate-600">{{ sale.client_label ?? '—' }}</td>
+            <td class="px-6 py-3 text-right font-mono text-slate-700">{{ sale.quantity }}</td>
+            <td class="px-6 py-3 text-right font-mono text-slate-900">{{ sale.amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-3 text-slate-500">{{ sale.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,0 +1,29 @@
+- generic [ref=e101]:
+  - banner [ref=e102]:
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - generic [ref=e105]:
+          - heading "SaasGym" [level=1] [ref=e106]
+          - generic [ref=e107]: Caja
+        - navigation [ref=e108]:
+          - link "Inicio" [ref=e109] [cursor=pointer]:
+            - /url: /caja/home
+          - link "Ventas" [ref=e110] [cursor=pointer]:
+            - /url: /caja/sales
+          - link "Asistencia" [ref=e111] [cursor=pointer]:
+            - /url: /caja/attendance
+      - generic [ref=e112]:
+        - generic [ref=e113]: Admin Gym ·admin
+        - button "Salir" [ref=e114]
+  - main [ref=e115]:
+    - generic [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - heading "Ventas" [level=2] [ref=e120]
+          - paragraph [ref=e121]: Registra ventas de productos y asigna membresías a socios.
+        - generic [ref=e122]:
+          - button "Vender producto" [ref=e123]
+          - button "Vender membresía" [ref=e124]
+      - generic [ref=e127]:
+        - paragraph [ref=e128]: Aún no hay ventas registradas.
+        - paragraph [ref=e129]: Registra la primera con los botones de arriba.

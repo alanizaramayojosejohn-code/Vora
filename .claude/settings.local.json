@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(ng version *)",
+      "Read(//c/Users/Jose/Desktop/**)",
+      "Bash(ng new *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(npx ng *)",
+      "Bash(npm start *)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_close",
+      "Bash(rm -f \"C:/Users/Jose/AppData/Local/ms-playwright/mcp-chrome-51f7faa/SingletonLock\")",
+      "Read(//c/Users/Jose/AppData/Local/ms-playwright/mcp-chrome-51f7faa/**)",
+      "Bash(tasklist //FI \"IMAGENAME eq chrome.exe\")",
+      "PowerShell(Get-CimInstance *)",
+      "Bash(curl *)",
+      "PowerShell(Test-Path *)",
+      "Bash(wmic process *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(supabase --version)",
+      "Bash(cat supabase/migrations/20260427000000_initial_schema.sql supabase/migrations/20260427010000_functions.sql supabase/migrations/20260427020000_views.sql)",
+      "Read(//tmp/**)",
+      "Bash(scoop --version)",
+      "Bash(choco --version)",
+      "Bash(winget --version)",
+      "mcp__playwright__browser_wait_for"
+    ]
+  }
+}

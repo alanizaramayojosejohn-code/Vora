@@ -1,0 +1,19 @@
+- generic [ref=e48]:
+  - generic [ref=e49]:
+    - heading "SaasGym" [level=1] [ref=e50]
+    - paragraph [ref=e51]: Gestión de negocios
+  - generic [ref=e53]:
+    - heading "Iniciar sesión" [level=2] [ref=e54]
+    - paragraph [ref=e55]: Ingresa con tu cuenta para continuar.
+    - button "Continuar con Google" [ref=e56]:
+      - img [ref=e57]
+      - text: Continuar con Google
+    - generic [ref=e64]: o continúa con email
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e68]: Email
+        - textbox "Email" [ref=e69]
+      - generic [ref=e70]:
+        - generic [ref=e71]: Contraseña
+        - textbox "Contraseña" [ref=e72]
+      - button "Entrar" [disabled] [ref=e73]

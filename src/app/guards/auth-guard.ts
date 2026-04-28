@@ -1,0 +1,48 @@
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth/auth.service';
+
+// Sólo autenticados.
+export const authGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  return inject(AuthService).isAuthenticated() ? true : router.parseUrl('/login');
+};
+
+// Sólo NO autenticados (login, recover password). Si ya está logueado,
+// redirige al home según rol.
+export const noAuthGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (!auth.isAuthenticated()) return true;
+  switch (auth.role()) {
+    case 'super_admin': return router.parseUrl('/saas');
+    case 'admin':       return router.parseUrl('/admin');
+    case 'caja':        return router.parseUrl('/caja');
+    default:            return router.parseUrl('/login');
+  }
+};
+
+// super_admin del SaaS. NO incluye a admin de negocio.
+export const superAdminGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  return inject(AuthService).role() === 'super_admin'
+    ? true
+    : router.parseUrl('/login');
+};
+
+// admin de negocio. super_admin NO entra (no pertenece a un business).
+export const adminGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  return inject(AuthService).role() === 'admin'
+    ? true
+    : router.parseUrl('/login');
+};
+
+// caja del negocio. admin también puede usar todo lo de caja.
+export const cajaGuard: CanActivateFn = () => {
+  const role = inject(AuthService).role();
+  const router = inject(Router);
+  return role === 'caja' || role === 'admin'
+    ? true
+    : router.parseUrl('/login');
+};

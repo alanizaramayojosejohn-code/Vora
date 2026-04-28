@@ -1,0 +1,68 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - heading "SaasGym" [level=1] [ref=e9]
+          - generic [ref=e10]: SaaS
+        - navigation [ref=e11]:
+          - link "Inicio" [ref=e12] [cursor=pointer]:
+            - /url: /saas/home
+          - link "Negocios" [ref=e13] [cursor=pointer]:
+            - /url: /saas/businesses
+      - generic [ref=e14]:
+        - generic [ref=e15]: José Alaniz ·super_admin
+        - button "Salir" [ref=e16]
+  - main [ref=e17]:
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - heading "Negocios" [level=2] [ref=e22]
+          - paragraph [ref=e23]: "Cada negocio es un tenant aislado. Tipos: POS o gimnasio."
+        - button "Cerrar formulario" [active] [ref=e41]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Nuevo negocio" [level=3] [ref=e45]
+          - paragraph [ref=e46]: Crea un negocio (POS o gimnasio) y asigna su primer admin.
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - generic [ref=e49]: Nombre del negocio
+            - textbox "Nombre del negocio" [ref=e50]
+          - generic [ref=e51]:
+            - generic [ref=e52]: Tipo de negocio
+            - combobox "Tipo de negocio" [ref=e53]:
+              - option "POS — productos + ventas"
+              - option "Gimnasio — POS + membresías + asistencia" [selected]
+          - generic [ref=e54]:
+            - generic [ref=e55]: UUID del admin (auth.users)
+            - textbox "UUID del admin (auth.users)" [ref=e56]:
+              - /placeholder: 00000000-0000-0000-0000-000000000000
+            - paragraph [ref=e57]: Pega el id del usuario creado en Authentication → Users.
+          - generic [ref=e58]:
+            - generic [ref=e59]: Nombre del admin
+            - textbox "Nombre del admin" [ref=e60]
+          - generic [ref=e61]:
+            - generic [ref=e62]: CI del admin
+            - textbox "CI del admin" [ref=e63]
+        - generic [ref=e64]:
+          - generic [ref=e65]: Servicios disponibles
+          - textbox "Servicios disponibles" [ref=e66]:
+            - /placeholder: máquinas, zumba, entrenador personal, nutricionista
+          - paragraph [ref=e67]: Sepáralos por comas. Puedes agregar más después.
+        - generic [ref=e68]:
+          - button "Cancelar" [ref=e69]
+          - button "Crear negocio" [disabled] [ref=e70]
+      - table [ref=e27]:
+        - rowgroup [ref=e28]:
+          - row "Nombre Tipo ID Creado" [ref=e29]:
+            - columnheader "Nombre" [ref=e30]
+            - columnheader "Tipo" [ref=e31]
+            - columnheader "ID" [ref=e32]
+            - columnheader "Creado" [ref=e33]
+        - rowgroup [ref=e34]:
+          - row "FatumNeo POS a83e8d1c-6438-4f05-834b-cb40545ca8a3 28/04/2026 01:38" [ref=e35]:
+            - cell "FatumNeo" [ref=e36]
+            - cell "POS" [ref=e37]:
+              - generic [ref=e38]: POS
+            - cell "a83e8d1c-6438-4f05-834b-cb40545ca8a3" [ref=e39]
+            - cell "28/04/2026 01:38" [ref=e40]

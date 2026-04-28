@@ -1,0 +1,55 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (plans().length === 0) {
+    <div class="px-6 py-12 text-center">
+      <p class="text-slate-500">Aún no hay planes de membresía.</p>
+      <p class="text-sm text-slate-400 mt-1">Crea el primero con el botón "Nuevo plan".</p>
+    </div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Nombre</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Tipo</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Precio</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Días</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Sesiones</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Servicios</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Alta</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (plan of plans(); track plan.id) {
+          <tr class="hover:bg-slate-50 align-top">
+            <td class="px-6 py-3 font-medium text-slate-900">{{ plan.name }}</td>
+            <td class="px-6 py-3">
+              <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                    [class.bg-slate-100]="plan.type === 'normal'"
+                    [class.text-slate-700]="plan.type === 'normal'"
+                    [class.bg-amber-100]="plan.type === 'promo'"
+                    [class.text-amber-800]="plan.type === 'promo'">
+                {{ plan.type === 'normal' ? 'Normal' : 'Promo' }}
+              </span>
+            </td>
+            <td class="px-6 py-3 text-right font-mono text-slate-700">{{ plan.price | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-3 text-right font-mono text-slate-700">{{ plan.duration_days }}</td>
+            <td class="px-6 py-3 text-right font-mono text-slate-700">{{ plan.sessions_number ?? '∞' }}</td>
+            <td class="px-6 py-3 text-slate-600">
+              @if (plan.service_names.length === 0) {
+                <span class="text-slate-400">—</span>
+              } @else {
+                <div class="flex flex-wrap gap-1">
+                  @for (svc of plan.service_names; track svc) {
+                    <span class="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">{{ svc }}</span>
+                  }
+                </div>
+              }
+            </td>
+            <td class="px-6 py-3 text-slate-500">{{ plan.created_at | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

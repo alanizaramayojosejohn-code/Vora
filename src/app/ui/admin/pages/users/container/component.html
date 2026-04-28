@@ -1,0 +1,26 @@
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">Usuarios del negocio</h2>
+      <p class="text-slate-600 text-sm">Cajas y administradores con acceso al panel.</p>
+    </div>
+    <button (click)="toggleForm()"
+            class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition">
+      @if (showForm()) {
+        Cerrar formulario
+      } @else {
+        Nuevo usuario
+      }
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <app-admin-users-form
+      [submitting]="submitting()"
+      [errorMessage]="formError()"
+      (submitForm)="handleSubmit($event)"
+      (cancel)="toggleForm()" />
+  }
+
+  <app-admin-users-list [users]="users()" [loading]="loading()" />
+</div>

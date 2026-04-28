@@ -1,0 +1,25 @@
+- generic [ref=e145]:
+  - banner [ref=e146]:
+    - generic [ref=e147]:
+      - generic [ref=e148]:
+        - generic [ref=e149]:
+          - heading "SaasGym" [level=1] [ref=e150]
+          - generic [ref=e151]: Caja
+        - navigation [ref=e152]:
+          - link "Inicio" [ref=e153] [cursor=pointer]:
+            - /url: /caja/home
+          - link "Ventas" [ref=e154] [cursor=pointer]:
+            - /url: /caja/sales
+      - generic [ref=e155]:
+        - generic [ref=e156]: Jose ·admin
+        - button "Salir" [ref=e157]
+  - main [ref=e158]:
+    - generic [ref=e160]:
+      - generic [ref=e161]:
+        - generic [ref=e162]:
+          - heading "Ventas" [level=2] [ref=e163]
+          - paragraph [ref=e164]: Registra ventas de productos.
+        - button "Vender producto" [ref=e166]
+      - generic [ref=e169]:
+        - paragraph [ref=e170]: Aún no hay ventas registradas.
+        - paragraph [ref=e171]: Registra la primera con los botones de arriba.

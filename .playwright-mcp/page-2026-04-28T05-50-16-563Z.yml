@@ -1,0 +1,42 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - heading "SaasGym" [level=1] [ref=e9]
+          - generic [ref=e10]: SaaS
+        - navigation [ref=e11]:
+          - link "Inicio" [ref=e12] [cursor=pointer]:
+            - /url: /saas/home
+          - link "Negocios" [ref=e13] [cursor=pointer]:
+            - /url: /saas/businesses
+      - generic [ref=e14]:
+        - generic [ref=e15]: José Alaniz ·super_admin
+        - button "Salir" [ref=e16]
+  - main [ref=e17]:
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - heading "Negocios" [level=2] [ref=e22]
+          - paragraph [ref=e23]: "Cada negocio es un tenant aislado. Tipos: POS o gimnasio."
+        - button "Nuevo negocio" [ref=e71]
+      - table [ref=e72]:
+        - rowgroup [ref=e73]:
+          - row "Nombre Tipo ID Creado" [ref=e74]:
+            - columnheader "Nombre" [ref=e75]
+            - columnheader "Tipo" [ref=e76]
+            - columnheader "ID" [ref=e77]
+            - columnheader "Creado" [ref=e78]
+        - rowgroup [ref=e79]:
+          - row "GymTest Gimnasio 5e998a39-d15f-43c8-a519-ef0756d68698 28/04/2026 01:49" [ref=e80]:
+            - cell "GymTest" [ref=e81]
+            - cell "Gimnasio" [ref=e82]:
+              - generic [ref=e83]: Gimnasio
+            - cell "5e998a39-d15f-43c8-a519-ef0756d68698" [ref=e84]
+            - cell "28/04/2026 01:49" [ref=e85]
+          - row "FatumNeo POS a83e8d1c-6438-4f05-834b-cb40545ca8a3 28/04/2026 01:38" [ref=e86]:
+            - cell "FatumNeo" [ref=e87]
+            - cell "POS" [ref=e88]:
+              - generic [ref=e89]: POS
+            - cell "a83e8d1c-6438-4f05-834b-cb40545ca8a3" [ref=e90]
+            - cell "28/04/2026 01:38" [ref=e91]

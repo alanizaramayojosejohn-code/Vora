@@ -1,0 +1,20 @@
+- generic [ref=e5]:
+  - generic [ref=e6]:
+    - heading "SaasGym" [level=1] [ref=e7]
+    - paragraph [ref=e8]: Gestión de gimnasios
+  - generic [ref=e10]:
+    - heading "Iniciar sesión" [level=2] [ref=e11]
+    - paragraph [ref=e12]: Ingresa con tu cuenta para continuar.
+    - button "Continuar con Google" [ref=e13]:
+      - img [ref=e14]
+      - text: Continuar con Google
+    - generic [ref=e21]: o continúa con email
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]: Email
+        - textbox "Email" [ref=e26]: josejohnalanizaramayo@gmail.com
+      - generic [ref=e27]:
+        - generic [ref=e28]: Contraseña
+        - textbox "Contraseña" [ref=e29]: Josi1234
+      - generic [ref=e31]: Email o contraseña incorrectos
+      - button "Entrar" [ref=e30]

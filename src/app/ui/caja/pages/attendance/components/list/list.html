@@ -1,0 +1,29 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (attendance().length === 0) {
+    <div class="px-6 py-12 text-center">
+      <p class="text-slate-500">Aún no hay asistencias registradas.</p>
+      <p class="text-sm text-slate-400 mt-1">Registra la primera con el formulario de arriba.</p>
+    </div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Socio</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Plan</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Ingresó</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (att of attendance(); track att.id) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3 font-medium text-slate-900">{{ att.client_label }}</td>
+            <td class="px-6 py-3 text-slate-600">{{ att.plan_name ?? '—' }}</td>
+            <td class="px-6 py-3 text-slate-500">{{ att.attended_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

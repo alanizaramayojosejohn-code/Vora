@@ -1,0 +1,23 @@
+- generic [ref=e32]:
+  - banner [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "SaasGym" [level=1] [ref=e37]
+          - generic [ref=e38]: SaaS
+        - navigation [ref=e39]:
+          - link "Inicio" [ref=e40] [cursor=pointer]:
+            - /url: /saas/home
+          - link "Negocios" [ref=e41] [cursor=pointer]:
+            - /url: /saas/businesses
+      - generic [ref=e42]:
+        - generic [ref=e43]: José Alaniz ·super_admin
+        - button "Salir" [ref=e44]
+  - main [ref=e45]:
+    - generic [ref=e47]:
+      - heading "Panel del SaaS" [level=2] [ref=e48]
+      - paragraph [ref=e49]: Gestiona los negocios y sus administradores.
+      - link "Negocios Lista, alta y configuración inicial." [ref=e51] [cursor=pointer]:
+        - /url: /saas/businesses
+        - heading "Negocios" [level=3] [ref=e52]
+        - paragraph [ref=e53]: Lista, alta y configuración inicial.

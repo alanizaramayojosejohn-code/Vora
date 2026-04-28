@@ -1,0 +1,35 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  <header class="px-6 py-4 border-b border-slate-100">
+    <h3 class="font-semibold text-slate-900">Ingresos mensuales</h3>
+    <p class="text-xs text-slate-500">Últimos 12 meses, separados por tipo de venta.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (pivoted().length === 0) {
+    <div class="px-6 py-12 text-center text-sm text-slate-500">Sin ingresos en el período.</div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-2 font-medium text-slate-700">Mes</th>
+          <th class="text-right px-6 py-2 font-medium text-slate-700">Productos</th>
+          <th class="text-right px-6 py-2 font-medium text-slate-700">Membresías</th>
+          <th class="text-right px-6 py-2 font-medium text-slate-700">Total</th>
+          <th class="text-right px-6 py-2 font-medium text-slate-700">Trans.</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (row of pivoted(); track row.month) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-2 text-slate-700">{{ row.month | date: 'MMM yyyy' }}</td>
+            <td class="px-6 py-2 text-right font-mono text-slate-600">{{ row.product | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-2 text-right font-mono text-slate-600">{{ row.membership | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-2 text-right font-mono font-semibold text-slate-900">{{ row.total | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-2 text-right font-mono text-slate-500">{{ row.transactions }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,0 +1,42 @@
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  @if (loading()) {
+    <div class="px-6 py-8 text-center text-sm text-slate-500">Cargando…</div>
+  } @else if (products().length === 0) {
+    <div class="px-6 py-12 text-center">
+      <p class="text-slate-500">Aún no hay productos registrados.</p>
+      <p class="text-sm text-slate-400 mt-1">Crea el primero con el botón "Nuevo producto".</p>
+    </div>
+  } @else {
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Nombre</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Categoría</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Precio</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Costo</th>
+          <th class="text-right px-6 py-3 font-medium text-slate-700">Stock</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Proveedor</th>
+          <th class="text-left px-6 py-3 font-medium text-slate-700">Alta</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        @for (product of products(); track product.id) {
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3 font-medium text-slate-900">{{ product.name }}</td>
+            <td class="px-6 py-3 text-slate-600">{{ product.category ?? '—' }}</td>
+            <td class="px-6 py-3 text-right font-mono text-slate-700">{{ product.price | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-3 text-right font-mono text-slate-500">{{ product.cost | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+            <td class="px-6 py-3 text-right font-mono"
+                [class.text-red-600]="product.stock === 0"
+                [class.text-amber-600]="product.stock > 0 && product.stock < 5"
+                [class.text-slate-700]="product.stock >= 5">
+              {{ product.stock }}
+            </td>
+            <td class="px-6 py-3 text-slate-600">{{ product.provider ?? '—' }}</td>
+            <td class="px-6 py-3 text-slate-500">{{ product.created_at | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
