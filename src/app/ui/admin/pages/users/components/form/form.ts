@@ -2,11 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Profile, UserRole } from '../../../../../../models/profile.model';
 
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
-// Shape unificado que emite el form. user_id solo se usa en modo create.
+// Shape unificado que emite el form. email/password solo se usan en modo create.
 export interface UserFormValue {
-  user_id: string;
+  email: string;
+  password: string;
   name: string;
   ci: string;
   role: Extract<UserRole, 'admin' | 'caja'>;
@@ -31,7 +30,8 @@ export class UsersFormComponent {
   readonly isEdit = computed(() => this.value() !== null);
 
   readonly form = this.fb.nonNullable.group({
-    user_id: ['', [Validators.required, Validators.pattern(UUID_REGEX)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     name: ['', [Validators.required, Validators.minLength(2)]],
     ci: ['', [Validators.required]],
     role: ['caja' as 'admin' | 'caja', [Validators.required]],
@@ -41,15 +41,16 @@ export class UsersFormComponent {
     effect(() => {
       const v = this.value();
       if (v) {
-        // En edit no editamos user_id; lo deshabilitamos para que el form siga válido sin pattern.
-        this.form.controls.user_id.disable({ emitEvent: false });
-        // role en super_admin no debería aparecer en este form (los super_admin no van por business),
-        // pero por las dudas lo coercemos a 'caja' para que el typed control no rompa.
+        // En edit no manejamos credenciales; las deshabilitamos para que el form
+        // siga válido sin email/password.
+        this.form.controls.email.disable({ emitEvent: false });
+        this.form.controls.password.disable({ emitEvent: false });
         const role: 'admin' | 'caja' = v.role === 'admin' ? 'admin' : 'caja';
-        this.form.reset({ user_id: '', name: v.name, ci: v.ci, role });
+        this.form.reset({ email: '', password: '', name: v.name, ci: v.ci, role });
       } else {
-        this.form.controls.user_id.enable({ emitEvent: false });
-        this.form.reset({ user_id: '', name: '', ci: '', role: 'caja' });
+        this.form.controls.email.enable({ emitEvent: false });
+        this.form.controls.password.enable({ emitEvent: false });
+        this.form.reset({ email: '', password: '', name: '', ci: '', role: 'caja' });
       }
     });
   }
@@ -58,7 +59,8 @@ export class UsersFormComponent {
     if (this.form.invalid || this.submitting()) return;
     const raw = this.form.getRawValue();
     this.submitForm.emit({
-      user_id: raw.user_id.trim(),
+      email: raw.email.trim().toLowerCase(),
+      password: raw.password,
       name: raw.name.trim(),
       ci: raw.ci.trim(),
       role: raw.role,

@@ -72,7 +72,8 @@ export class AdminUsersContainerComponent {
         });
       } else {
         await this.profileService.createUserForBusiness({
-          user_id: input.user_id,
+          email: input.email,
+          password: input.password,
           name: input.name,
           ci: input.ci,
           role: input.role,

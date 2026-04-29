@@ -366,6 +366,11 @@ allow_dynamic_registration = false
 
 [edge_runtime]
 enabled = true
+
+# create-business-user valida el JWT manualmente en el código (porque también
+# necesita el preflight OPTIONS sin Authorization). No usar verify_jwt del gateway.
+[functions.create-business-user]
+verify_jwt = false
 # Supported request policies: `oneshot`, `per_worker`.
 # `per_worker` (default) — enables hot reload during local development.
 # `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).

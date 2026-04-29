@@ -4,10 +4,12 @@ import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
 export interface CreateUserForBusinessInput {
-  user_id: string;
+  email: string;
+  password: string;
   name: string;
   ci: string;
   role: Extract<UserRole, 'admin' | 'caja'>;
+  business_id?: string; // solo super_admin lo usa
 }
 
 export interface UpdateProfileInput {
@@ -21,21 +23,35 @@ export class ProfileService {
   private readonly client = inject(SupabaseService).client;
   private readonly auth = inject(AuthService);
 
-  // RPC create_user_for_business: crea profile para un auth.user existente.
-  // El admin caller solo puede crear users en su propio negocio.
+  // Edge Function create-business-user: crea auth.user + profile en una sola llamada.
+  // Para admin: business_id = el del caller (el server lo resuelve, ignora el del body).
+  // Para super_admin: requiere business_id explícito.
   async createUserForBusiness(input: CreateUserForBusinessInput): Promise<string> {
-    const businessId = this.auth.businessId();
-    if (!businessId) throw new Error('Tu cuenta no tiene un negocio asignado.');
-
-    const { data, error } = await this.client.rpc('create_user_for_business', {
-      p_user_id: input.user_id,
-      p_business_id: businessId,
-      p_name: input.name,
-      p_ci: input.ci,
-      p_role: input.role,
+    const { data, error } = await this.client.functions.invoke('create-business-user', {
+      body: {
+        email: input.email,
+        password: input.password,
+        name: input.name,
+        ci: input.ci,
+        role: input.role,
+        business_id: input.business_id,
+      },
     });
-    if (error) throw error;
-    return data as string;
+    if (error) {
+      // FunctionsHttpError trae el body de error en .context — lo extraemos para
+      // mostrar el mensaje real ("La password debe tener al menos…", etc.).
+      const ctx = (error as { context?: Response }).context;
+      if (ctx && typeof ctx.json === 'function') {
+        try {
+          const payload = await ctx.json();
+          if (payload?.error) throw new Error(payload.error);
+        } catch (parseErr) {
+          if (parseErr instanceof Error && parseErr.message) throw parseErr;
+        }
+      }
+      throw error;
+    }
+    return (data as { user_id: string }).user_id;
   }
 
   // Update solo de campos editables (name, ci, role). business_id e id no se tocan.
