@@ -14,17 +14,27 @@ export type ThemePresetKey =
   | 'plum'
   | 'graphite';
 
+// Mode es preferencia GLOBAL del usuario, no del negocio: lo guarda
+// theme.service en localStorage y aplica encima del preset asignado por
+// el super_admin. Tres opciones; 'system' sigue prefers-color-scheme.
 export type ThemeMode = 'light' | 'dark' | 'system';
 
+// La fila de DB sigue teniendo ambos campos por compatibilidad (los
+// negocios viejos pueden tener un mode persistido que ahora ignoramos),
+// pero el codigo solo lee preset.
 export interface BusinessTheme {
   preset: ThemePresetKey;
-  mode: ThemeMode;
 }
 
 export const DEFAULT_THEME: BusinessTheme = {
   preset: 'monochrome',
-  mode: 'system',
 };
+
+export const DEFAULT_MODE: ThemeMode = 'system';
+
+// Clave localStorage. Cambiar este string es breaking: descarta la
+// preferencia que tuvieran los usuarios.
+export const THEME_MODE_STORAGE_KEY = 'saasgym.theme.mode';
 
 // Tokens semánticos. Mantener este shape sincronizado con styles.css.
 // Los nombres mapean a utilities Tailwind (bg-base, text-foreground, etc.).

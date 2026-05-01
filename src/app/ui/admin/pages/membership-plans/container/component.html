@@ -32,4 +32,20 @@
     [loading]="loading()"
     (edit)="openEdit($event)"
     (remove)="handleDelete($event)" />
+
+  @if (deleting(); as p) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar este plan?"
+      [description]="deletingError() ?? 'No se puede deshacer. Si hay socios activos con este plan, la operación fallará.'"
+      confirmLabel="Eliminar plan"
+      [entityLabel]="p.name"
+      [entitySublabel]="deletingSublabel()"
+      [entityInitials]="deletingInitials()"
+      [amount]="deletingPrice()"
+      amountLabel="Precio"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
 </div>

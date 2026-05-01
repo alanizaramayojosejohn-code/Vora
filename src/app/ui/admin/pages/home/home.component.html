@@ -1,5 +1,449 @@
-<div class="max-w-7xl mx-auto px-6 py-10">
-  <h2 class="text-2xl font-bold text-slate-900 mb-2">Panel de administración</h2>
-  <p class="text-slate-600">Aquí gestionarás clientes, productos, membresías, usuarios y reports.</p>
-  <p class="text-sm text-slate-400 mt-6">Pendiente: clients, products, membership-plans, users, reports.</p>
-</div>
+@if (isGym()) {
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       GYM DASHBOARD — Glassmorphism B&W (dark) / Light
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="px-8 py-8 space-y-6 max-w-7xl mx-auto">
+
+    <!-- Topbar -->
+    <div class="flex items-center gap-4 px-5 py-4 rounded-2xl bg-surface backdrop-blur-2xl border border-border-subtle shadow-sm">
+      <div class="flex-1 min-w-0">
+        <h2 class="text-base font-semibold text-foreground tracking-tight leading-none">Bienvenido, {{ auth.profile()?.name ?? 'admin' }}</h2>
+        <p class="text-xs text-foreground-muted mt-0.5">{{ now() | date: 'EEEE · d MMM yyyy' : '' : 'es-BO' }}</p>
+      </div>
+
+      <!-- Search -->
+      <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-elevated border border-border-subtle w-72">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-faint flex-shrink-0">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <span class="text-xs text-foreground-faint flex-1">Buscar socios, clases…</span>
+        <span class="text-[10px] font-semibold text-foreground-faint px-1.5 py-0.5 rounded bg-muted border border-border-subtle">⌘K</span>
+      </div>
+
+      <!-- Icon buttons -->
+      <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-elevated border border-border-subtle text-foreground-muted hover:text-foreground transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+
+      <!-- CTA -->
+      <a routerLink="/admin/clients"
+         class="flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-base text-sm font-semibold hover:opacity-90 transition shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg>
+        Nuevo socio
+      </a>
+    </div>
+
+    <!-- KPI Row (2 cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- KPI: Socios activos -->
+      <div class="bg-surface backdrop-blur-2xl border border-border-subtle rounded-2xl p-5 shadow-sm space-y-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-elevated border border-border-subtle flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-foreground-muted flex-1">Socios activos</span>
+          @if (expiringSoonCount() > 0) {
+            <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-elevated border border-border-subtle text-[10px] font-semibold text-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
+              {{ expiringSoonCount() }} por vencer
+            </span>
+          }
+        </div>
+
+        <p class="text-4xl font-bold text-foreground tracking-tight leading-none">{{ activeCount() }}</p>
+
+        <div class="flex items-end justify-between gap-3">
+          <span class="text-xs text-foreground-subtle">membresías activas hoy</span>
+          <!-- Sparkline mini bars -->
+          <div class="flex items-end gap-0.5 h-6">
+            @for (h of sparklineBars(); track $index) {
+              <div class="w-1 rounded-sm bg-foreground/30 last:bg-foreground/80"
+                   [style.height.px]="h"></div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI: Ingresos del mes -->
+      <div class="bg-surface backdrop-blur-2xl border border-border-subtle rounded-2xl p-5 shadow-sm space-y-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-elevated border border-border-subtle flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted">
+              <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <span class="text-xs font-medium text-foreground-muted flex-1">Ingresos del mes</span>
+          @if (monthOverMonth(); as delta) {
+            <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-elevated border border-border-subtle text-[10px] font-semibold"
+                  [class.text-foreground]="delta >= 0"
+                  [class.text-danger]="delta < 0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                @if (delta >= 0) {
+                  <path d="M7 17 17 7"/><path d="M7 7h10v10"/>
+                } @else {
+                  <path d="M7 7 17 17"/><path d="M17 7v10H7"/>
+                }
+              </svg>
+              {{ delta >= 0 ? '+' : '' }}{{ delta | number: '1.0-1' }}%
+            </span>
+          }
+        </div>
+
+        <p class="text-4xl font-bold text-foreground tracking-tight leading-none font-mono">
+          {{ currentMonthIncome() | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+
+        <p class="text-xs text-foreground-subtle">vs mes anterior</p>
+      </div>
+    </div>
+
+    <!-- Chart card: donut ingresos por categoría -->
+    <div class="bg-surface backdrop-blur-2xl border border-border-subtle rounded-2xl p-6 shadow-sm">
+      <!-- Head -->
+      <div class="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h3 class="text-sm font-semibold text-foreground tracking-tight">Ingresos por categoría</h3>
+          <p class="text-xs text-foreground-subtle mt-0.5">Mes en curso · por producto y disciplina</p>
+        </div>
+        <!-- Tabs -->
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-elevated border border-border-subtle">
+          <button class="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-surface border border-border-subtle text-foreground shadow-sm">Mes</button>
+          <button class="px-3 py-1.5 text-[11px] font-medium rounded-lg text-foreground-muted hover:text-foreground transition">Semana</button>
+          <button class="px-3 py-1.5 text-[11px] font-medium rounded-lg text-foreground-muted hover:text-foreground transition">Año</button>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="py-16 text-center text-sm text-foreground-subtle">Cargando…</div>
+      } @else if (donutTotal() === 0) {
+        <div class="py-16 text-center text-sm text-foreground-subtle">Sin ventas registradas este mes.</div>
+      } @else {
+        <div class="flex items-center gap-10 flex-wrap">
+
+          <!-- Donut SVG -->
+          <div class="relative flex-shrink-0">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <!-- Background ring -->
+              <circle cx="100" cy="100" r="75" fill="none"
+                      class="stroke-foreground/5"
+                      stroke-width="38"/>
+              <!-- Segments -->
+              @for (seg of donutSegments(); track seg.category; let i = $index) {
+                <circle cx="100" cy="100" r="75" fill="none"
+                        class="stroke-foreground"
+                        [attr.opacity]="segmentOpacity(i)"
+                        stroke-width="38"
+                        [attr.stroke-dasharray]="seg.dashArray"
+                        [attr.stroke-dashoffset]="seg.dashOffset"
+                        transform="rotate(-90 100 100)"
+                        stroke-linecap="butt"/>
+              }
+            </svg>
+            <!-- Center label -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center gap-0.5 pointer-events-none">
+              <span class="text-[10px] font-semibold text-foreground-faint uppercase tracking-widest">Total</span>
+              <span class="text-lg font-bold text-foreground tracking-tight leading-none font-mono">
+                {{ donutTotal() | currency: 'BOB':'symbol-narrow':'1.0-0' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="flex-1 min-w-0 space-y-4">
+
+            @if (donutMemberships().length > 0) {
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-faint mb-2">Disciplinas / Planes</p>
+                <div class="space-y-2">
+                  @for (cat of donutMemberships(); track cat.category; let i = $index) {
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-2.5 h-2.5 rounded-full bg-foreground flex-shrink-0"
+                           [style.opacity]="segmentOpacity(donutSegments().findIndex(s => s.category === cat.category))"></div>
+                      <span class="text-xs text-foreground-muted flex-1 truncate">{{ cat.category }}</span>
+                      <span class="text-xs font-mono font-semibold text-foreground">
+                        {{ cat.total | currency: 'BOB':'symbol-narrow':'1.0-0' }}
+                      </span>
+                      <span class="text-[10px] text-foreground-faint w-10 text-right">
+                        {{ (cat.total / donutTotal() * 100) | number: '1.0-0' }}%
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (donutProducts().length > 0) {
+              <div class="border-t border-border-subtle pt-4">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-foreground-faint mb-2">Productos</p>
+                <div class="space-y-2">
+                  @for (cat of donutProducts(); track cat.category; let i = $index) {
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-2.5 h-2.5 rounded-full bg-foreground flex-shrink-0"
+                           [style.opacity]="segmentOpacity(donutSegments().findIndex(s => s.category === cat.category))"></div>
+                      <span class="text-xs text-foreground-muted flex-1 truncate">{{ cat.category }}</span>
+                      <span class="text-xs font-mono font-semibold text-foreground">
+                        {{ cat.total | currency: 'BOB':'symbol-narrow':'1.0-0' }}
+                      </span>
+                      <span class="text-[10px] text-foreground-faint w-10 text-right">
+                        {{ (cat.total / donutTotal() * 100) | number: '1.0-0' }}%
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Socios recientes (tabla) -->
+    <div class="bg-surface backdrop-blur-2xl border border-border-subtle rounded-2xl shadow-sm overflow-hidden">
+      <!-- Head -->
+      <div class="flex items-center gap-3 px-6 py-4 border-b border-border-subtle">
+        <div class="flex-1 min-w-0">
+          <h3 class="text-sm font-semibold text-foreground tracking-tight">Socios recientes</h3>
+          <p class="text-xs text-foreground-subtle mt-0.5">Últimos registros y cambios de estado</p>
+        </div>
+        <a routerLink="/admin/clients"
+           class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-foreground-muted hover:text-foreground rounded-lg bg-elevated border border-border-subtle transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+          Todos los planes
+        </a>
+        <a routerLink="/admin/clients"
+           class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-foreground-muted hover:text-foreground rounded-lg bg-elevated border border-border-subtle transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+          </svg>
+          Exportar
+        </a>
+      </div>
+
+      <!-- Col headers -->
+      <div class="flex items-center gap-2 px-6 py-2.5 bg-muted/40 border-b border-border-subtle">
+        <div class="flex-1 min-w-0">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-foreground-faint">Socio</span>
+        </div>
+        <div class="w-36 hidden md:block">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-foreground-faint">Plan</span>
+        </div>
+        <div class="w-24">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-foreground-faint">Estado</span>
+        </div>
+        <div class="w-36 hidden lg:block">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-foreground-faint">Última visita</span>
+        </div>
+        <div class="w-10"></div>
+      </div>
+
+      <!-- Rows -->
+      @if (loading()) {
+        <div class="py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+      } @else if (recentMembers().length === 0) {
+        <div class="py-12 text-center text-sm text-foreground-subtle">Sin socios registrados.</div>
+      } @else {
+        @for (m of recentMembers(); track m.id; let odd = $odd) {
+          <div class="flex items-center gap-2 px-6 py-3 border-b border-border-subtle/50 last:border-b-0"
+               [class.bg-muted/20]="odd">
+            <!-- Avatar + name -->
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 rounded-full bg-foreground text-base flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                {{ initials(m.name) }}
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-foreground truncate">{{ m.name }}</p>
+                <p class="text-[10px] text-foreground-faint font-mono">{{ m.ci }}</p>
+              </div>
+            </div>
+            <!-- Plan -->
+            <div class="w-36 hidden md:block">
+              @if (m.plan) {
+                <span class="inline-block px-2 py-0.5 text-[11px] font-medium rounded-md bg-elevated border border-border-subtle text-foreground-muted truncate max-w-full">
+                  {{ m.plan }}
+                </span>
+              } @else {
+                <span class="text-xs text-foreground-faint">—</span>
+              }
+            </div>
+            <!-- Status pill -->
+            <div class="w-24">
+              @if (m.isActive) {
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-foreground text-base">
+                  <span class="w-1.5 h-1.5 rounded-full bg-base"></span>
+                  Activo
+                </span>
+              } @else {
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-medium rounded-full bg-elevated border border-border-subtle text-foreground-muted">
+                  <span class="w-1.5 h-1.5 rounded-full bg-foreground-faint"></span>
+                  Inactivo
+                </span>
+              }
+            </div>
+            <!-- Last visit -->
+            <div class="w-36 hidden lg:block">
+              <span class="text-xs text-foreground-muted">{{ formatLastVisit(m.lastVisit) }}</span>
+            </div>
+            <!-- Actions -->
+            <div class="w-10 flex justify-end">
+              <button class="text-foreground-faint hover:text-foreground-muted transition p-1 rounded">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Footer -->
+      <div class="flex items-center justify-between gap-3 px-6 py-3 border-t border-border-subtle bg-muted/20">
+        <span class="text-xs text-foreground-subtle">Mostrando {{ recentMembers().length }} de {{ activeCount() }} socios</span>
+        <a routerLink="/admin/clients" class="text-xs font-semibold text-foreground-muted hover:text-foreground transition">
+          Ver todos →
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+} @else {
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       POS DASHBOARD
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-foreground tracking-tight">
+          Bienvenido, {{ auth.profile()?.name ?? 'admin' }}
+        </h2>
+        <p class="text-foreground-muted text-sm">Resumen del negocio · {{ now() | date: 'EEEE d MMM' }}</p>
+      </div>
+      <a routerLink="/admin/sales"
+         class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
+        Nueva venta
+      </a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-7 h-7 rounded-lg bg-muted border border-border-subtle flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted">
+              <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-foreground-muted">Ingresos del mes</p>
+        </div>
+        <p class="text-2xl font-bold text-foreground tracking-tight">{{ currentMonthIncome() | currency: 'BOB':'symbol-narrow':'1.2-2' }}</p>
+        @if (monthOverMonth(); as delta) {
+          <p class="text-xs mt-1" [class.text-success]="delta >= 0" [class.text-danger]="delta < 0">
+            {{ delta >= 0 ? '+' : '' }}{{ delta | number: '1.0-1' }}% vs mes pasado
+          </p>
+        } @else {
+          <p class="text-xs text-foreground-faint mt-1">Sin datos del mes anterior</p>
+        }
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-7 h-7 rounded-lg bg-muted border border-border-subtle flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-foreground-muted">Stock crítico</p>
+        </div>
+        <p class="text-2xl font-bold text-foreground tracking-tight">{{ lowStockCount() }}</p>
+        @if (outOfStockCount() > 0) {
+          <p class="text-xs text-danger mt-1">{{ outOfStockCount() }} sin stock</p>
+        } @else {
+          <p class="text-xs text-foreground-faint mt-1">≤ 5 unidades</p>
+        }
+      </div>
+
+      <a routerLink="/admin/reports"
+         class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm hover:border-primary transition flex flex-col justify-between group">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-7 h-7 rounded-lg bg-muted border border-border-subtle flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted">
+              <path d="M3 3v18h18"/><path d="M7 12v5"/><path d="M12 8v9"/><path d="M17 5v12"/>
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-foreground-muted">Reportes</p>
+        </div>
+        <p class="text-sm text-foreground-muted">Ingresos detallados, productos bajo stock.</p>
+        <p class="text-xs font-semibold text-foreground mt-3 group-hover:text-primary">Ver todo →</p>
+      </a>
+    </div>
+
+    <!-- Bar chart + stock bajo -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-semibold text-foreground">Ingresos · últimos 7 días</h3>
+            <p class="text-xs text-foreground-subtle">Total combinado producto + membresía</p>
+          </div>
+        </div>
+        @if (loading()) {
+          <div class="py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+        } @else if (dailyAggregates().length === 0) {
+          <div class="py-12 text-center text-sm text-foreground-subtle">Sin movimiento en el período.</div>
+        } @else {
+          <div class="flex items-end justify-between gap-2 h-40 pt-4">
+            @for (day of dailyAggregates(); track day.day) {
+              <div class="flex-1 flex flex-col items-center gap-2 group" [title]="day.day + ' — Bs ' + day.total.toFixed(2)">
+                <div class="w-full rounded-t-md bg-primary/80 hover:bg-primary transition relative"
+                     [style.height.%]="barHeight(day.total)">
+                  <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-mono font-semibold text-foreground-muted opacity-0 group-hover:opacity-100 whitespace-nowrap">
+                    {{ day.total | number: '1.0-0' }}
+                  </span>
+                </div>
+                <span class="text-[10px] text-foreground-faint font-mono">{{ day.day | date: 'd/M' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-foreground">Stock bajo</h3>
+          <a routerLink="/admin/reports" class="text-xs font-semibold text-primary hover:underline">Ver todo</a>
+        </div>
+        @if (loading()) {
+          <div class="py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+        } @else if (criticalStock().length === 0) {
+          <div class="py-8 text-center text-sm text-success bg-success/10 rounded-lg px-3 py-2">Inventario sobre el umbral.</div>
+        } @else {
+          <div class="divide-y divide-border-subtle">
+            @for (p of criticalStock(); track p.id) {
+              <div class="py-2.5 flex items-center justify-between gap-2 first:pt-0 last:pb-0">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-foreground truncate">{{ p.name }}</p>
+                  <p class="text-xs text-foreground-subtle truncate">{{ p.category ?? '—' }}</p>
+                </div>
+                <p class="text-sm font-mono font-semibold flex-shrink-0"
+                   [class.text-danger]="p.stock === 0"
+                   [class.text-warning]="p.stock > 0">
+                  {{ p.stock }}
+                </p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

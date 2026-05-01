@@ -15,6 +15,13 @@ export const CajaRoutes: Routes = [
       ),
   },
   {
+    path: 'clients',
+    loadComponent: () =>
+      import('../admin/pages/clients/container/component').then(
+        (m) => m.AdminClientsContainerComponent,
+      ),
+  },
+  {
     path: 'attendance',
     loadComponent: () =>
       import('./pages/attendance/container/component').then(

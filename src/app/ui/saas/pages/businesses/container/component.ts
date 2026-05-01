@@ -3,12 +3,13 @@ import { Business } from '../../../../../models/business.model';
 import { BusinessService } from '../../../../../services/business/business.service';
 import { BusinessQueryService } from '../../../../../services/business/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
+import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
 import { BusinessesFormComponent, BusinessFormValue } from '../components/form/form';
 import { BusinessesListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-saas-businesses',
-  imports: [BusinessesListComponent, BusinessesFormComponent],
+  imports: [BusinessesListComponent, BusinessesFormComponent, ConfirmDeleteModalComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -28,6 +29,26 @@ export class SaasBusinessesContainerComponent {
 
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+
+  // Modal de borrado. Type-to-confirm porque borra TODO en cascada.
+  readonly deleting = signal<Business | null>(null);
+  readonly deletingError = signal<string | null>(null);
+  readonly deletingSubmitting = signal(false);
+
+  readonly deletingInitials = computed(() => {
+    const b = this.deleting();
+    if (!b) return null;
+    const parts = b.name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  });
+
+  readonly deletingSublabel = computed(() => {
+    const b = this.deleting();
+    if (!b) return null;
+    return b.type === 'gym' ? 'Gimnasio' : 'POS';
+  });
 
   constructor() {
     void this.refresh();
@@ -92,20 +113,31 @@ export class SaasBusinessesContainerComponent {
     }
   }
 
-  async handleDelete(business: Business): Promise<void> {
-    const ok = window.confirm(
-      `⚠️ BORRAR NEGOCIO "${business.name}"\n\n` +
-      `Esto borra TODO en cascada: usuarios, clientes, productos, planes, ventas, ` +
-      `membresías y asistencias. NO se puede deshacer.\n\n` +
-      `¿Continuar?`,
-    );
-    if (!ok) return;
+  handleDelete(business: Business): void {
+    this.deleting.set(business);
+    this.deletingError.set(null);
+  }
+
+  cancelDelete(): void {
+    if (this.deletingSubmitting()) return;
+    this.deleting.set(null);
+    this.deletingError.set(null);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const business = this.deleting();
+    if (!business) return;
+    this.deletingSubmitting.set(true);
+    this.deletingError.set(null);
     try {
       await this.businessService.deleteBusiness(business.id);
       if (this.editing()?.id === business.id) this.formState.set(null);
+      this.deleting.set(null);
       await this.refresh();
     } catch (err: unknown) {
-      window.alert(errorMessage(err, 'Error al borrar negocio'));
+      this.deletingError.set(errorMessage(err, 'Error al borrar negocio'));
+    } finally {
+      this.deletingSubmitting.set(false);
     }
   }
 }

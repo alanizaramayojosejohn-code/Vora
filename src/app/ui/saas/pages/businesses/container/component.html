@@ -31,4 +31,19 @@
     [loading]="loading()"
     (edit)="openEdit($event)"
     (remove)="handleDelete($event)" />
+
+  @if (deleting(); as b) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar este negocio?"
+      [description]="deletingError() ?? 'Borra TODO en cascada: usuarios, socios, productos, planes, ventas, membresías y asistencias. No se puede deshacer.'"
+      confirmLabel="Eliminar negocio"
+      [entityLabel]="b.name"
+      [entitySublabel]="deletingSublabel()"
+      [entityInitials]="deletingInitials()"
+      confirmWord="ELIMINAR"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
 </div>

@@ -31,4 +31,19 @@
     [loading]="loading()"
     (edit)="openEdit($event)"
     (remove)="handleDelete($event)" />
+
+  @if (deleting(); as c) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar este socio?"
+      [description]="deletingError() ?? 'Esta acción no se puede deshacer. Si tiene membresías asignadas, la operación fallará.'"
+      confirmLabel="Eliminar socio"
+      [entityLabel]="c.name"
+      [entitySublabel]="'CI ' + c.ci"
+      [entityInitials]="deletingInitials()"
+      confirmWord="ELIMINAR"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
 </div>

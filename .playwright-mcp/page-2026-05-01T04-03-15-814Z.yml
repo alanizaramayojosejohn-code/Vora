@@ -1,0 +1,39 @@
+- generic [ref=e36]:
+  - complementary [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e39]: S
+      - generic [ref=e40]: SaasGym
+      - generic [ref=e41]: SaaS
+    - navigation [ref=e42]:
+      - paragraph [ref=e43]: Plataforma
+      - link "Inicio" [ref=e44] [cursor=pointer]:
+        - /url: /saas/home
+        - img [ref=e45]
+        - text: Inicio
+      - link "Negocios" [ref=e48] [cursor=pointer]:
+        - /url: /saas/businesses
+        - img [ref=e49]
+        - text: Negocios
+    - generic [ref=e53]:
+      - radiogroup "Modo de visualización" [ref=e56]:
+        - radio "Modo claro" [ref=e57]:
+          - img [ref=e58]
+        - radio "Modo oscuro" [ref=e64]:
+          - img [ref=e65]
+        - radio "Seguir el sistema" [checked] [ref=e67]:
+          - img [ref=e68]
+      - generic [ref=e70]:
+        - generic [ref=e71]: JA
+        - generic [ref=e72]:
+          - paragraph [ref=e73]: José Alaniz
+          - paragraph [ref=e74]: super_admin
+        - button "Salir" [ref=e75]:
+          - img [ref=e76]
+  - main [ref=e79]:
+    - generic [ref=e81]:
+      - heading "Panel del SaaS" [level=2] [ref=e82]
+      - paragraph [ref=e83]: Gestiona los negocios y sus administradores.
+      - link "Negocios Lista, alta y configuración inicial." [ref=e85] [cursor=pointer]:
+        - /url: /saas/businesses
+        - heading "Negocios" [level=3] [ref=e86]
+        - paragraph [ref=e87]: Lista, alta y configuración inicial.

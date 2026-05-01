@@ -1,0 +1,4 @@
+- generic [ref=e4]:
+  - generic [ref=e5]: "TS2339: Property 'selectMode' does not exist on type 'BusinessesFormComponent'."
+  - generic [ref=e6]: src/app/ui/saas/pages/businesses/components/form/form.html:138:25
+  - generic [ref=e8]: Click outside, press Esc key, or fix the code to dismiss.

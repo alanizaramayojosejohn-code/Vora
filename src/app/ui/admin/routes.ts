@@ -42,4 +42,18 @@ export const AdminRoutes: Routes = [
         (m) => m.AdminReportsContainerComponent,
       ),
   },
+  {
+    path: 'sales',
+    loadComponent: () =>
+      import('../caja/pages/sales/container/component').then(
+        (m) => m.CajaSalesContainerComponent,
+      ),
+  },
+  {
+    path: 'attendance',
+    loadComponent: () =>
+      import('../caja/pages/attendance/container/component').then(
+        (m) => m.CajaAttendanceContainerComponent,
+      ),
+  },
 ];

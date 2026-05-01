@@ -119,10 +119,14 @@ export class AuthService {
     this.profile.set(profile);
     this.businessType.set(businesses?.type ?? null);
 
-    // Aplica el tema apenas tenemos profile cargado. super_admin no tiene
-    // business asignado (businesses === null) → default monochrome.
-    const businessTheme = businesses?.theme ?? DEFAULT_THEME;
+    // Aplica el preset del negocio. El mode (light/dark/system) lo gestiona
+    // el theme.service por su cuenta desde localStorage — es preferencia
+    // del usuario, no del negocio.
+    // super_admin no tiene business asignado → cae a default monochrome.
+    const businessTheme = businesses?.theme
+      ? { preset: businesses.theme.preset }
+      : DEFAULT_THEME;
     this.businessTheme.set(businessTheme);
-    this.theme.apply(businessTheme);
+    this.theme.applyPreset(businessTheme);
   }
 }

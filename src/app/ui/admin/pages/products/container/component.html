@@ -31,4 +31,20 @@
     [loading]="loading()"
     (edit)="openEdit($event)"
     (remove)="handleDelete($event)" />
+
+  @if (deleting(); as p) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar este producto?"
+      [description]="deletingError() ?? 'Se quitará del catálogo y del POS. Las ventas históricas seguirán mostrándolo.'"
+      confirmLabel="Eliminar producto"
+      [entityLabel]="p.name"
+      [entitySublabel]="deletingSublabel()"
+      [entityInitials]="deletingInitials()"
+      [amount]="deletingPrice()"
+      amountLabel="Precio"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
 </div>

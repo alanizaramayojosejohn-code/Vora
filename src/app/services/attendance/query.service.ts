@@ -17,6 +17,21 @@ export class AttendanceQueryService {
   private readonly client = inject(SupabaseService).client;
 
   // RLS filtra por business_id del caller.
+  async lastVisitByClientIds(clientIds: string[]): Promise<Map<string, string>> {
+    if (clientIds.length === 0) return new Map();
+    const { data, error } = await this.client
+      .from('attendance')
+      .select('client_id, attended_at')
+      .in('client_id', clientIds)
+      .order('attended_at', { ascending: false });
+    if (error) throw error;
+    const map = new Map<string, string>();
+    for (const row of (data ?? []) as { client_id: string; attended_at: string }[]) {
+      if (!map.has(row.client_id)) map.set(row.client_id, row.attended_at);
+    }
+    return map;
+  }
+
   async listRecent(limit = 50): Promise<AttendanceWithDetails[]> {
     const { data, error } = await this.client
       .from('attendance')

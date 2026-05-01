@@ -1,8 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import {
   BusinessTheme,
+  DEFAULT_MODE,
   DEFAULT_THEME,
   getPreset,
+  THEME_MODE_STORAGE_KEY,
   THEME_PRESET_LIST,
   ThemeMode,
   ThemePreset,
@@ -10,55 +12,78 @@ import {
 } from './theme.presets';
 
 // Aplica el tema al documento via data-attributes en <html>.
-// styles.css define las variables CSS por combinacion preset+mode,
-// y Tailwind v4 las consume via @theme. Cambiar el data-attribute
-// re-pinta toda la app en un frame, sin reload.
+// Dos canales independientes:
+//  · preset: viene del business asignado por el super_admin → auth.service
+//    lo carga al login y llama applyPreset().
+//  · mode (light/dark/system): preferencia del USUARIO en este navegador,
+//    se persiste en localStorage. setMode() la cambia en runtime.
 //
-// Bootstrap: app.config.ts llama applyFromAuth() despues de auth.initialize(),
-// asi el tema correcto esta listo antes de que el router monte la primera ruta
-// (evita el flash blanco durante el login).
+// Las variables CSS dependen de la combinacion preset+mode resueltos.
+// Para 'system', escuchamos prefers-color-scheme y re-aplicamos sin reload.
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  // Tema actualmente aplicado. La UI puede leer esto para mostrar
-  // pickers (ej: form de business resaltando el preset activo).
-  readonly current = signal<BusinessTheme>(DEFAULT_THEME);
+  // Tema (preset) actualmente aplicado. UI lo lee para resaltar el preset
+  // activo en pickers (form de business).
+  readonly currentPreset = signal<BusinessTheme>(DEFAULT_THEME);
 
-  // Modo efectivamente aplicado (resuelto si current.mode = 'system').
-  // light/dark sale del preset; util para componentes que necesiten
-  // saber el modo real (ej: cargar logo claro vs oscuro).
+  // Modo elegido por el usuario (puede ser 'system'). UI lo lee para el toggle.
+  readonly currentMode = signal<ThemeMode>(DEFAULT_MODE);
+
+  // Modo efectivamente aplicado (resuelto si currentMode = 'system').
+  // Util para componentes que necesiten saber el modo real (logo claro vs
+  // oscuro, etc.).
   readonly resolvedMode = signal<'light' | 'dark'>('light');
 
-  // Listener de prefers-color-scheme. Solo activo cuando mode = 'system';
-  // se cancela cuando el negocio elige light/dark explicito.
   private mediaQuery: MediaQueryList | null = null;
   private mediaListener: ((e: MediaQueryListEvent) => void) | null = null;
 
-  apply(theme: BusinessTheme): void {
-    this.current.set(theme);
-    this.applyToDom(theme);
+  constructor() {
+    // Cargar mode persistido. En SSR window/localStorage no existen,
+    // asi que protegemos con typeof checks.
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem(THEME_MODE_STORAGE_KEY) as ThemeMode | null;
+      if (stored === 'light' || stored === 'dark' || stored === 'system') {
+        this.currentMode.set(stored);
+      }
+    }
   }
 
-  // Resetea al default (monochrome system). Util en logout o cuando
-  // el usuario aun no tiene business asignado (super_admin viendo
-  // login screen, por ejemplo).
+  // Llamado por auth.service.loadProfile() cuando viene preset del business,
+  // y por reset() cuando no hay sesion. No toca el mode (separado).
+  applyPreset(theme: BusinessTheme): void {
+    this.currentPreset.set(theme);
+    this.applyToDom();
+  }
+
+  // Toggle del usuario. Persiste en localStorage para que la proxima carga
+  // arranque con la misma preferencia (sin esperar a que initialize aplique
+  // nada — la lee el constructor).
+  setMode(mode: ThemeMode): void {
+    this.currentMode.set(mode);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
+    }
+    this.applyToDom();
+  }
+
+  // Resetea el preset al default (monochrome). NO toca el mode — la
+  // preferencia del usuario sobrevive logout/login.
   reset(): void {
-    this.apply(DEFAULT_THEME);
+    this.applyPreset(DEFAULT_THEME);
   }
 
-  private applyToDom(theme: BusinessTheme): void {
+  private applyToDom(): void {
     const root = document.documentElement;
-    const preset = getPreset(theme.preset);
+    const preset = getPreset(this.currentPreset().preset);
     root.dataset['preset'] = preset.key;
-    this.applyMode(theme.mode, preset);
+    this.applyModeResolution(this.currentMode(), preset);
   }
 
-  private applyMode(mode: ThemeMode, preset: ThemePreset): void {
+  private applyModeResolution(mode: ThemeMode, preset: ThemePreset): void {
     this.detachMediaListener();
 
     if (mode === 'system') {
-      // Usar la media query como fuente. Tambien suscribir a cambios:
-      // si el usuario alterna OS dark/light mientras la app esta abierta,
-      // re-aplicamos sin que tenga que recargar.
+      // Mientras este en 'system', escuchamos cambios del SO.
       this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       this.mediaListener = (e) => this.setResolvedMode(e.matches ? 'dark' : 'light', preset);
       this.mediaQuery.addEventListener('change', this.mediaListener);
@@ -72,10 +97,6 @@ export class ThemeService {
     const root = document.documentElement;
     root.dataset['mode'] = mode;
     this.resolvedMode.set(mode);
-    // Inyectamos los tokens como variables inline en :root.
-    // Aunque styles.css ya los tiene declarados estaticamente por
-    // [data-preset][data-mode], setearlos aca es defensivo: cubre el caso
-    // de presets agregados en runtime (a futuro, custom themes por cliente).
     const tokens = mode === 'dark' ? preset.dark : preset.light;
     this.writeTokensToRoot(root, tokens);
   }
@@ -109,9 +130,6 @@ export class ThemeService {
     this.mediaListener = null;
   }
 
-  // Helper para el picker en el form de business (super_admin).
-  // Devuelve la lista completa con metadata (label, description, tokens)
-  // para renderizar previews.
   getPresets(): readonly ThemePreset[] {
     return THEME_PRESET_LIST;
   }

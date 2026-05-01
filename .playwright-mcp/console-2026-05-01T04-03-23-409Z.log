@@ -1,0 +1,5 @@
+[     381ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Jose/Desktop/SaasGym/SaasGym/.angular/cache/21.2.8/SaasGym/vite/deps/chunk-FRA7QK43.js?v=1775b614:17069
+[  296143ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://jwoqcvynwkfdnomwzrhf.supabase.co/rest/v1/rpc/create_business_with_admin:0
+[  328670ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://jwoqcvynwkfdnomwzrhf.supabase.co/rest/v1/businesses?id=eq.daa01b40-67f2-4ddb-87bf-872a500fc426:0
+[ 1598352ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Jose/Desktop/SaasGym/SaasGym/.angular/cache/21.2.8/SaasGym/vite/deps/chunk-FRA7QK43.js?v=1775b614:17069
+[ 1849664ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/C:/Users/Jose/Desktop/SaasGym/SaasGym/.angular/cache/21.2.8/SaasGym/vite/deps/chunk-FRA7QK43.js?v=1775b614:17069

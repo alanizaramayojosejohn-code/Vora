@@ -64,16 +64,16 @@
   }
 
   <!-- ======================== Apariencia ========================
-       Picker de paleta visual + toggle modo. Los previews usan los hex
-       reales de cada preset (no las CSS vars del tema activo) — asi se
-       ve como queda independiente de lo que el super_admin tiene puesto.
+       Solo paleta. El modo claro/oscuro es preferencia global de cada
+       usuario en su navegador (toggle en el header de la app), no se
+       asigna por negocio.
   -->
   <div class="space-y-4 pt-5 border-t border-border-subtle">
     <div>
-      <h4 class="font-semibold text-foreground text-sm">Apariencia del negocio</h4>
+      <h4 class="font-semibold text-foreground text-sm">Paleta del negocio</h4>
       <p class="text-xs text-foreground-subtle mt-0.5">
-        Es lo que verán los usuarios del negocio (admin y caja) al entrar.
-        El default <strong class="text-foreground-muted">Monocromo · Sistema</strong> imita el SO del usuario.
+        Es la paleta que verán los usuarios del negocio (admin y caja) al entrar.
+        Cada usuario elige por separado si la quiere ver clara u oscura.
       </p>
     </div>
 
@@ -129,40 +129,6 @@
       }
     </div>
 
-    <!-- Toggle modo. Tres opciones; "Sistema" deja al SO decidir.
-         La clase activa pone bg-primary y la inactiva queda en bg-elevated. -->
-    <div>
-      <label class="block text-sm font-medium text-foreground-muted mb-2">Modo de visualización</label>
-      <div class="inline-flex rounded-xl border border-border-subtle bg-elevated p-1 gap-1">
-        <button type="button"
-                (click)="selectMode('system')"
-                [class.bg-primary]="selectedMode() === 'system'"
-                [class.text-primary-fg]="selectedMode() === 'system'"
-                [class.shadow-sm]="selectedMode() === 'system'"
-                [class.text-foreground-muted]="selectedMode() !== 'system'"
-                class="px-4 py-1.5 text-sm font-medium rounded-lg transition">
-          Sistema
-        </button>
-        <button type="button"
-                (click)="selectMode('light')"
-                [class.bg-primary]="selectedMode() === 'light'"
-                [class.text-primary-fg]="selectedMode() === 'light'"
-                [class.shadow-sm]="selectedMode() === 'light'"
-                [class.text-foreground-muted]="selectedMode() !== 'light'"
-                class="px-4 py-1.5 text-sm font-medium rounded-lg transition">
-          Claro
-        </button>
-        <button type="button"
-                (click)="selectMode('dark')"
-                [class.bg-primary]="selectedMode() === 'dark'"
-                [class.text-primary-fg]="selectedMode() === 'dark'"
-                [class.shadow-sm]="selectedMode() === 'dark'"
-                [class.text-foreground-muted]="selectedMode() !== 'dark'"
-                class="px-4 py-1.5 text-sm font-medium rounded-lg transition">
-          Oscuro
-        </button>
-      </div>
-    </div>
   </div>
 
   @if (errorMessage(); as msg) {

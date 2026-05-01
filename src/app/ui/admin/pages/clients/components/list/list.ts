@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Client } from '../../../../../../models/client.model';
+
+// Tabs del listado: filtran sobre el array completo en memoria.
+type ClientFilter = 'all' | 'recent' | 'no-phone';
+type ClientSort = 'name' | 'ci' | 'created';
 
 @Component({
   selector: 'app-admin-clients-list',
@@ -14,4 +18,75 @@ export class ClientsListComponent {
   readonly loading = input<boolean>(false);
   readonly edit = output<Client>();
   readonly remove = output<Client>();
+  readonly view = output<Client>();
+
+  readonly search = signal('');
+  readonly filter = signal<ClientFilter>('all');
+  readonly sort = signal<ClientSort>('created');
+  readonly sortMenuOpen = signal(false);
+
+  // Iniciales del avatar: 2 chars del nombre.
+  initials(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '··';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  // Recientes = creados en últimos 30 días.
+  private readonly thirtyDaysAgo = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString();
+  })();
+
+  readonly counts = computed(() => {
+    const list = this.clients();
+    return {
+      all: list.length,
+      recent: list.filter((c) => c.created_at >= this.thirtyDaysAgo).length,
+      noPhone: list.filter((c) => !c.phone).length,
+    };
+  });
+
+  readonly filteredSorted = computed<Client[]>(() => {
+    const q = this.search().toLowerCase().trim();
+    const f = this.filter();
+    const s = this.sort();
+    let list = this.clients().slice();
+
+    if (f === 'recent') list = list.filter((c) => c.created_at >= this.thirtyDaysAgo);
+    else if (f === 'no-phone') list = list.filter((c) => !c.phone);
+
+    if (q) {
+      list = list.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.ci.toLowerCase().includes(q) ||
+          (c.phone ?? '').toLowerCase().includes(q),
+      );
+    }
+
+    if (s === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+    else if (s === 'ci') list.sort((a, b) => a.ci.localeCompare(b.ci));
+    else list.sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+    return list;
+  });
+
+  readonly sortLabel = computed(() => {
+    switch (this.sort()) {
+      case 'name': return 'Nombre A→Z';
+      case 'ci': return 'CI ascendente';
+      default: return 'Recientes primero';
+    }
+  });
+
+  setSearch(v: string): void { this.search.set(v); }
+  setFilter(f: ClientFilter): void { this.filter.set(f); }
+  setSort(s: ClientSort): void {
+    this.sort.set(s);
+    this.sortMenuOpen.set(false);
+  }
+  toggleSortMenu(): void { this.sortMenuOpen.update((v) => !v); }
 }

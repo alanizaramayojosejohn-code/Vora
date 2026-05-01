@@ -1,5 +1,164 @@
-<div class="max-w-7xl mx-auto px-6 py-10">
-  <h2 class="text-2xl font-bold text-foreground tracking-tight mb-2">Panel de caja</h2>
-  <p class="text-foreground-muted">Aquí tomarás asistencia y registrarás ventas.</p>
-  <p class="text-sm text-foreground-faint mt-6">Pendiente: tomar asistencia, vender productos, vender membresías.</p>
+<div class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+  <!-- Header -->
+  <div class="flex items-end justify-between gap-4 flex-wrap">
+    <div>
+      <h2 class="text-2xl font-bold text-foreground tracking-tight">
+        Buenos días, {{ auth.profile()?.name ?? 'caja' }}
+      </h2>
+      <p class="text-foreground-muted text-sm">{{ now() | date: 'EEEE d MMMM y' }}</p>
+    </div>
+    <div class="flex gap-2">
+      <a routerLink="/caja/sales"
+         class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
+        Nueva venta
+      </a>
+      @if (isGym()) {
+        <a routerLink="/caja/attendance"
+           class="px-4 py-2 text-sm font-semibold bg-elevated text-foreground border border-border-subtle rounded-lg transition hover:bg-muted">
+          Tomar asistencia
+        </a>
+      }
+    </div>
+  </div>
+
+  <!-- ============================== KPIs ============================== -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Ventas hoy (big card, span 1.5) -->
+    <div class="md:col-span-2 bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 shadow-sm">
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <p class="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Ventas del día</p>
+          <p class="text-4xl font-bold text-foreground tracking-tight mt-1">
+            {{ todayTotal() | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+          </p>
+          <div class="flex items-center gap-3 mt-1">
+            <p class="text-xs text-foreground-subtle">{{ todayTransactions() }} transacciones</p>
+            @if (dayOverDay(); as delta) {
+              <span class="text-xs font-semibold"
+                    [class.text-success]="delta >= 0"
+                    [class.text-danger]="delta < 0">
+                {{ delta >= 0 ? '+' : '' }}{{ delta | number: '1.0-1' }}% vs ayer
+              </span>
+            }
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+            <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Split bar: productos vs membresías. Solo cuando hay datos. -->
+      @if (todayTotal() > 0) {
+        <div class="space-y-2 pt-3 border-t border-border-subtle">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-foreground"></span>
+              <span class="text-foreground-muted">Productos</span>
+            </div>
+            <span class="font-mono text-foreground-muted">{{ todayProductTotal() | currency: 'BOB':'symbol-narrow':'1.2-2' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-primary"></span>
+              <span class="text-foreground-muted">Membresías</span>
+            </div>
+            <span class="font-mono text-foreground-muted">{{ todayMembershipTotal() | currency: 'BOB':'symbol-narrow':'1.2-2' }}</span>
+          </div>
+          <!-- Stacked progress bar -->
+          <div class="flex h-2 rounded-full overflow-hidden bg-muted mt-2">
+            <div class="bg-foreground transition-all" [style.width.%]="productPct()"></div>
+            <div class="flex-1 bg-primary"></div>
+          </div>
+        </div>
+      } @else {
+        <p class="text-xs text-foreground-faint pt-3 border-t border-border-subtle">Aún no hay ventas hoy.</p>
+      }
+    </div>
+
+    <!-- Tickets hoy -->
+    <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm flex flex-col">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-7 h-7 rounded-lg bg-muted border border-border-subtle flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted">
+            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+          </svg>
+        </div>
+        <p class="text-xs font-semibold text-foreground-muted">Tickets del día</p>
+      </div>
+      <p class="text-3xl font-bold text-foreground tracking-tight">{{ todayTransactions() }}</p>
+      <p class="text-xs text-foreground-faint mt-1">Promedio
+        @if (todayTransactions() > 0) {
+          {{ todayTotal() / todayTransactions() | currency: 'BOB':'symbol-narrow':'1.2-2' }} c/u
+        } @else {
+          —
+        }
+      </p>
+      <a routerLink="/caja/sales"
+         class="mt-auto pt-3 text-xs font-semibold text-primary hover:underline">Ver todas las ventas →</a>
+    </div>
+  </div>
+
+  <!-- Últimas ventas -->
+  <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+    <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+      <div>
+        <h3 class="font-semibold text-foreground">Últimas ventas</h3>
+        <p class="text-xs text-foreground-subtle">Movimiento más reciente del negocio.</p>
+      </div>
+      <a routerLink="/caja/sales" class="text-xs font-semibold text-primary hover:underline">Ver todas</a>
+    </header>
+
+    @if (loading()) {
+      <div class="px-6 py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+    } @else if (latestSales().length === 0) {
+      <div class="px-6 py-12 text-center">
+        <p class="text-foreground-muted">Aún no hay ventas registradas.</p>
+        <a routerLink="/caja/sales" class="text-sm text-primary hover:underline mt-2 inline-block">Registrar la primera</a>
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead class="bg-muted border-b border-border-subtle">
+          <tr>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Tipo</th>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Detalle</th>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cliente</th>
+            <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Monto</th>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Fecha</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border-subtle">
+          @for (sale of latestSales(); track sale.id) {
+            <tr class="hover:bg-muted/50 transition"
+                [class.opacity-60]="sale.cancelled_at">
+              <td class="px-6 py-2.5">
+                <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border"
+                      [class.bg-muted]="sale.type === 'product'"
+                      [class.text-foreground-muted]="sale.type === 'product'"
+                      [class.border-border-subtle]="sale.type === 'product'"
+                      [class.bg-primary/10]="sale.type === 'membership'"
+                      [class.text-primary]="sale.type === 'membership'"
+                      [class.border-primary/20]="sale.type === 'membership'">
+                  {{ sale.type === 'product' ? 'Producto' : 'Membresía' }}
+                </span>
+              </td>
+              <td class="px-6 py-2.5 font-medium text-foreground">
+                @if (sale.type === 'product') {
+                  {{ sale.product_name ?? '—' }}
+                } @else {
+                  {{ sale.plan_name ?? '—' }}
+                }
+              </td>
+              <td class="px-6 py-2.5 text-foreground-muted">{{ sale.client_label ?? '—' }}</td>
+              <td class="px-6 py-2.5 text-right font-mono font-semibold text-foreground">
+                {{ sale.amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+              </td>
+              <td class="px-6 py-2.5 text-foreground-subtle">{{ sale.created_at | date: 'dd/MM HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
 </div>

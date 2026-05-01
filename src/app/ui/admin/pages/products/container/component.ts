@@ -3,12 +3,13 @@ import { Product } from '../../../../../models/product.model';
 import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
+import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
 import { ProductsFormComponent } from '../components/form/form';
 import { ProductsListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-admin-products',
-  imports: [ProductsListComponent, ProductsFormComponent],
+  imports: [ProductsListComponent, ProductsFormComponent, ConfirmDeleteModalComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -28,6 +29,35 @@ export class AdminProductsContainerComponent {
 
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+
+  // Soft delete via modal — los productos no requieren type-to-confirm porque
+  // queda en deleted_at, las ventas históricas siguen viendolo.
+  readonly deleting = signal<Product | null>(null);
+  readonly deletingError = signal<string | null>(null);
+  readonly deletingSubmitting = signal(false);
+
+  readonly deletingInitials = computed(() => {
+    const p = this.deleting();
+    if (!p) return null;
+    const parts = p.name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  });
+
+  // Precio formateado como string para el slot "amount" del modal.
+  readonly deletingPrice = computed(() => {
+    const p = this.deleting();
+    if (!p) return null;
+    return `Bs ${Number(p.price).toFixed(2)}`;
+  });
+
+  readonly deletingSublabel = computed(() => {
+    const p = this.deleting();
+    if (!p) return null;
+    const cat = p.category ?? 'Sin categoría';
+    return `${cat} · Stock ${p.stock}`;
+  });
 
   constructor() {
     void this.refresh();
@@ -80,19 +110,31 @@ export class AdminProductsContainerComponent {
     }
   }
 
-  async handleDelete(product: Product): Promise<void> {
-    const ok = window.confirm(
-      `¿Eliminar "${product.name}" del inventario?\n` +
-      `Soft delete: ya no aparecerá en listas ni se podrá vender, ` +
-      `pero las ventas históricas seguirán mostrándolo.`,
-    );
-    if (!ok) return;
+  handleDelete(product: Product): void {
+    this.deleting.set(product);
+    this.deletingError.set(null);
+  }
+
+  cancelDelete(): void {
+    if (this.deletingSubmitting()) return;
+    this.deleting.set(null);
+    this.deletingError.set(null);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const product = this.deleting();
+    if (!product) return;
+    this.deletingSubmitting.set(true);
+    this.deletingError.set(null);
     try {
       await this.productService.softDeleteProduct(product.id);
       if (this.editing()?.id === product.id) this.formState.set(null);
+      this.deleting.set(null);
       await this.refresh();
     } catch (err: unknown) {
-      window.alert(errorMessage(err, 'Error al eliminar producto'));
+      this.deletingError.set(errorMessage(err, 'Error al eliminar producto'));
+    } finally {
+      this.deletingSubmitting.set(false);
     }
   }
 }

@@ -5,12 +5,13 @@ import { CreateMembershipPlanInput, MembershipPlanService } from '../../../../..
 import { MembershipPlanQueryService } from '../../../../../services/membership-plan/query.service';
 import { ServiceQueryService } from '../../../../../services/service/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
+import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
 import { MembershipPlansFormComponent } from '../components/form/form';
 import { MembershipPlansListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-admin-membership-plans',
-  imports: [MembershipPlansListComponent, MembershipPlansFormComponent],
+  imports: [MembershipPlansListComponent, MembershipPlansFormComponent, ConfirmDeleteModalComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -32,6 +33,36 @@ export class AdminMembershipPlansContainerComponent {
 
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+
+  // Modal de borrado. Borrado hard, pero la UX no requiere type-to-confirm
+  // porque la RPC bloquea si hay socios activos con el plan.
+  readonly deleting = signal<MembershipPlanWithServices | null>(null);
+  readonly deletingError = signal<string | null>(null);
+  readonly deletingSubmitting = signal(false);
+
+  readonly deletingInitials = computed(() => {
+    const p = this.deleting();
+    if (!p) return null;
+    const parts = p.name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return null;
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  });
+
+  readonly deletingPrice = computed(() => {
+    const p = this.deleting();
+    if (!p) return null;
+    return `Bs ${Number(p.price).toFixed(2)}`;
+  });
+
+  readonly deletingSublabel = computed(() => {
+    const p = this.deleting();
+    if (!p) return null;
+    const parts: string[] = [`${p.duration_days} días`];
+    if (p.sessions_number != null) parts.push(`${p.sessions_number} sesiones`);
+    parts.push(p.type === 'promo' ? 'Promo' : 'Normal');
+    return parts.join(' · ');
+  });
 
   constructor() {
     void this.refresh();
@@ -89,18 +120,31 @@ export class AdminMembershipPlansContainerComponent {
     }
   }
 
-  async handleDelete(plan: MembershipPlanWithServices): Promise<void> {
-    const ok = window.confirm(
-      `¿Borrar el plan "${plan.name}"?\n` +
-      `No se puede deshacer. Si hay socios con este plan asignado, la operación fallará.`,
-    );
-    if (!ok) return;
+  handleDelete(plan: MembershipPlanWithServices): void {
+    this.deleting.set(plan);
+    this.deletingError.set(null);
+  }
+
+  cancelDelete(): void {
+    if (this.deletingSubmitting()) return;
+    this.deleting.set(null);
+    this.deletingError.set(null);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const plan = this.deleting();
+    if (!plan) return;
+    this.deletingSubmitting.set(true);
+    this.deletingError.set(null);
     try {
       await this.planService.deletePlan(plan.id);
       if (this.editing()?.id === plan.id) this.formState.set(null);
+      this.deleting.set(null);
       await this.refresh();
     } catch (err: unknown) {
-      window.alert(errorMessage(err, 'Error al borrar plan'));
+      this.deletingError.set(errorMessage(err, 'Error al borrar plan'));
+    } finally {
+      this.deletingSubmitting.set(false);
     }
   }
 }

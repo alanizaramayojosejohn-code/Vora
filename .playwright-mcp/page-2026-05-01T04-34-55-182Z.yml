@@ -1,0 +1,118 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: S
+      - generic [ref=e8]: SaasGym
+      - generic [ref=e9]: SaaS
+    - navigation [ref=e10]:
+      - paragraph [ref=e11]: Plataforma
+      - link "Inicio" [ref=e12] [cursor=pointer]:
+        - /url: /saas/home
+        - img [ref=e13]
+        - text: Inicio
+      - link "Negocios" [ref=e16] [cursor=pointer]:
+        - /url: /saas/businesses
+        - img [ref=e17]
+        - text: Negocios
+    - generic [ref=e21]:
+      - radiogroup "Modo de visualización" [ref=e24]:
+        - radio "Modo claro" [ref=e25]:
+          - img [ref=e26]
+        - radio "Modo oscuro" [ref=e32]:
+          - img [ref=e33]
+        - radio "Seguir el sistema" [checked] [ref=e35]:
+          - img [ref=e36]
+      - generic [ref=e38]:
+        - generic [ref=e39]: JA
+        - generic [ref=e40]:
+          - paragraph [ref=e41]: José Alaniz
+          - paragraph [ref=e42]: super_admin
+        - button "Salir" [ref=e43]:
+          - img [ref=e44]
+  - main [ref=e47]:
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - heading "Panel SaaS" [level=2] [ref=e52]
+          - paragraph [ref=e53]: Friday 1 May 2026 · super_admin
+        - link "Nuevo negocio" [ref=e54] [cursor=pointer]:
+          - /url: /saas/businesses
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - paragraph [ref=e59]: Negocios totales
+              - paragraph [ref=e60]: "5"
+              - paragraph [ref=e61]: +5 en los últimos 30 días
+            - img [ref=e63]
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e71]: Gimnasios
+              - generic [ref=e72]: "2"
+            - generic [ref=e73]:
+              - generic [ref=e76]: POS
+              - generic [ref=e77]: "3"
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - img [ref=e84]
+            - paragraph [ref=e90]: Paletas en uso
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - generic [ref=e95]: Monocromo
+              - generic [ref=e96]: "3"
+            - generic [ref=e97]:
+              - generic [ref=e100]: Océano
+              - generic [ref=e101]: "1"
+            - generic [ref=e102]:
+              - generic [ref=e105]: Bosque
+              - generic [ref=e106]: "1"
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - heading "Negocios recientes" [level=3] [ref=e110]
+            - paragraph [ref=e111]: Últimos onboardings.
+          - link "Ver todos" [ref=e112] [cursor=pointer]:
+            - /url: /saas/businesses
+        - table [ref=e113]:
+          - rowgroup [ref=e114]:
+            - row "Nombre Tipo Paleta Alta" [ref=e115]:
+              - columnheader "Nombre" [ref=e116]
+              - columnheader "Tipo" [ref=e117]
+              - columnheader "Paleta" [ref=e118]
+              - columnheader "Alta" [ref=e119]
+          - rowgroup [ref=e120]:
+            - row "hola Gimnasio Océano 30 Apr 2026" [ref=e121]:
+              - cell "hola" [ref=e122]
+              - cell "Gimnasio" [ref=e123]:
+                - generic [ref=e124]: Gimnasio
+              - cell "Océano" [ref=e125]:
+                - generic [ref=e128]: Océano
+              - cell "30 Apr 2026" [ref=e129]
+            - row "la mafia POS Bosque 30 Apr 2026" [ref=e130]:
+              - cell "la mafia" [ref=e131]
+              - cell "POS" [ref=e132]:
+                - generic [ref=e133]: POS
+              - cell "Bosque" [ref=e134]:
+                - generic [ref=e137]: Bosque
+              - cell "30 Apr 2026" [ref=e138]
+            - row "patitas pet shop POS Monocromo 28 Apr 2026" [ref=e139]:
+              - cell "patitas pet shop" [ref=e140]
+              - cell "POS" [ref=e141]:
+                - generic [ref=e142]: POS
+              - cell "Monocromo" [ref=e143]:
+                - generic [ref=e146]: Monocromo
+              - cell "28 Apr 2026" [ref=e147]
+            - row "GymTest Gimnasio Monocromo 28 Apr 2026" [ref=e148]:
+              - cell "GymTest" [ref=e149]
+              - cell "Gimnasio" [ref=e150]:
+                - generic [ref=e151]: Gimnasio
+              - cell "Monocromo" [ref=e152]:
+                - generic [ref=e155]: Monocromo
+              - cell "28 Apr 2026" [ref=e156]
+            - row "FatumNeo POS Monocromo 28 Apr 2026" [ref=e157]:
+              - cell "FatumNeo" [ref=e158]
+              - cell "POS" [ref=e159]:
+                - generic [ref=e160]: POS
+              - cell "Monocromo" [ref=e161]:
+                - generic [ref=e164]: Monocromo
+              - cell "28 Apr 2026" [ref=e165]

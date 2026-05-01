@@ -31,4 +31,19 @@
     [loading]="loading()"
     (edit)="openEdit($event)"
     (remove)="handleDelete($event)" />
+
+  @if (deleting(); as u) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar a este colaborador?"
+      [description]="deletingError() ?? 'Su profile se borra y no podrá entrar al panel. La cuenta de auth queda en Supabase: para eliminarla por completo hay que hacerlo desde el Dashboard.'"
+      confirmLabel="Eliminar usuario"
+      [entityLabel]="u.name"
+      [entitySublabel]="deletingSublabel()"
+      [entityInitials]="deletingInitials()"
+      confirmWord="ELIMINAR"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
 </div>

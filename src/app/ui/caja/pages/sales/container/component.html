@@ -1,5 +1,6 @@
-<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
-  <div class="flex items-center justify-between">
+<div class="max-w-7xl mx-auto px-6 py-6 space-y-5">
+  <!-- ======================== Header + tabs ======================== -->
+  <div class="flex items-end justify-between gap-4 flex-wrap">
     <div>
       <h2 class="text-2xl font-bold text-foreground tracking-tight">Ventas</h2>
       <p class="text-foreground-muted text-sm">
@@ -10,56 +11,338 @@
         }
       </p>
     </div>
-    <div class="flex gap-2">
-      <button (click)="openForm('product')"
-              [class.bg-primary]="activeForm() === 'product'"
-              [class.text-primary-fg]="activeForm() === 'product'"
-              [class.border-primary]="activeForm() === 'product'"
-              [class.shadow-md]="activeForm() === 'product'"
-              [class.shadow-primary/20]="activeForm() === 'product'"
-              [class.bg-elevated]="activeForm() !== 'product'"
-              [class.text-foreground-muted]="activeForm() !== 'product'"
-              [class.border-border-subtle]="activeForm() !== 'product'"
-              class="px-4 py-2 text-sm font-semibold border hover:bg-primary hover:text-primary-fg hover:border-primary rounded-lg transition">
-        Vender producto
-      </button>
-      @if (isGym()) {
-        <button (click)="openForm('membership')"
-                [class.bg-primary]="activeForm() === 'membership'"
-                [class.text-primary-fg]="activeForm() === 'membership'"
-                [class.border-primary]="activeForm() === 'membership'"
-                [class.shadow-md]="activeForm() === 'membership'"
-                [class.shadow-primary/20]="activeForm() === 'membership'"
-                [class.bg-elevated]="activeForm() !== 'membership'"
-                [class.text-foreground-muted]="activeForm() !== 'membership'"
-                [class.border-border-subtle]="activeForm() !== 'membership'"
-                class="px-4 py-2 text-sm font-semibold border hover:bg-primary hover:text-primary-fg hover:border-primary rounded-lg transition">
-          Vender membresía
+
+    <!-- Tabs entre POS productos y form de membresia (solo gym) -->
+    @if (isGym()) {
+      <div class="inline-flex rounded-lg border border-border-subtle bg-elevated p-0.5">
+        <button type="button"
+                (click)="setMode('products')"
+                [class.bg-primary]="mode() === 'products'"
+                [class.text-primary-fg]="mode() === 'products'"
+                [class.shadow-sm]="mode() === 'products'"
+                [class.text-foreground-muted]="mode() !== 'products'"
+                class="px-4 py-1.5 text-sm font-medium rounded-md transition">
+          Vender productos
         </button>
-      }
-    </div>
+        <button type="button"
+                (click)="setMode('membership')"
+                [class.bg-primary]="mode() === 'membership'"
+                [class.text-primary-fg]="mode() === 'membership'"
+                [class.shadow-sm]="mode() === 'membership'"
+                [class.text-foreground-muted]="mode() !== 'membership'"
+                class="px-4 py-1.5 text-sm font-medium rounded-md transition">
+          Asignar membresía
+        </button>
+      </div>
+    }
   </div>
 
-  @if (activeForm() === 'product') {
-    <app-caja-sales-product-form
-      [products]="products()"
-      [clients]="clients()"
-      [submitting]="submitting()"
-      [errorMessage]="formError()"
-      (submitForm)="handleSaleProduct($event)"
-      (cancel)="closeForm()" />
-  } @else if (activeForm() === 'membership' && isGym()) {
+  <!-- ======================== Modo: Membresía ======================== -->
+  @if (mode() === 'membership' && isGym()) {
     <app-caja-sales-membership-form
       [clients]="clients()"
       [plans]="plans()"
       [submitting]="submitting()"
       [errorMessage]="formError()"
       (submitForm)="handleSaleMembership($event)"
-      (cancel)="closeForm()" />
+      (cancel)="setMode('products')" />
   }
 
-  <app-caja-sales-list
-    [sales]="sales()"
-    [loading]="loading()"
-    (cancel)="handleCancel($event)" />
+  <!-- ======================== Modo: POS productos ======================== -->
+  @if (mode() === 'products') {
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5 items-start">
+      <!-- ============================== Catálogo (izq) ============================== -->
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 shadow-sm space-y-4">
+        <!-- Header del catálogo: title + search -->
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-foreground">Catálogo</h3>
+            <p class="text-xs text-foreground-subtle">
+              {{ availableProducts().length }} productos con stock
+              @if (filteredProducts().length !== availableProducts().length) {
+                · {{ filteredProducts().length }} en filtro
+              }
+            </p>
+          </div>
+          <div class="flex items-center gap-2 bg-input border border-border-subtle rounded-lg px-3 py-1.5 w-full md:w-72">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-faint flex-shrink-0">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" placeholder="Buscar producto…"
+                   [value]="searchQuery()"
+                   (input)="setSearch($any($event.target).value)"
+                   class="bg-transparent text-foreground text-sm outline-none flex-1 min-w-0 placeholder:text-foreground-faint" />
+          </div>
+        </div>
+
+        <!-- Category chips -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" (click)="selectCategory(null)"
+                  [class.bg-primary]="activeCategory() === null"
+                  [class.text-primary-fg]="activeCategory() === null"
+                  [class.bg-elevated]="activeCategory() !== null"
+                  [class.text-foreground-muted]="activeCategory() !== null"
+                  [class.border-border-subtle]="activeCategory() !== null"
+                  class="px-3 py-1 text-xs font-semibold rounded-full transition border border-transparent">
+            Todos · {{ availableProducts().length }}
+          </button>
+          @for (cat of categories(); track cat) {
+            <button type="button" (click)="selectCategory(cat)"
+                    [class.bg-primary]="activeCategory() === cat"
+                    [class.text-primary-fg]="activeCategory() === cat"
+                    [class.bg-elevated]="activeCategory() !== cat"
+                    [class.text-foreground-muted]="activeCategory() !== cat"
+                    [class.border-border-subtle]="activeCategory() !== cat"
+                    class="px-3 py-1 text-xs font-semibold rounded-full transition border border-transparent">
+              {{ cat }}
+            </button>
+          }
+        </div>
+
+        <!-- Product grid 4 cols -->
+        @if (loading()) {
+          <div class="py-12 text-center text-sm text-foreground-subtle">Cargando catálogo…</div>
+        } @else if (filteredProducts().length === 0) {
+          <div class="py-12 text-center">
+            <p class="text-foreground-muted text-sm">
+              @if (availableProducts().length === 0) {
+                Sin productos con stock. Agrega o repón inventario en Productos.
+              } @else {
+                Sin productos que coincidan con tu filtro.
+              }
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            @for (product of filteredProducts(); track product.id) {
+              <button type="button"
+                      (click)="addToCart(product)"
+                      class="text-left bg-elevated border border-border-subtle rounded-xl p-3 hover:border-primary hover:shadow-md transition group flex flex-col gap-2">
+                <!-- Top row: category tag + stock -->
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-[9px] font-bold uppercase tracking-wider text-foreground-subtle px-1.5 py-0.5 rounded bg-muted border border-border-subtle">
+                    {{ (product.category ?? 'GEN').slice(0, 4).toUpperCase() }}
+                  </span>
+                  <span class="text-[10px] font-mono"
+                        [class.text-danger]="product.stock < 5"
+                        [class.text-warning]="product.stock >= 5 && product.stock < 10"
+                        [class.text-foreground-faint]="product.stock >= 10">
+                    {{ product.stock }} stk
+                  </span>
+                </div>
+
+                <!-- Name (no image) -->
+                <div class="flex-1 min-h-[2.4rem]">
+                  <p class="text-sm font-semibold text-foreground leading-tight line-clamp-2">{{ product.name }}</p>
+                </div>
+
+                <!-- Footer: price + add icon -->
+                <div class="flex items-center justify-between gap-2 pt-1 border-t border-border-subtle">
+                  <span class="text-base font-bold tracking-tight text-foreground">
+                    {{ product.price | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+                  </span>
+                  <span class="w-7 h-7 rounded-lg bg-primary text-primary-fg flex items-center justify-center group-hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"/><path d="M12 5v14"/>
+                    </svg>
+                  </span>
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ============================== Order panel (der) ============================== -->
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl shadow-sm flex flex-col sticky top-4 max-h-[calc(100vh-2rem)] overflow-hidden">
+        <!-- Order header -->
+        <div class="flex items-start justify-between gap-2 p-5">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-foreground-faint">Venta nueva</p>
+            <h3 class="font-semibold text-foreground">{{ cartTotalQuantity() }} {{ cartTotalQuantity() === 1 ? 'item' : 'items' }} · {{ cartItemCount() }} producto{{ cartItemCount() === 1 ? '' : 's' }}</h3>
+          </div>
+          @if (cart().length > 0) {
+            <button type="button" (click)="clearCart()" title="Vaciar carrito"
+                    class="text-foreground-muted hover:text-danger p-1 rounded transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          }
+        </div>
+
+        <!-- Customer selector -->
+        <div class="px-5 pb-3 border-b border-border-subtle">
+          <label for="cart-client" class="block text-[10px] font-bold uppercase tracking-wider text-foreground-faint mb-1.5">Cliente</label>
+          <select id="cart-client"
+                  [value]="cartCustomerId()"
+                  (change)="selectCustomer($any($event.target).value)"
+                  class="w-full px-3 py-2 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+            <option value="">— Venta sin cliente —</option>
+            @for (c of clients(); track c.id) {
+              <option [value]="c.id">{{ c.ci }} · {{ c.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Items list (scrollable) -->
+        <div class="flex-1 overflow-y-auto px-5 py-3">
+          @if (cart().length === 0) {
+            <div class="py-10 text-center">
+              <p class="text-sm text-foreground-muted">Carrito vacío</p>
+              <p class="text-xs text-foreground-faint mt-1">Toca un producto del catálogo para agregarlo.</p>
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (item of cart(); track item.product_id) {
+                <div class="flex items-start gap-2.5 pb-3 border-b border-border-subtle last:border-b-0 last:pb-0">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-foreground line-clamp-1">{{ item.product_name }}</p>
+                    <p class="text-xs text-foreground-subtle">
+                      {{ item.unit_price | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+                      @if (item.category) {
+                        <span class="text-foreground-faint">· {{ item.category }}</span>
+                      }
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span class="text-sm font-bold font-mono text-foreground">
+                      {{ item.unit_price * item.quantity | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+                    </span>
+                    <div class="inline-flex items-center gap-1 bg-elevated rounded-lg border border-border-subtle">
+                      <button type="button" (click)="updateQty(item.product_id, -1)"
+                              class="w-6 h-6 flex items-center justify-center text-foreground-muted hover:text-foreground transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M5 12h14"/>
+                        </svg>
+                      </button>
+                      <span class="text-xs font-bold font-mono text-foreground min-w-[1.2rem] text-center">{{ item.quantity }}</span>
+                      <button type="button" (click)="updateQty(item.product_id, 1)"
+                              [disabled]="itemAtMax(item)"
+                              [class.opacity-30]="itemAtMax(item)"
+                              [class.cursor-not-allowed]="itemAtMax(item)"
+                              class="w-6 h-6 flex items-center justify-center text-foreground-muted hover:text-foreground transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M5 12h14"/><path d="M12 5v14"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Totals + payment + cobrar (sticky bottom) -->
+        @if (cart().length > 0) {
+          <div class="border-t border-border-subtle bg-elevated/50 backdrop-blur-sm p-5 space-y-3">
+            <!-- Total -->
+            <div class="flex items-baseline justify-between gap-2">
+              <span class="text-sm text-foreground-muted">Total</span>
+              <span class="text-2xl font-bold font-mono text-foreground tracking-tight">
+                {{ cartSubtotal() | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+              </span>
+            </div>
+
+            <!-- Payment method -->
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-foreground-faint mb-1.5">Método de pago</label>
+              <div class="flex gap-1 bg-input rounded-lg p-0.5 border border-border-subtle">
+                <button type="button" (click)="setPaymentMethod('cash')"
+                        [class.bg-primary]="paymentMethod() === 'cash'"
+                        [class.text-primary-fg]="paymentMethod() === 'cash'"
+                        [class.shadow-sm]="paymentMethod() === 'cash'"
+                        [class.text-foreground-muted]="paymentMethod() !== 'cash'"
+                        class="flex-1 py-1.5 text-xs font-semibold rounded-md transition">
+                  Efectivo
+                </button>
+                <button type="button" (click)="setPaymentMethod('card')"
+                        [class.bg-primary]="paymentMethod() === 'card'"
+                        [class.text-primary-fg]="paymentMethod() === 'card'"
+                        [class.shadow-sm]="paymentMethod() === 'card'"
+                        [class.text-foreground-muted]="paymentMethod() !== 'card'"
+                        class="flex-1 py-1.5 text-xs font-semibold rounded-md transition">
+                  Tarjeta
+                </button>
+                <button type="button" (click)="setPaymentMethod('qr')"
+                        [class.bg-primary]="paymentMethod() === 'qr'"
+                        [class.text-primary-fg]="paymentMethod() === 'qr'"
+                        [class.shadow-sm]="paymentMethod() === 'qr'"
+                        [class.text-foreground-muted]="paymentMethod() !== 'qr'"
+                        class="flex-1 py-1.5 text-xs font-semibold rounded-md transition">
+                  QR
+                </button>
+              </div>
+            </div>
+
+            <!-- Cash inputs (solo si efectivo) -->
+            @if (paymentMethod() === 'cash') {
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-foreground-faint mb-1">Recibido</label>
+                  <input type="number" min="0" step="0.01"
+                         [value]="cashReceived() || ''"
+                         (input)="setCashReceived(+$any($event.target).value)"
+                         placeholder="0.00"
+                         class="w-full px-2 py-1.5 bg-input text-foreground text-sm font-mono border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-foreground-faint mb-1">Cambio</label>
+                  <div class="px-2 py-1.5 bg-muted text-sm font-mono rounded-md border border-border-subtle"
+                       [class.text-foreground]="cashChange() >= 0"
+                       [class.text-danger]="cashChange() < 0">
+                    {{ cashChange() | number: '1.2-2' }}
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Error -->
+            @if (formError(); as msg) {
+              <div class="text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-2 py-1.5">
+                {{ msg }}
+              </div>
+            }
+
+            <!-- Cobrar button (full width, big) -->
+            <button type="button" (click)="charge()" [disabled]="!canCharge()"
+                    class="w-full py-3 bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed font-bold rounded-xl transition shadow-lg shadow-primary/20 disabled:shadow-none flex items-center justify-center gap-2">
+              @if (submitting()) {
+                Cobrando…
+              } @else {
+                <span>Cobrar</span>
+                <span class="font-mono">{{ cartSubtotal() | currency: 'BOB':'symbol-narrow':'1.2-2' }}</span>
+              }
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ======================== Sales history (siempre visible) ======================== -->
+  <div>
+    <h3 class="font-semibold text-foreground mb-3">Ventas recientes</h3>
+    <app-caja-sales-list
+      [sales]="sales()"
+      [loading]="loading()"
+      (cancel)="handleCancel($event)" />
+  </div>
 </div>
+
+@if (cancelling(); as sale) {
+  <app-confirm-delete
+    [open]="true"
+    title="¿Cancelar esta venta?"
+    [description]="cancellingDescription()"
+    confirmLabel="Cancelar venta"
+    [entityLabel]="cancellingLabel()"
+    [entitySublabel]="cancellingSublabel()"
+    [entityInitials]="cancellingInitials()"
+    [amount]="cancellingAmount()"
+    amountLabel="Total"
+    [submitting]="cancellingSubmitting()"
+    (confirmed)="confirmCancel()"
+    (cancelled)="abortCancel()" />
+}

@@ -39,7 +39,12 @@
       "mcp__playwright__browser_handle_dialog",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\SaasGym\\\\src\\\\app\\\\ui\\\\admin\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(ls \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\SaasGym\\\\src\\\\app\\\\ui\\\\admin\\\\pages\" -Recurse | Where-Object {$_.Name -eq \"component.ts\" -or $_.Name -eq \"home.component.ts\"} | Select-Object FullName)"
     ]
   }
 }
