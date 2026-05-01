@@ -68,6 +68,7 @@ export class SaasBusinessesContainerComponent {
         await this.businessService.updateBusiness(editing.id, {
           name: input.businessName,
           type: input.businessType,
+          theme: input.theme,
         });
       } else {
         await this.businessService.createBusinessWithAdmin({
@@ -77,6 +78,7 @@ export class SaasBusinessesContainerComponent {
           adminName: input.adminName,
           adminCi: input.adminCi,
           services: input.services,
+          theme: input.theme,
         });
       }
       this.formState.set(null);

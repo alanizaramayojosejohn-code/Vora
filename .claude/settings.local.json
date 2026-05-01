@@ -38,7 +38,8 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_handle_dialog",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npx supabase *)"
     ]
   }
 }
