@@ -3,7 +3,8 @@ export interface Product {
   business_id: string;
   name: string;
   description: string | null;
-  category: string | null;
+  category_id: string | null;
+  category: { id: string; name: string; description: string | null } | null;
   price: number;
   cost: number;
   stock: number;

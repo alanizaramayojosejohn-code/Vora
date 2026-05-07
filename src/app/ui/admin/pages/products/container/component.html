@@ -20,6 +20,7 @@
   @if (showForm()) {
     <app-admin-products-form
       [value]="editing()"
+      [categories]="categories()"
       [submitting]="submitting()"
       [errorMessage]="formError()"
       (submitForm)="handleSubmit($event)"

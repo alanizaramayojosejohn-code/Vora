@@ -6,7 +6,7 @@ import { SupabaseService } from '../supabase/supabase.service';
 export interface CreateProductInput {
   name: string;
   description: string | null;
-  category: string | null;
+  category_id: string | null;
   price: number;
   cost: number;
   stock: number;
@@ -30,13 +30,13 @@ export class ProductService {
         business_id: businessId,
         name: input.name,
         description: input.description,
-        category: input.category,
+        category_id: input.category_id,
         price: input.price,
         cost: input.cost,
         stock: input.stock,
         provider: input.provider,
       })
-      .select('*')
+      .select('*, category:categories(id, name, description)')
       .single();
     if (error) throw error;
     return data as Product;
@@ -48,14 +48,14 @@ export class ProductService {
       .update({
         name: input.name,
         description: input.description,
-        category: input.category,
+        category_id: input.category_id,
         price: input.price,
         cost: input.cost,
         stock: input.stock,
         provider: input.provider,
       })
       .eq('id', id)
-      .select('*')
+      .select('*, category:categories(id, name, description)')
       .single();
     if (error) throw error;
     return data as Product;

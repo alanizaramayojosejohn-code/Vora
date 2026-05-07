@@ -14,11 +14,12 @@
 
   <div class="w-full max-w-md relative">
     <div class="text-center mb-8">
-      <div class="inline-flex items-center gap-2.5 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-primary text-primary-fg flex items-center justify-center font-bold">
-          S
-        </div>
-        <h1 class="text-2xl font-bold text-foreground tracking-tight">SaasGym</h1>
+      <div class="inline-flex items-center justify-center mb-3">
+        @if (theme.resolvedMode() === 'light') {
+          <img src="img/svima_white.webp" alt="SaasGym" class="h-14 w-auto">
+        } @else {
+          <img src="img/vima_black.webp" alt="SaasGym" class="h-14 w-auto">
+        }
       </div>
       <p class="text-sm text-foreground-subtle">Gestión de negocios POS y GYM</p>
     </div>

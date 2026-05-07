@@ -44,7 +44,11 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\SaasGym\\\\src\\\\app\\\\ui\\\\admin\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "PowerShell(ls \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\SaasGym\\\\src\\\\app\\\\ui\\\\admin\\\\pages\" -Recurse | Where-Object {$_.Name -eq \"component.ts\" -or $_.Name -eq \"home.component.ts\"} | Select-Object FullName)"
+      "PowerShell(ls \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\SaasGym\\\\src\\\\app\\\\ui\\\\admin\\\\pages\" -Recurse | Where-Object {$_.Name -eq \"component.ts\" -or $_.Name -eq \"home.component.ts\"} | Select-Object FullName)",
+      "Bash(xargs grep -l \"categoria\\\\|category\")",
+      "Bash(Get-ChildItem *)",
+      "Bash(xargs grep -l \"profile\\\\|password\\\\|update.*user\")",
+      "Bash(xargs grep -l \"profile\\\\|account\\\\|settings\")"
     ]
   }
 }

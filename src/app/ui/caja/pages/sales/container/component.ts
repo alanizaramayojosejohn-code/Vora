@@ -118,7 +118,7 @@ export class CajaSalesContainerComponent {
   readonly categories = computed<string[]>(() => {
     const set = new Set<string>();
     for (const p of this.availableProducts()) {
-      if (p.category) set.add(p.category);
+      if (p.category?.name) set.add(p.category.name);
     }
     return Array.from(set).sort();
   });
@@ -128,7 +128,7 @@ export class CajaSalesContainerComponent {
     const q = this.searchQuery().toLowerCase().trim();
     const cat = this.activeCategory();
     return this.availableProducts().filter((p) => {
-      if (cat && p.category !== cat) return false;
+      if (cat && p.category?.name !== cat) return false;
       if (q && !p.name.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -205,7 +205,7 @@ export class CajaSalesContainerComponent {
       {
         product_id: product.id,
         product_name: product.name,
-        category: product.category,
+        category: product.category?.name ?? null,
         unit_price: Number(product.price),
         stock_available: product.stock,
         quantity: 1,

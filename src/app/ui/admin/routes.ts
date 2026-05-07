@@ -3,6 +3,11 @@ import { Routes } from '@angular/router';
 export const AdminRoutes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   {
+    path: 'profile',
+    loadComponent: () =>
+      import('../shared/profile-page/component').then((m) => m.ProfilePageComponent),
+  },
+  {
     path: 'home',
     loadComponent: () =>
       import('./pages/home/home.component').then((m) => m.AdminHomeComponent),
@@ -19,6 +24,13 @@ export const AdminRoutes: Routes = [
     loadComponent: () =>
       import('./pages/products/container/component').then(
         (m) => m.AdminProductsContainerComponent,
+      ),
+  },
+  {
+    path: 'categories',
+    loadComponent: () =>
+      import('./pages/categories/container/component').then(
+        (m) => m.AdminCategoriesContainerComponent,
       ),
   },
   {

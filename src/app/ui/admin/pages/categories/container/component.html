@@ -1,0 +1,48 @@
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-foreground tracking-tight">Categorías</h2>
+      <p class="text-foreground-muted text-sm">Organiza tus productos por categorías.</p>
+    </div>
+    @if (showForm()) {
+      <button (click)="closeForm()"
+              class="px-4 py-2 text-sm font-semibold bg-muted hover:bg-input text-foreground border border-border-subtle rounded-lg transition">
+        Cerrar formulario
+      </button>
+    } @else {
+      <button (click)="openCreate()"
+              class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
+        Nueva categoría
+      </button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <app-admin-categories-form
+      [value]="editing()"
+      [submitting]="submitting()"
+      [errorMessage]="formError()"
+      (submitForm)="handleSubmit($event)"
+      (cancel)="closeForm()" />
+  }
+
+  <app-admin-categories-list
+    [categories]="categories()"
+    [loading]="loading()"
+    (edit)="openEdit($event)"
+    (remove)="handleDelete($event)" />
+
+  @if (deleting(); as c) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar esta categoría?"
+      [description]="deletingError() ?? 'Los productos en esta categoría quedarán sin categoría asignada.'"
+      confirmLabel="Eliminar categoría"
+      [entityLabel]="c.name"
+      [entitySublabel]="c.description"
+      [entityInitials]="deletingInitials()"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
+</div>

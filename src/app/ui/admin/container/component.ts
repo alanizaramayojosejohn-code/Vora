@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
 import { ThemeModeToggleComponent } from '../../shared/theme-mode-toggle.component';
@@ -15,6 +15,7 @@ export class AdminContainerComponent {
 
   readonly audienceLabel = 'Admin';
   readonly isGym = computed(() => this.auth.businessType() === 'gym');
+  readonly sidebarOpen = signal(false);
 
   // 2 letras del nombre para el avatar circle del sidebar.
   // Ej: "Daniela Mendez" → "DM", "Jose" → "JO".

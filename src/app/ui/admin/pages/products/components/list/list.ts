@@ -39,7 +39,7 @@ export class ProductsListComponent {
       inStock: list.filter((p) => p.stock >= 5).length,
       lowStock: list.filter((p) => p.stock > 0 && p.stock < 5).length,
       outOfStock: list.filter((p) => p.stock === 0).length,
-      noCategory: list.filter((p) => !p.category).length,
+      noCategory: list.filter((p) => !p.category_id).length,
     };
   });
 
@@ -52,13 +52,13 @@ export class ProductsListComponent {
     if (f === 'in-stock') list = list.filter((p) => p.stock >= 5);
     else if (f === 'low-stock') list = list.filter((p) => p.stock > 0 && p.stock < 5);
     else if (f === 'out-of-stock') list = list.filter((p) => p.stock === 0);
-    else if (f === 'no-category') list = list.filter((p) => !p.category);
+    else if (f === 'no-category') list = list.filter((p) => !p.category_id);
 
     if (q) {
       list = list.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
-          (p.category ?? '').toLowerCase().includes(q) ||
+          (p.category?.name ?? '').toLowerCase().includes(q) ||
           (p.provider ?? '').toLowerCase().includes(q),
       );
     }

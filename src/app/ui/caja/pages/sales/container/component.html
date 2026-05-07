@@ -121,7 +121,7 @@
                 <!-- Top row: category tag + stock -->
                 <div class="flex items-center justify-between gap-1">
                   <span class="text-[9px] font-bold uppercase tracking-wider text-foreground-subtle px-1.5 py-0.5 rounded bg-muted border border-border-subtle">
-                    {{ (product.category ?? 'GEN').slice(0, 4).toUpperCase() }}
+                    {{ (product.category?.name ?? 'GEN').slice(0, 4).toUpperCase() }}
                   </span>
                   <span class="text-[10px] font-mono"
                         [class.text-danger]="product.stock < 5"

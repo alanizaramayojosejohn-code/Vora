@@ -7,7 +7,7 @@ import { BusinessTheme, DEFAULT_THEME } from '../theme/theme.presets';
 import { ThemeService } from '../theme/theme.service';
 
 interface ProfileWithBusiness extends Profile {
-  businesses: { type: BusinessType; theme: BusinessTheme | null } | null;
+  businesses: { type: BusinessType; theme: BusinessTheme | null; name: string } | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,6 +18,7 @@ export class AuthService {
   readonly session = signal<Session | null>(null);
   readonly profile = signal<Profile | null>(null);
   readonly businessType = signal<BusinessType | null>(null);
+  readonly businessName = signal<string | null>(null);
   // Tema actual del negocio. Lo expone aqui (en lugar de meterlo en theme.service)
   // porque el theme se deriva del profile y se actualiza con el mismo loadProfile().
   readonly businessTheme = signal<BusinessTheme | null>(null);
@@ -79,15 +80,31 @@ export class AuthService {
     this.session.set(null);
     this.profile.set(null);
     this.businessType.set(null);
+    this.businessName.set(null);
     this.businessTheme.set(null);
     this.unauthorizedEmail.set(null);
     this.theme.reset();
   }
 
+  async updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const email = this.session()?.user.email;
+    if (!email) throw new Error('No hay sesión activa.');
+
+    // Verificar contraseña actual re-autenticando antes de actualizar.
+    const { error: verifyError } = await this.client.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+    if (verifyError) throw new Error('La contraseña actual es incorrecta.');
+
+    const { error: updateError } = await this.client.auth.updateUser({ password: newPassword });
+    if (updateError) throw updateError;
+  }
+
   private async loadProfile(userId: string): Promise<void> {
     const { data, error } = await this.client
       .from('profiles')
-      .select('*, businesses(type, theme)')
+      .select('*, businesses(type, theme, name)')
       .eq('id', userId)
       .maybeSingle();
 
@@ -95,6 +112,7 @@ export class AuthService {
       console.error('Error cargando profile', error);
       this.profile.set(null);
       this.businessType.set(null);
+      this.businessName.set(null);
       this.businessTheme.set(null);
       this.theme.reset();
       return;
@@ -110,6 +128,7 @@ export class AuthService {
       this.session.set(null);
       this.profile.set(null);
       this.businessType.set(null);
+      this.businessName.set(null);
       this.businessTheme.set(null);
       this.theme.reset();
       return;
@@ -118,6 +137,7 @@ export class AuthService {
     const { businesses, ...profile } = data as ProfileWithBusiness;
     this.profile.set(profile);
     this.businessType.set(businesses?.type ?? null);
+    this.businessName.set(businesses?.name ?? null);
 
     // Aplica el preset del negocio. El mode (light/dark/system) lo gestiona
     // el theme.service por su cuenta desde localStorage — es preferencia

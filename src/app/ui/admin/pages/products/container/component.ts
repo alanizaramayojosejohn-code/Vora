@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Category } from '../../../../../models/category.model';
 import { Product } from '../../../../../models/product.model';
+import { CategoryQueryService } from '../../../../../services/category/query.service';
 import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
@@ -16,8 +18,10 @@ import { ProductsListComponent } from '../components/list/list';
 export class AdminProductsContainerComponent {
   private readonly productService = inject(ProductService);
   private readonly productQuery = inject(ProductQueryService);
+  private readonly categoryQuery = inject(CategoryQueryService);
 
   readonly products = signal<Product[]>([]);
+  readonly categories = signal<Category[]>([]);
   readonly loading = signal(false);
 
   readonly formState = signal<null | 'create' | Product>(null);
@@ -55,12 +59,13 @@ export class AdminProductsContainerComponent {
   readonly deletingSublabel = computed(() => {
     const p = this.deleting();
     if (!p) return null;
-    const cat = p.category ?? 'Sin categoría';
+    const cat = p.category?.name ?? 'Sin categoría';
     return `${cat} · Stock ${p.stock}`;
   });
 
   constructor() {
     void this.refresh();
+    void this.loadCategories();
   }
 
   async refresh(): Promise<void> {
@@ -71,6 +76,14 @@ export class AdminProductsContainerComponent {
       console.error('Error listando productos', err);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async loadCategories(): Promise<void> {
+    try {
+      this.categories.set(await this.categoryQuery.listCategories());
+    } catch (err: unknown) {
+      console.error('Error listando categorías', err);
     }
   }
 

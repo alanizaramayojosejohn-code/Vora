@@ -65,7 +65,7 @@ export class ReportQueryService {
 
     const { data, error } = await this.client
       .from('sales')
-      .select('amount, type, products(category), client_memberships(membership_plans(name))')
+      .select('amount, type, products(category:categories(name)), client_memberships(membership_plans(name))')
       .is('cancelled_at', null)
       .gte('created_at', firstDay)
       .lt('created_at', nextMonth);
@@ -75,7 +75,7 @@ export class ReportQueryService {
     const types = new Map<string, 'product' | 'membership'>();
     for (const row of (data ?? []) as any[]) {
       const cat: string = row.type === 'product'
-        ? (row.products?.category ?? 'Otros')
+        ? (row.products?.category?.name ?? 'Otros')
         : (row.client_memberships?.membership_plans?.name ?? 'Membresía');
       totals.set(cat, (totals.get(cat) ?? 0) + Number(row.amount));
       if (!types.has(cat)) types.set(cat, row.type as 'product' | 'membership');

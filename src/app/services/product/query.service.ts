@@ -7,10 +7,11 @@ export class ProductQueryService {
   private readonly client = inject(SupabaseService).client;
 
   // RLS filtra por business_id. Excluye soft-deleted.
+  // Join con categories para incluir el objeto category en cada producto.
   async listProducts(): Promise<Product[]> {
     const { data, error } = await this.client
       .from('products')
-      .select('*')
+      .select('*, category:categories(id, name, description)')
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
     if (error) throw error;
