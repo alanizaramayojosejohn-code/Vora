@@ -48,6 +48,34 @@ export const AdminRoutes: Routes = [
       ),
   },
   {
+    path: 'purchases',
+    loadComponent: () =>
+      import('./pages/purchases/container/component').then(
+        (m) => m.PurchasesDashboardComponent,
+      ),
+  },
+  {
+    path: 'purchases/suppliers',
+    loadComponent: () =>
+      import('./pages/purchases/suppliers/component').then(
+        (m) => m.PurchasesSuppliersComponent,
+      ),
+  },
+  {
+    path: 'purchases/acquisitions/new',
+    loadComponent: () =>
+      import('./pages/purchases/acquisitions/new/component').then(
+        (m) => m.NewAcquisitionComponent,
+      ),
+  },
+  {
+    path: 'purchases/orders/new',
+    loadComponent: () =>
+      import('./pages/purchases/orders/new/component').then(
+        (m) => m.NewPurchaseOrderComponent,
+      ),
+  },
+  {
     path: 'reports',
     loadComponent: () =>
       import('./pages/reports/container/component').then(
@@ -59,6 +87,13 @@ export const AdminRoutes: Routes = [
     loadComponent: () =>
       import('../caja/pages/sales/container/component').then(
         (m) => m.CajaSalesContainerComponent,
+      ),
+  },
+  {
+    path: 'sales/new',
+    loadComponent: () =>
+      import('../caja/pages/sales/new/component').then(
+        (m) => m.CajaSalesNewComponent,
       ),
   },
   {

@@ -10,6 +10,7 @@ export interface CreateProductInput {
   price: number;
   cost: number;
   stock: number;
+  has_stock: boolean;
   provider: string | null;
 }
 
@@ -33,7 +34,8 @@ export class ProductService {
         category_id: input.category_id,
         price: input.price,
         cost: input.cost,
-        stock: input.stock,
+        stock: input.has_stock ? input.stock : 0,
+        has_stock: input.has_stock,
         provider: input.provider,
       })
       .select('*, category:categories(id, name, description)')
@@ -51,7 +53,8 @@ export class ProductService {
         category_id: input.category_id,
         price: input.price,
         cost: input.cost,
-        stock: input.stock,
+        stock: input.has_stock ? input.stock : 0,
+        has_stock: input.has_stock,
         provider: input.provider,
       })
       .eq('id', id)

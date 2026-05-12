@@ -1,0 +1,95 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: S
+      - generic [ref=e8]: SaasGym
+      - generic [ref=e9]: Admin
+    - navigation [ref=e10]:
+      - paragraph [ref=e11]: General
+      - link "Inicio" [ref=e12] [cursor=pointer]:
+        - /url: /admin/home
+        - img [ref=e13]
+        - text: Inicio
+      - paragraph [ref=e16]: Operación
+      - link "Socios" [ref=e17] [cursor=pointer]:
+        - /url: /admin/clients
+        - img [ref=e18]
+        - text: Socios
+      - link "Productos" [ref=e23] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e24]
+        - text: Productos
+      - link "Categorías" [ref=e28] [cursor=pointer]:
+        - /url: /admin/categories
+        - img [ref=e29]
+        - text: Categorías
+      - link "Personal" [ref=e31] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e32]
+        - text: Personal
+      - paragraph [ref=e36]: Ventas
+      - link "Ventas" [ref=e37] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e38]
+        - text: Ventas
+      - paragraph [ref=e42]: Análisis
+      - link "Reportes" [ref=e43] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e44]
+        - text: Reportes
+    - generic [ref=e46]:
+      - radiogroup "Modo de visualización" [ref=e49]:
+        - radio "Modo claro" [ref=e50]:
+          - img [ref=e51]
+        - radio "Modo oscuro" [ref=e57]:
+          - img [ref=e58]
+        - radio "Seguir el sistema" [checked] [ref=e60]:
+          - img [ref=e61]
+      - generic [ref=e63]:
+        - link "JO Jose admin" [ref=e64] [cursor=pointer]:
+          - /url: /admin/profile
+          - generic [ref=e65]: JO
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Jose
+            - paragraph [ref=e68]: admin
+        - button "Salir" [ref=e69]:
+          - img [ref=e70]
+  - main [ref=e73]:
+    - generic [ref=e541]:
+      - generic [ref=e543]:
+        - button [ref=e544]:
+          - img [ref=e545]
+        - generic [ref=e547]:
+          - heading "Nueva venta" [level=2] [ref=e548]
+          - paragraph [ref=e549]: Selecciona productos y cobra.
+      - generic [ref=e550]:
+        - generic [ref=e551]:
+          - generic [ref=e552]:
+            - generic [ref=e553]:
+              - heading "Catálogo" [level=3] [ref=e554]
+              - paragraph [ref=e555]: 1 productos con stock
+            - generic [ref=e556]:
+              - img [ref=e557]
+              - textbox "Buscar producto…" [ref=e560]
+          - generic [ref=e561]:
+            - button "Todos · 1" [ref=e562]
+            - button "polera" [ref=e563]
+          - button "POLE 94 stk polera Bs220.00" [ref=e565]:
+            - generic [ref=e566]:
+              - generic [ref=e567]: POLE
+              - generic [ref=e568]: 94 stk
+            - paragraph [ref=e570]: polera
+            - generic [ref=e571]:
+              - generic [ref=e572]: Bs220.00
+              - img [ref=e574]
+        - generic [ref=e575]:
+          - generic [ref=e577]:
+            - paragraph [ref=e578]: Venta nueva
+            - heading "0 items · 0 productos" [level=3] [ref=e579]
+          - generic [ref=e580]:
+            - generic [ref=e581]: Cliente
+            - combobox "Cliente" [ref=e582]:
+              - option "— Venta sin cliente —" [selected]
+          - generic [ref=e584]:
+            - paragraph [ref=e585]: Carrito vacío
+            - paragraph [ref=e586]: Toca un producto del catálogo para agregarlo.

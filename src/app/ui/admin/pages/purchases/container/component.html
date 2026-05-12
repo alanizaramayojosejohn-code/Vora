@@ -1,0 +1,124 @@
+<div class="p-6 space-y-8 max-w-5xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="text-2xl font-bold text-foreground">Compras</h1>
+      <p class="text-sm text-foreground-subtle mt-0.5">Proveedores, llegadas de productos y pedidos de compra.</p>
+    </div>
+    <div class="flex gap-2">
+      <a routerLink="/admin/purchases/suppliers"
+         class="px-3 py-2 text-sm font-medium text-foreground-muted border border-border-subtle rounded-lg hover:bg-muted transition">
+        Proveedores
+      </a>
+      <a routerLink="/admin/purchases/orders/new"
+         class="px-3 py-2 text-sm font-medium text-foreground-muted border border-border-subtle rounded-lg hover:bg-muted transition">
+        + Pedido
+      </a>
+      <a routerLink="/admin/purchases/acquisitions/new"
+         class="px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg hover:bg-primary/90 transition shadow-md shadow-primary/20">
+        + Llegada
+      </a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-16 text-foreground-muted text-sm">Cargando…</div>
+  } @else if (error(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+  } @else {
+
+    @if (actionError(); as msg) {
+      <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+    }
+
+    <!-- Pedidos pendientes -->
+    <section>
+      <h2 class="text-base font-semibold text-foreground mb-3">
+        Pedidos pendientes
+        @if (pendingOrders().length > 0) {
+          <span class="ml-2 text-xs font-bold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning">
+            {{ pendingOrders().length }}
+          </span>
+        }
+      </h2>
+
+      @if (pendingOrders().length === 0) {
+        <div class="rounded-xl border border-border-subtle bg-surface px-5 py-8 text-center text-sm text-foreground-muted">
+          No hay pedidos pendientes.
+          <a routerLink="/admin/purchases/orders/new" class="text-primary hover:underline ml-1">Crear uno</a>
+        </div>
+      } @else {
+        <div class="rounded-xl border border-border-subtle bg-surface divide-y divide-border-subtle overflow-hidden">
+          @for (order of pendingOrders(); track order.id) {
+            <div class="px-5 py-4 flex items-start gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-semibold text-foreground">
+                    {{ order.supplier?.name ?? 'Sin proveedor' }}
+                  </span>
+                  <span class="text-xs text-foreground-faint">
+                    {{ formatItems(order.items.length) }}
+                  </span>
+                  @if (order.expected_date) {
+                    <span class="text-xs px-1.5 py-0.5 rounded bg-muted text-foreground-muted">
+                      Esperado: {{ order.expected_date | date:'dd/MM/yyyy' }}
+                    </span>
+                  }
+                </div>
+                @if (order.notes) {
+                  <p class="text-xs text-foreground-subtle mt-0.5 truncate">{{ order.notes }}</p>
+                }
+                <p class="text-xs text-foreground-faint mt-1">{{ order.created_at | date:'dd/MM/yyyy' }}</p>
+              </div>
+              <div class="flex gap-2 flex-shrink-0">
+                <button (click)="cancelOrder(order.id)"
+                        [disabled]="cancellingId() === order.id || receivingId() === order.id"
+                        class="px-3 py-1.5 text-xs font-medium text-foreground-muted border border-border-subtle rounded-lg hover:bg-muted disabled:opacity-50 transition">
+                  @if (cancellingId() === order.id) { Cancelando… } @else { Cancelar }
+                </button>
+                <button (click)="receiveOrder(order.id)"
+                        [disabled]="receivingId() === order.id || cancellingId() === order.id"
+                        class="px-3 py-1.5 text-xs font-semibold bg-success/15 text-success border border-success/25 rounded-lg hover:bg-success/25 disabled:opacity-50 transition">
+                  @if (receivingId() === order.id) { Recibiendo… } @else { Recibir }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Llegadas recientes -->
+    <section>
+      <h2 class="text-base font-semibold text-foreground mb-3">Llegadas recientes</h2>
+
+      @if (acquisitions().length === 0) {
+        <div class="rounded-xl border border-border-subtle bg-surface px-5 py-8 text-center text-sm text-foreground-muted">
+          No hay llegadas registradas.
+          <a routerLink="/admin/purchases/acquisitions/new" class="text-primary hover:underline ml-1">Registrar una</a>
+        </div>
+      } @else {
+        <div class="rounded-xl border border-border-subtle bg-surface divide-y divide-border-subtle overflow-hidden">
+          @for (acq of acquisitions(); track acq.id) {
+            <div class="px-5 py-4 flex items-center gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-semibold text-foreground">
+                    {{ acq.supplier?.name ?? 'Sin proveedor' }}
+                  </span>
+                  <span class="text-xs text-foreground-faint">{{ formatItems(acq.items.length) }}</span>
+                </div>
+                <p class="text-xs text-foreground-faint mt-0.5">{{ acq.acquired_at | date:'dd/MM/yyyy' }}</p>
+              </div>
+              <span class="text-sm font-bold text-foreground flex-shrink-0">
+                {{ acq.total_cost | currency:'BOB':'Bs. ':'1.2-2' }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+  }
+</div>

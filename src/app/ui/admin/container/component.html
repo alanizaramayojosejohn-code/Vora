@@ -94,6 +94,17 @@
         Personal
       </a>
 
+      <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Compras</p>
+
+      <a routerLink="/admin/purchases" routerLinkActive="bg-primary text-primary-fg shadow-sm"
+         (click)="sidebarOpen.set(false)"
+         class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        Compras
+      </a>
+
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Ventas</p>
 
       <a routerLink="/admin/sales" routerLinkActive="bg-primary text-primary-fg shadow-sm"

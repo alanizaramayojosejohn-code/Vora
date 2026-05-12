@@ -1,0 +1,221 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: S
+      - generic [ref=e8]: SaasGym
+      - generic [ref=e9]: Admin
+    - navigation [ref=e10]:
+      - paragraph [ref=e11]: General
+      - link "Inicio" [ref=e12] [cursor=pointer]:
+        - /url: /admin/home
+        - img [ref=e13]
+        - text: Inicio
+      - paragraph [ref=e16]: Operación
+      - link "Socios" [ref=e17] [cursor=pointer]:
+        - /url: /admin/clients
+        - img [ref=e18]
+        - text: Socios
+      - link "Productos" [ref=e23] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e24]
+        - text: Productos
+      - link "Categorías" [ref=e28] [cursor=pointer]:
+        - /url: /admin/categories
+        - img [ref=e29]
+        - text: Categorías
+      - link "Personal" [ref=e31] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e32]
+        - text: Personal
+      - paragraph [ref=e36]: Ventas
+      - link "Ventas" [ref=e37] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e38]
+        - text: Ventas
+      - paragraph [ref=e42]: Análisis
+      - link "Reportes" [ref=e43] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e44]
+        - text: Reportes
+    - generic [ref=e46]:
+      - radiogroup "Modo de visualización" [ref=e49]:
+        - radio "Modo claro" [ref=e50]:
+          - img [ref=e51]
+        - radio "Modo oscuro" [ref=e57]:
+          - img [ref=e58]
+        - radio "Seguir el sistema" [checked] [ref=e60]:
+          - img [ref=e61]
+      - generic [ref=e63]:
+        - link "JO Jose admin" [ref=e64] [cursor=pointer]:
+          - /url: /admin/profile
+          - generic [ref=e65]: JO
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Jose
+            - paragraph [ref=e68]: admin
+        - button "Salir" [ref=e69]:
+          - img [ref=e70]
+  - main [ref=e73]:
+    - generic [ref=e75]:
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - heading "Productos" [level=2] [ref=e78]
+          - paragraph [ref=e79]: Inventario disponible para venta en caja.
+        - button "Cerrar formulario" [ref=e80]
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - heading "Nuevo producto" [level=3] [ref=e84]
+          - paragraph [ref=e85]: Agrega un ítem al inventario del negocio.
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - generic [ref=e88]: Nombre
+            - textbox "Nombre" [ref=e89]
+          - generic [ref=e90]:
+            - generic [ref=e91]: Descripción (opcional)
+            - textbox "Descripción (opcional)" [ref=e92]
+          - generic [ref=e93]:
+            - generic [ref=e94]: Categoría (opcional)
+            - combobox "Categoría (opcional)" [ref=e95]:
+              - option "— Sin categoría —" [selected]
+              - option "Bebida caliente"
+              - option "Paninis"
+              - option "polera"
+              - option "Suplemento"
+          - generic [ref=e96]:
+            - generic [ref=e97]: Proveedor (opcional)
+            - textbox "Proveedor (opcional)" [ref=e98]
+          - generic [ref=e99]:
+            - generic [ref=e100]: Precio
+            - spinbutton "Precio" [ref=e101]: "0"
+          - generic [ref=e102]:
+            - generic [ref=e103]: Costo
+            - spinbutton "Costo" [ref=e104]: "0"
+          - generic [ref=e105]:
+            - generic [ref=e106] [cursor=pointer]:
+              - checkbox "Gestionar stock" [checked] [ref=e108]
+              - generic [ref=e111]: Gestionar stock
+            - paragraph [ref=e112]: El producto requiere stock disponible para aparecer en ventas.
+          - generic [ref=e113]:
+            - generic [ref=e114]: Stock inicial
+            - spinbutton "Stock inicial" [ref=e115]: "0"
+        - generic [ref=e116]:
+          - button "Cancelar" [ref=e117]
+          - button "Crear producto" [disabled] [ref=e118]
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - heading "Productos" [level=3] [ref=e123]
+            - paragraph [ref=e124]: 4 SKUs · 1 en stock · 0 bajo stock · 2 sin stock
+          - generic [ref=e125]:
+            - img [ref=e126]
+            - textbox "Buscar nombre, categoría, proveedor…" [ref=e129]
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - button "Todos · 4" [ref=e132]
+            - button "En stock · 1" [ref=e133]
+            - button "Bajo stock · 0" [ref=e134]
+            - button "Sin stock · 2" [ref=e135]
+            - button "Sin categoría · 1" [ref=e136]
+          - button "Recientes primero" [ref=e138]:
+            - img [ref=e139]
+            - text: Recientes primero
+          - button "Exportar" [ref=e141]:
+            - img [ref=e142]
+            - text: Exportar
+        - generic [ref=e145]:
+          - table [ref=e146]:
+            - rowgroup [ref=e147]:
+              - row "Producto Categoría Stock Precio Costo Proveedor Acciones" [ref=e148]:
+                - columnheader "Producto" [ref=e149]
+                - columnheader "Categoría" [ref=e150]
+                - columnheader "Stock" [ref=e151]
+                - columnheader "Precio" [ref=e152]
+                - columnheader "Costo" [ref=e153]
+                - columnheader "Proveedor" [ref=e154]
+                - columnheader "Acciones" [ref=e155]
+            - rowgroup [ref=e156]:
+              - row "CE Café Expresso Bebida caliente libre Bs18.00 Bs10.00 —" [ref=e157]:
+                - cell "CE Café Expresso" [ref=e158]:
+                  - button "CE Café Expresso" [ref=e159]:
+                    - generic [ref=e160]: CE
+                    - generic [ref=e162]: Café Expresso
+                - cell "Bebida caliente" [ref=e163]:
+                  - generic [ref=e164]: Bebida caliente
+                - cell "libre" [ref=e165]:
+                  - generic [ref=e166]: libre
+                - cell "Bs18.00" [ref=e167]
+                - cell "Bs10.00" [ref=e168]
+                - cell "—" [ref=e169]
+                - cell [ref=e170]:
+                  - generic [ref=e171]:
+                    - button "Ver detalle" [ref=e172]:
+                      - img [ref=e173]
+                    - button "Editar" [ref=e176]:
+                      - img [ref=e177]
+                    - button "Eliminar" [ref=e179]:
+                      - img [ref=e180]
+              - row "CL Café Latte expresso con leche texturizada Bebida caliente 0 Bs20.00 Bs12.00 —" [ref=e183]:
+                - cell "CL Café Latte expresso con leche texturizada" [ref=e184]:
+                  - button "CL Café Latte expresso con leche texturizada" [ref=e185]:
+                    - generic [ref=e186]: CL
+                    - generic [ref=e187]:
+                      - generic [ref=e188]: Café Latte
+                      - generic [ref=e189]: expresso con leche texturizada
+                - cell "Bebida caliente" [ref=e190]:
+                  - generic [ref=e191]: Bebida caliente
+                - cell "0" [ref=e192]:
+                  - generic [ref=e193]: "0"
+                - cell "Bs20.00" [ref=e194]
+                - cell "Bs12.00" [ref=e195]
+                - cell "—" [ref=e196]
+                - cell [ref=e197]:
+                  - generic [ref=e198]:
+                    - button "Ver detalle" [ref=e199]:
+                      - img [ref=e200]
+                    - button "Editar" [ref=e203]:
+                      - img [ref=e204]
+                    - button "Eliminar" [ref=e206]:
+                      - img [ref=e207]
+              - row "CA Café Café del diablo \"ira\" — 0 Bs80.00 Bs50.00 Diablo" [ref=e210]:
+                - cell "CA Café Café del diablo \"ira\"" [ref=e211]:
+                  - button "CA Café Café del diablo \"ira\"" [ref=e212]:
+                    - generic [ref=e213]: CA
+                    - generic [ref=e214]:
+                      - generic [ref=e215]: Café
+                      - generic [ref=e216]: Café del diablo "ira"
+                - cell "—" [ref=e217]
+                - cell "0" [ref=e218]:
+                  - generic [ref=e219]: "0"
+                - cell "Bs80.00" [ref=e220]
+                - cell "Bs50.00" [ref=e221]
+                - cell "Diablo" [ref=e222]
+                - cell [ref=e223]:
+                  - generic [ref=e224]:
+                    - button "Ver detalle" [ref=e225]:
+                      - img [ref=e226]
+                    - button "Editar" [ref=e229]:
+                      - img [ref=e230]
+                    - button "Eliminar" [ref=e232]:
+                      - img [ref=e233]
+              - row "PO polera polera YoungLA polera 94 Bs220.00 Bs180.00 —" [ref=e236]:
+                - cell "PO polera polera YoungLA" [ref=e237]:
+                  - button "PO polera polera YoungLA" [ref=e238]:
+                    - generic [ref=e239]: PO
+                    - generic [ref=e240]:
+                      - generic [ref=e241]: polera
+                      - generic [ref=e242]: polera YoungLA
+                - cell "polera" [ref=e243]:
+                  - generic [ref=e244]: polera
+                - cell "94" [ref=e245]:
+                  - generic [ref=e246]: "94"
+                - cell "Bs220.00" [ref=e247]
+                - cell "Bs180.00" [ref=e248]
+                - cell "—" [ref=e249]
+                - cell [ref=e250]:
+                  - generic [ref=e251]:
+                    - button "Ver detalle" [ref=e252]:
+                      - img [ref=e253]
+                    - button "Editar" [ref=e256]:
+                      - img [ref=e257]
+                    - button "Eliminar" [ref=e259]:
+                      - img [ref=e260]
+          - generic [ref=e264]: Mostrando 4 de 4 productos

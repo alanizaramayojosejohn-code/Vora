@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Category } from '../../../../../../models/category.model';
 import { Product } from '../../../../../../models/product.model';
@@ -23,6 +23,8 @@ export class ProductsFormComponent {
 
   readonly isEdit = computed(() => this.value() !== null);
 
+  readonly hasStock = signal(true);
+
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     description: [''],
@@ -30,6 +32,7 @@ export class ProductsFormComponent {
     price: [0, [Validators.required, Validators.min(0)]],
     cost: [0, [Validators.required, Validators.min(0)]],
     stock: [0, [Validators.required, Validators.min(0)]],
+    has_stock: [true],
     provider: [''],
   });
 
@@ -37,6 +40,7 @@ export class ProductsFormComponent {
     effect(() => {
       const v = this.value();
       if (v) {
+        this.hasStock.set(v.has_stock);
         this.form.reset({
           name: v.name,
           description: v.description ?? '',
@@ -44,15 +48,22 @@ export class ProductsFormComponent {
           price: v.price,
           cost: v.cost,
           stock: v.stock,
+          has_stock: v.has_stock,
           provider: v.provider ?? '',
         });
       } else {
+        this.hasStock.set(true);
         this.form.reset({
           name: '', description: '', category_id: '',
-          price: 0, cost: 0, stock: 0, provider: '',
+          price: 0, cost: 0, stock: 0, has_stock: true, provider: '',
         });
       }
     });
+  }
+
+  toggleHasStock(checked: boolean): void {
+    this.hasStock.set(checked);
+    this.form.controls.has_stock.setValue(checked);
   }
 
   onSubmit(): void {
@@ -67,6 +78,7 @@ export class ProductsFormComponent {
       price: Number(raw.price),
       cost: Number(raw.cost),
       stock: Math.trunc(Number(raw.stock)),
+      has_stock: raw.has_stock,
       provider: provider.length > 0 ? provider : null,
     });
   }

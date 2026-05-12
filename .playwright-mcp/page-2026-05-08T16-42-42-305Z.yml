@@ -1,0 +1,145 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: S
+      - generic [ref=e8]: SaasGym
+      - generic [ref=e9]: Admin
+    - navigation [ref=e10]:
+      - paragraph [ref=e11]: General
+      - link "Inicio" [ref=e12] [cursor=pointer]:
+        - /url: /admin/home
+        - img [ref=e13]
+        - text: Inicio
+      - paragraph [ref=e16]: Operación
+      - link "Socios" [ref=e17] [cursor=pointer]:
+        - /url: /admin/clients
+        - img [ref=e18]
+        - text: Socios
+      - link "Productos" [ref=e23] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e24]
+        - text: Productos
+      - link "Categorías" [ref=e28] [cursor=pointer]:
+        - /url: /admin/categories
+        - img [ref=e29]
+        - text: Categorías
+      - link "Personal" [ref=e31] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e32]
+        - text: Personal
+      - paragraph [ref=e36]: Ventas
+      - link "Ventas" [ref=e37] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e38]
+        - text: Ventas
+      - paragraph [ref=e42]: Análisis
+      - link "Reportes" [ref=e43] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e44]
+        - text: Reportes
+    - generic [ref=e46]:
+      - radiogroup "Modo de visualización" [ref=e49]:
+        - radio "Modo claro" [ref=e50]:
+          - img [ref=e51]
+        - radio "Modo oscuro" [ref=e57]:
+          - img [ref=e58]
+        - radio "Seguir el sistema" [checked] [ref=e60]:
+          - img [ref=e61]
+      - generic [ref=e63]:
+        - link "JO Jose admin" [ref=e64] [cursor=pointer]:
+          - /url: /admin/profile
+          - generic [ref=e65]: JO
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Jose
+            - paragraph [ref=e68]: admin
+        - button "Salir" [ref=e69]:
+          - img [ref=e70]
+  - main [ref=e73]:
+    - generic [ref=e75]:
+      - generic [ref=e77]:
+        - button [ref=e78]:
+          - img [ref=e79]
+        - generic [ref=e81]:
+          - heading "Nueva venta" [level=2] [ref=e82]
+          - paragraph [ref=e83]: Selecciona productos y cobra.
+      - generic [ref=e84]:
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - heading "Catálogo" [level=3] [ref=e88]
+              - paragraph [ref=e89]: 3 productos disponibles
+            - generic [ref=e90]:
+              - img [ref=e91]
+              - textbox "Buscar producto…" [ref=e94]
+          - generic [ref=e95]:
+            - button "Todos · 3" [ref=e96]
+            - button "Bebida caliente" [ref=e97]
+            - button "polera" [ref=e98]
+          - generic [ref=e99]:
+            - button "GEN libre Jugo de naranja Bs15.00" [ref=e100]:
+              - generic [ref=e101]:
+                - generic [ref=e102]: GEN
+                - generic [ref=e103]: libre
+              - paragraph [ref=e105]: Jugo de naranja
+              - generic [ref=e106]:
+                - generic [ref=e107]: Bs15.00
+                - img [ref=e109]
+            - button "BEBI libre Café Expresso Bs18.00" [ref=e110]:
+              - generic [ref=e111]:
+                - generic [ref=e112]: BEBI
+                - generic [ref=e113]: libre
+              - paragraph [ref=e115]: Café Expresso
+              - generic [ref=e116]:
+                - generic [ref=e117]: Bs18.00
+                - img [ref=e119]
+            - button "POLE 94 stk polera Bs220.00" [ref=e120]:
+              - generic [ref=e121]:
+                - generic [ref=e122]: POLE
+                - generic [ref=e123]: 94 stk
+              - paragraph [ref=e125]: polera
+              - generic [ref=e126]:
+                - generic [ref=e127]: Bs220.00
+                - img [ref=e129]
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - paragraph [ref=e133]: Venta nueva
+              - heading "2 items · 1 producto" [level=3] [ref=e180]
+            - button "Vaciar carrito" [ref=e143]:
+              - img [ref=e144]
+          - generic [ref=e135]:
+            - generic [ref=e136]: Cliente
+            - combobox "Cliente" [ref=e137]:
+              - option "— Venta sin cliente —" [selected]
+          - generic [ref=e148]:
+            - generic [ref=e149]:
+              - paragraph [ref=e150]: Jugo de naranja
+              - paragraph [ref=e151]: Bs15.00
+            - generic [ref=e152]:
+              - generic [ref=e153]: Bs30.00
+              - generic [ref=e154]:
+                - button [ref=e155]:
+                  - img [ref=e156]
+                - generic [ref=e157]: "2"
+                - button [active] [ref=e158]:
+                  - img [ref=e159]
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e162]: Total
+              - generic [ref=e163]: Bs30.00
+            - generic [ref=e164]:
+              - generic [ref=e165]: Método de pago
+              - generic [ref=e166]:
+                - button "Efectivo" [ref=e167]
+                - button "Tarjeta" [ref=e168]
+                - button "QR" [ref=e169]
+            - generic [ref=e170]:
+              - generic [ref=e171]:
+                - generic [ref=e172]: Recibido
+                - spinbutton [ref=e173]
+              - generic [ref=e174]:
+                - generic [ref=e175]: Cambio
+                - generic [ref=e176]: "-30.00"
+            - button "Cobrar Bs30.00" [disabled] [ref=e181]:
+              - generic [ref=e178]: Cobrar
+              - generic [ref=e179]: Bs30.00

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { SaleWithDetails } from '../../../../../../models/sale.model';
+import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel, orderPrimaryType } from '../../../../../../models/order.model';
 
 @Component({
   selector: 'app-caja-sales-list',
@@ -10,7 +10,12 @@ import { SaleWithDetails } from '../../../../../../models/sale.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SalesListComponent {
-  readonly sales = input.required<SaleWithDetails[]>();
+  readonly sales = input.required<OrderWithDetails[]>();
   readonly loading = input<boolean>(false);
-  readonly cancel = output<SaleWithDetails>();
+  readonly cancel = output<OrderWithDetails>();
+  readonly invoice = output<OrderWithDetails>();
+
+  readonly paymentLabel = PAYMENT_METHOD_LABEL;
+  readonly primaryLabel = orderPrimaryLabel;
+  readonly primaryType = orderPrimaryType;
 }

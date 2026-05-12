@@ -1,0 +1,96 @@
+- generic [ref=e35]:
+  - complementary [ref=e36]:
+    - generic [ref=e37]:
+      - generic [ref=e38]: S
+      - generic [ref=e39]: SaasGym
+      - generic [ref=e40]: Admin
+    - navigation [ref=e41]:
+      - paragraph [ref=e42]: General
+      - link "Inicio" [ref=e43] [cursor=pointer]:
+        - /url: /admin/home
+        - img [ref=e44]
+        - text: Inicio
+      - paragraph [ref=e47]: Operación
+      - link "Socios" [ref=e48] [cursor=pointer]:
+        - /url: /admin/clients
+        - img [ref=e49]
+        - text: Socios
+      - link "Productos" [ref=e54] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e55]
+        - text: Productos
+      - link "Categorías" [ref=e59] [cursor=pointer]:
+        - /url: /admin/categories
+        - img [ref=e60]
+        - text: Categorías
+      - link "Personal" [ref=e62] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e63]
+        - text: Personal
+      - paragraph [ref=e67]: Ventas
+      - link "Ventas" [ref=e68] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e69]
+        - text: Ventas
+      - paragraph [ref=e73]: Análisis
+      - link "Reportes" [ref=e74] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e75]
+        - text: Reportes
+    - generic [ref=e77]:
+      - radiogroup "Modo de visualización" [ref=e80]:
+        - radio "Modo claro" [ref=e81]:
+          - img [ref=e82]
+        - radio "Modo oscuro" [ref=e88]:
+          - img [ref=e89]
+        - radio "Seguir el sistema" [checked] [ref=e91]:
+          - img [ref=e92]
+      - generic [ref=e94]:
+        - link "JO Jose admin" [ref=e95] [cursor=pointer]:
+          - /url: /admin/profile
+          - generic [ref=e96]: JO
+          - generic [ref=e97]:
+            - paragraph [ref=e98]: Jose
+            - paragraph [ref=e99]: admin
+        - button "Salir" [ref=e100]:
+          - img [ref=e101]
+  - main [ref=e104]:
+    - generic [ref=e106]:
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - heading "Bienvenido, Jose" [level=2] [ref=e109]
+          - paragraph [ref=e110]: Resumen del negocio · Friday 8 May
+        - link "Nueva venta" [ref=e111] [cursor=pointer]:
+          - /url: /admin/sales
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - img [ref=e116]
+            - paragraph [ref=e118]: Ingresos del mes
+          - paragraph [ref=e119]: Bs0.00
+          - paragraph [ref=e120]: Sin datos del mes anterior
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - img [ref=e124]
+            - paragraph [ref=e126]: Stock crítico
+          - paragraph [ref=e127]: "0"
+          - paragraph [ref=e128]: ≤ 5 unidades
+        - link "Reportes Ingresos detallados, productos bajo stock. Ver todo →" [ref=e129] [cursor=pointer]:
+          - /url: /admin/reports
+          - generic [ref=e130]:
+            - img [ref=e132]
+            - paragraph [ref=e134]: Reportes
+          - paragraph [ref=e135]: Ingresos detallados, productos bajo stock.
+          - paragraph [ref=e136]: Ver todo →
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - generic [ref=e140]:
+            - heading "Ingresos · últimos 7 días" [level=3] [ref=e141]
+            - paragraph [ref=e142]: Total combinado producto + membresía
+          - generic [ref=e143]: Cargando…
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - heading "Stock bajo" [level=3] [ref=e146]
+            - link "Ver todo" [ref=e147] [cursor=pointer]:
+              - /url: /admin/reports
+          - generic [ref=e148]: Cargando…

@@ -64,8 +64,8 @@ export class ReportQueryService {
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
 
     const { data, error } = await this.client
-      .from('sales')
-      .select('amount, type, products(category:categories(name)), client_memberships(membership_plans(name))')
+      .from('orders')
+      .select('order_items(unit_price, quantity, type, products(category:categories(name)), membership_plans(name))')
       .is('cancelled_at', null)
       .gte('created_at', firstDay)
       .lt('created_at', nextMonth);
@@ -73,12 +73,15 @@ export class ReportQueryService {
 
     const totals = new Map<string, number>();
     const types = new Map<string, 'product' | 'membership'>();
-    for (const row of (data ?? []) as any[]) {
-      const cat: string = row.type === 'product'
-        ? (row.products?.category?.name ?? 'Otros')
-        : (row.client_memberships?.membership_plans?.name ?? 'Membresía');
-      totals.set(cat, (totals.get(cat) ?? 0) + Number(row.amount));
-      if (!types.has(cat)) types.set(cat, row.type as 'product' | 'membership');
+    for (const order of (data ?? []) as any[]) {
+      for (const item of (order.order_items ?? []) as any[]) {
+        const cat: string = item.type === 'product'
+          ? (item.products?.category?.name ?? 'Otros')
+          : (item.membership_plans?.name ?? 'Membresía');
+        const lineTotal = Number(item.unit_price) * Number(item.quantity);
+        totals.set(cat, (totals.get(cat) ?? 0) + lineTotal);
+        if (!types.has(cat)) types.set(cat, item.type as 'product' | 'membership');
+      }
     }
     return Array.from(totals.entries())
       .map(([category, total]) => ({ category, total, type: types.get(category)! }))

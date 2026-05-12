@@ -121,7 +121,7 @@
 
     @if (loading()) {
     <div class="px-6 py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
-    } @else if (latestSales().length === 0) {
+    } @else if (latestOrders().length === 0) {
     <div class="px-6 py-12 text-center">
       <p class="text-foreground-muted">Aún no hay ventas registradas.</p>
       <a routerLink="/caja/sales" class="text-sm text-primary hover:underline mt-2 inline-block">Registrar la
@@ -131,41 +131,33 @@
     <table class="w-full text-sm">
       <thead class="bg-muted border-b border-border-subtle">
         <tr>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Tipo
-          </th>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">
-            Detalle</th>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">
-            Cliente</th>
-          <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">
-            Monto</th>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">
-            Fecha</th>
+          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Tipo</th>
+          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Detalle</th>
+          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cliente</th>
+          <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Total</th>
+          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Fecha</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-border-subtle">
-        @for (sale of latestSales(); track sale.id) {
-        <tr class="hover:bg-muted/50 transition" [class.opacity-60]="sale.cancelled_at">
+        @for (order of latestOrders(); track order.id) {
+        <tr class="hover:bg-muted/50 transition" [class.opacity-60]="order.cancelled_at">
           <td class="px-6 py-2.5">
             <span class="text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border"
-              [class.bg-muted]="sale.type === 'product'" [class.text-foreground-muted]="sale.type === 'product'"
-              [class.border-border-subtle]="sale.type === 'product'" [class.bg-primary/10]="sale.type === 'membership'"
-              [class.text-primary]="sale.type === 'membership'" [class.border-primary/20]="sale.type === 'membership'">
-              {{ sale.type === 'product' ? 'Producto' : 'Membresía' }}
+              [class.bg-muted]="primaryType(order) === 'product'"
+              [class.text-foreground-muted]="primaryType(order) === 'product'"
+              [class.border-border-subtle]="primaryType(order) === 'product'"
+              [class.bg-primary/10]="primaryType(order) === 'membership'"
+              [class.text-primary]="primaryType(order) === 'membership'"
+              [class.border-primary/20]="primaryType(order) === 'membership'">
+              {{ primaryType(order) === 'product' ? 'Producto' : 'Membresía' }}
             </span>
           </td>
-          <td class="px-6 py-2.5 font-medium text-foreground">
-            @if (sale.type === 'product') {
-            {{ sale.product_name ?? '—' }}
-            } @else {
-            {{ sale.plan_name ?? '—' }}
-            }
-          </td>
-          <td class="px-6 py-2.5 text-foreground-muted">{{ sale.client_label ?? '—' }}</td>
+          <td class="px-6 py-2.5 font-medium text-foreground">{{ primaryLabel(order) }}</td>
+          <td class="px-6 py-2.5 text-foreground-muted">{{ order.client_label ?? '—' }}</td>
           <td class="px-6 py-2.5 text-right font-mono font-semibold text-foreground">
-            {{ sale.amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+            {{ order.total_amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
           </td>
-          <td class="px-6 py-2.5 text-foreground-subtle">{{ sale.created_at | date: 'dd/MM HH:mm' }}</td>
+          <td class="px-6 py-2.5 text-foreground-subtle">{{ order.created_at | date: 'dd/MM HH:mm' }}</td>
         </tr>
         }
       </tbody>

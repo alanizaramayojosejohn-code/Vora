@@ -51,13 +51,36 @@
              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
     </div>
 
-    <div>
-      <label for="stock" class="block text-sm font-medium text-foreground-muted mb-1">
-        @if (isEdit()) { Stock } @else { Stock inicial }
+    <div class="md:col-span-2">
+      <label class="flex items-center gap-3 cursor-pointer select-none">
+        <div class="relative">
+          <input type="checkbox" formControlName="has_stock"
+                 [checked]="hasStock()"
+                 (change)="toggleHasStock($any($event.target).checked)"
+                 class="sr-only peer" />
+          <div class="w-11 h-6 bg-muted peer-checked:bg-primary rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40"></div>
+          <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></div>
+        </div>
+        <span class="text-sm font-medium text-foreground-muted">Gestionar stock</span>
       </label>
-      <input id="stock" type="number" min="0" step="1" formControlName="stock"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+      <p class="text-xs text-foreground-faint mt-1">
+        @if (hasStock()) {
+          El producto requiere stock disponible para aparecer en ventas.
+        } @else {
+          El producto siempre aparece disponible para venta (ej: preparado al momento).
+        }
+      </p>
     </div>
+
+    @if (hasStock()) {
+      <div>
+        <label for="stock" class="block text-sm font-medium text-foreground-muted mb-1">
+          @if (isEdit()) { Stock } @else { Stock inicial }
+        </label>
+        <input id="stock" type="number" min="0" step="1" formControlName="stock"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+      </div>
+    }
   </div>
 
   @if (errorMessage(); as msg) {

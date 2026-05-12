@@ -1,0 +1,182 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: S
+      - generic [ref=e8]: SaasGym
+      - generic [ref=e9]: Admin
+    - navigation [ref=e10]:
+      - paragraph [ref=e11]: General
+      - link "Inicio" [ref=e12] [cursor=pointer]:
+        - /url: /admin/home
+        - img [ref=e13]
+        - text: Inicio
+      - paragraph [ref=e16]: Operación
+      - link "Socios" [ref=e17] [cursor=pointer]:
+        - /url: /admin/clients
+        - img [ref=e18]
+        - text: Socios
+      - link "Productos" [ref=e23] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e24]
+        - text: Productos
+      - link "Categorías" [ref=e28] [cursor=pointer]:
+        - /url: /admin/categories
+        - img [ref=e29]
+        - text: Categorías
+      - link "Personal" [ref=e31] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e32]
+        - text: Personal
+      - paragraph [ref=e36]: Ventas
+      - link "Ventas" [active] [ref=e37] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e38]
+        - text: Ventas
+      - paragraph [ref=e42]: Análisis
+      - link "Reportes" [ref=e43] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e44]
+        - text: Reportes
+    - generic [ref=e46]:
+      - radiogroup "Modo de visualización" [ref=e49]:
+        - radio "Modo claro" [ref=e50]:
+          - img [ref=e51]
+        - radio "Modo oscuro" [ref=e57]:
+          - img [ref=e58]
+        - radio "Seguir el sistema" [checked] [ref=e60]:
+          - img [ref=e61]
+      - generic [ref=e63]:
+        - link "JO Jose admin" [ref=e64] [cursor=pointer]:
+          - /url: /admin/profile
+          - generic [ref=e65]: JO
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Jose
+            - paragraph [ref=e68]: admin
+        - button "Salir" [ref=e69]:
+          - img [ref=e70]
+  - main [ref=e73]:
+    - generic [ref=e413]:
+      - generic [ref=e414]:
+        - generic [ref=e415]:
+          - heading "Ventas" [level=2] [ref=e416]
+          - paragraph [ref=e417]: Historial de órdenes registradas.
+        - button "Nueva venta" [ref=e418]:
+          - img [ref=e419]
+          - text: Nueva venta
+      - table [ref=e423]:
+        - rowgroup [ref=e424]:
+          - row "Fecha Cliente Detalle Items Total Pago Estado Acciones" [ref=e425]:
+            - columnheader "Fecha" [ref=e426]
+            - columnheader "Cliente" [ref=e427]
+            - columnheader "Detalle" [ref=e428]
+            - columnheader "Items" [ref=e429]
+            - columnheader "Total" [ref=e430]
+            - columnheader "Pago" [ref=e431]
+            - columnheader "Estado" [ref=e432]
+            - columnheader "Acciones" [ref=e433]
+        - rowgroup [ref=e434]:
+          - row "03/05/26 13:18 — Prod polera 1 Bs220.00 Efectivo Activa Factura Cancelar" [ref=e435]:
+            - cell "03/05/26 13:18" [ref=e436]
+            - cell "—" [ref=e437]
+            - cell "Prod polera" [ref=e438]:
+              - generic [ref=e439]:
+                - generic [ref=e440]: Prod
+                - generic [ref=e441]: polera
+            - cell "1" [ref=e442]
+            - cell "Bs220.00" [ref=e443]
+            - cell "Efectivo" [ref=e444]
+            - cell "Activa" [ref=e445]
+            - cell "Factura Cancelar" [ref=e446]:
+              - generic [ref=e447]:
+                - button "Factura" [ref=e448]
+                - button "Cancelar" [ref=e449]
+          - row "03/05/26 13:18 — Prod Café 1 Bs80.00 Efectivo Activa Factura Cancelar" [ref=e450]:
+            - cell "03/05/26 13:18" [ref=e451]
+            - cell "—" [ref=e452]
+            - cell "Prod Café" [ref=e453]:
+              - generic [ref=e454]:
+                - generic [ref=e455]: Prod
+                - generic [ref=e456]: Café
+            - cell "1" [ref=e457]
+            - cell "Bs80.00" [ref=e458]
+            - cell "Efectivo" [ref=e459]
+            - cell "Activa" [ref=e460]
+            - cell "Factura Cancelar" [ref=e461]:
+              - generic [ref=e462]:
+                - button "Factura" [ref=e463]
+                - button "Cancelar" [ref=e464]
+          - row "03/05/26 13:18 — Prod polera 1 Bs220.00 Efectivo Activa Factura Cancelar" [ref=e465]:
+            - cell "03/05/26 13:18" [ref=e466]
+            - cell "—" [ref=e467]
+            - cell "Prod polera" [ref=e468]:
+              - generic [ref=e469]:
+                - generic [ref=e470]: Prod
+                - generic [ref=e471]: polera
+            - cell "1" [ref=e472]
+            - cell "Bs220.00" [ref=e473]
+            - cell "Efectivo" [ref=e474]
+            - cell "Activa" [ref=e475]
+            - cell "Factura Cancelar" [ref=e476]:
+              - generic [ref=e477]:
+                - button "Factura" [ref=e478]
+                - button "Cancelar" [ref=e479]
+          - row "03/05/26 13:18 — Prod Café 1 Bs160.00 Efectivo Activa Factura Cancelar" [ref=e480]:
+            - cell "03/05/26 13:18" [ref=e481]
+            - cell "—" [ref=e482]
+            - cell "Prod Café" [ref=e483]:
+              - generic [ref=e484]:
+                - generic [ref=e485]: Prod
+                - generic [ref=e486]: Café
+            - cell "1" [ref=e487]
+            - cell "Bs160.00" [ref=e488]
+            - cell "Efectivo" [ref=e489]
+            - cell "Activa" [ref=e490]
+            - cell "Factura Cancelar" [ref=e491]:
+              - generic [ref=e492]:
+                - button "Factura" [ref=e493]
+                - button "Cancelar" [ref=e494]
+          - row "01/05/26 12:24 — Prod polera 1 Bs220.00 Efectivo Activa Factura Cancelar" [ref=e495]:
+            - cell "01/05/26 12:24" [ref=e496]
+            - cell "—" [ref=e497]
+            - cell "Prod polera" [ref=e498]:
+              - generic [ref=e499]:
+                - generic [ref=e500]: Prod
+                - generic [ref=e501]: polera
+            - cell "1" [ref=e502]
+            - cell "Bs220.00" [ref=e503]
+            - cell "Efectivo" [ref=e504]
+            - cell "Activa" [ref=e505]
+            - cell "Factura Cancelar" [ref=e506]:
+              - generic [ref=e507]:
+                - button "Factura" [ref=e508]
+                - button "Cancelar" [ref=e509]
+          - row "01/05/26 12:24 — Prod Café 1 Bs160.00 Efectivo Activa Factura Cancelar" [ref=e510]:
+            - cell "01/05/26 12:24" [ref=e511]
+            - cell "—" [ref=e512]
+            - cell "Prod Café" [ref=e513]:
+              - generic [ref=e514]:
+                - generic [ref=e515]: Prod
+                - generic [ref=e516]: Café
+            - cell "1" [ref=e517]
+            - cell "Bs160.00" [ref=e518]
+            - cell "Efectivo" [ref=e519]
+            - cell "Activa" [ref=e520]
+            - cell "Factura Cancelar" [ref=e521]:
+              - generic [ref=e522]:
+                - button "Factura" [ref=e523]
+                - button "Cancelar" [ref=e524]
+          - row "01/05/26 12:21 — Prod polera 1 Bs660.00 Efectivo Activa Factura Cancelar" [ref=e525]:
+            - cell "01/05/26 12:21" [ref=e526]
+            - cell "—" [ref=e527]
+            - cell "Prod polera" [ref=e528]:
+              - generic [ref=e529]:
+                - generic [ref=e530]: Prod
+                - generic [ref=e531]: polera
+            - cell "1" [ref=e532]
+            - cell "Bs660.00" [ref=e533]
+            - cell "Efectivo" [ref=e534]
+            - cell "Activa" [ref=e535]
+            - cell "Factura Cancelar" [ref=e536]:
+              - generic [ref=e537]:
+                - button "Factura" [ref=e538]
+                - button "Cancelar" [ref=e539]

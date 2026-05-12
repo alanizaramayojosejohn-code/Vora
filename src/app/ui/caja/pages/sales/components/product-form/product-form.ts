@@ -28,7 +28,9 @@ export class SalesProductFormComponent {
     client_id: [''],
   });
 
-  readonly availableProducts = computed(() => this.products().filter((p) => p.stock > 0));
+  readonly availableProducts = computed(() =>
+    this.products().filter((p) => !p.has_stock || p.stock > 0)
+  );
 
   readonly selectedProduct = computed<Product | null>(() => {
     const id = this.form.controls.product_id.value;

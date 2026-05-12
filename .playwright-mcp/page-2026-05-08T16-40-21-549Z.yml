@@ -1,0 +1,201 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: S
+      - generic [ref=e8]: SaasGym
+      - generic [ref=e9]: Admin
+    - navigation [ref=e10]:
+      - paragraph [ref=e11]: General
+      - link "Inicio" [ref=e12] [cursor=pointer]:
+        - /url: /admin/home
+        - img [ref=e13]
+        - text: Inicio
+      - paragraph [ref=e16]: Operación
+      - link "Socios" [ref=e17] [cursor=pointer]:
+        - /url: /admin/clients
+        - img [ref=e18]
+        - text: Socios
+      - link "Productos" [ref=e23] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e24]
+        - text: Productos
+      - link "Categorías" [ref=e28] [cursor=pointer]:
+        - /url: /admin/categories
+        - img [ref=e29]
+        - text: Categorías
+      - link "Personal" [ref=e31] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e32]
+        - text: Personal
+      - paragraph [ref=e36]: Ventas
+      - link "Ventas" [ref=e37] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e38]
+        - text: Ventas
+      - paragraph [ref=e42]: Análisis
+      - link "Reportes" [ref=e43] [cursor=pointer]:
+        - /url: /admin/reports
+        - img [ref=e44]
+        - text: Reportes
+    - generic [ref=e46]:
+      - radiogroup "Modo de visualización" [ref=e49]:
+        - radio "Modo claro" [ref=e50]:
+          - img [ref=e51]
+        - radio "Modo oscuro" [ref=e57]:
+          - img [ref=e58]
+        - radio "Seguir el sistema" [checked] [ref=e60]:
+          - img [ref=e61]
+      - generic [ref=e63]:
+        - link "JO Jose admin" [ref=e64] [cursor=pointer]:
+          - /url: /admin/profile
+          - generic [ref=e65]: JO
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Jose
+            - paragraph [ref=e68]: admin
+        - button "Salir" [ref=e69]:
+          - img [ref=e70]
+  - main [ref=e73]:
+    - generic [ref=e75]:
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - heading "Productos" [level=2] [ref=e78]
+          - paragraph [ref=e79]: Inventario disponible para venta en caja.
+        - button "Nuevo producto" [ref=e265]
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - heading "Productos" [level=3] [ref=e123]
+            - paragraph [ref=e124]: 5 SKUs · 1 en stock · 0 bajo stock · 2 sin stock
+          - generic [ref=e125]:
+            - img [ref=e126]
+            - textbox "Buscar nombre, categoría, proveedor…" [ref=e129]
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - button "Todos · 5" [ref=e266]
+            - button "En stock · 1" [ref=e133]
+            - button "Bajo stock · 0" [ref=e134]
+            - button "Sin stock · 2" [ref=e135]
+            - button "Sin categoría · 2" [ref=e267]
+          - button "Recientes primero" [ref=e138]:
+            - img [ref=e139]
+            - text: Recientes primero
+          - button "Exportar" [ref=e141]:
+            - img [ref=e142]
+            - text: Exportar
+        - generic [ref=e145]:
+          - table [ref=e268]:
+            - rowgroup [ref=e269]:
+              - row "Producto Categoría Stock Precio Costo Proveedor Acciones" [ref=e270]:
+                - columnheader "Producto" [ref=e271]
+                - columnheader "Categoría" [ref=e272]
+                - columnheader "Stock" [ref=e273]
+                - columnheader "Precio" [ref=e274]
+                - columnheader "Costo" [ref=e275]
+                - columnheader "Proveedor" [ref=e276]
+                - columnheader "Acciones" [ref=e277]
+            - rowgroup [ref=e278]:
+              - row "JD Jugo de naranja — libre Bs15.00 Bs5.00 —" [ref=e279]:
+                - cell "JD Jugo de naranja" [ref=e280]:
+                  - button "JD Jugo de naranja" [ref=e281]:
+                    - generic [ref=e282]: JD
+                    - generic [ref=e284]: Jugo de naranja
+                - cell "—" [ref=e285]
+                - cell "libre" [ref=e286]:
+                  - generic [ref=e287]: libre
+                - cell "Bs15.00" [ref=e288]
+                - cell "Bs5.00" [ref=e289]
+                - cell "—" [ref=e290]
+                - cell [ref=e291]:
+                  - generic [ref=e292]:
+                    - button "Ver detalle" [ref=e293]:
+                      - img [ref=e294]
+                    - button "Editar" [ref=e297]:
+                      - img [ref=e298]
+                    - button "Eliminar" [ref=e300]:
+                      - img [ref=e301]
+              - row "CE Café Expresso Bebida caliente libre Bs18.00 Bs10.00 —" [ref=e304]:
+                - cell "CE Café Expresso" [ref=e305]:
+                  - button "CE Café Expresso" [ref=e306]:
+                    - generic [ref=e307]: CE
+                    - generic [ref=e309]: Café Expresso
+                - cell "Bebida caliente" [ref=e310]:
+                  - generic [ref=e311]: Bebida caliente
+                - cell "libre" [ref=e312]:
+                  - generic [ref=e313]: libre
+                - cell "Bs18.00" [ref=e314]
+                - cell "Bs10.00" [ref=e315]
+                - cell "—" [ref=e316]
+                - cell [ref=e317]:
+                  - generic [ref=e318]:
+                    - button "Ver detalle" [ref=e319]:
+                      - img [ref=e320]
+                    - button "Editar" [ref=e323]:
+                      - img [ref=e324]
+                    - button "Eliminar" [ref=e326]:
+                      - img [ref=e327]
+              - row "CL Café Latte expresso con leche texturizada Bebida caliente 0 Bs20.00 Bs12.00 —" [ref=e330]:
+                - cell "CL Café Latte expresso con leche texturizada" [ref=e331]:
+                  - button "CL Café Latte expresso con leche texturizada" [ref=e332]:
+                    - generic [ref=e333]: CL
+                    - generic [ref=e334]:
+                      - generic [ref=e335]: Café Latte
+                      - generic [ref=e336]: expresso con leche texturizada
+                - cell "Bebida caliente" [ref=e337]:
+                  - generic [ref=e338]: Bebida caliente
+                - cell "0" [ref=e339]:
+                  - generic [ref=e340]: "0"
+                - cell "Bs20.00" [ref=e341]
+                - cell "Bs12.00" [ref=e342]
+                - cell "—" [ref=e343]
+                - cell [ref=e344]:
+                  - generic [ref=e345]:
+                    - button "Ver detalle" [ref=e346]:
+                      - img [ref=e347]
+                    - button "Editar" [ref=e350]:
+                      - img [ref=e351]
+                    - button "Eliminar" [ref=e353]:
+                      - img [ref=e354]
+              - row "CA Café Café del diablo \"ira\" — 0 Bs80.00 Bs50.00 Diablo" [ref=e357]:
+                - cell "CA Café Café del diablo \"ira\"" [ref=e358]:
+                  - button "CA Café Café del diablo \"ira\"" [ref=e359]:
+                    - generic [ref=e360]: CA
+                    - generic [ref=e361]:
+                      - generic [ref=e362]: Café
+                      - generic [ref=e363]: Café del diablo "ira"
+                - cell "—" [ref=e364]
+                - cell "0" [ref=e365]:
+                  - generic [ref=e366]: "0"
+                - cell "Bs80.00" [ref=e367]
+                - cell "Bs50.00" [ref=e368]
+                - cell "Diablo" [ref=e369]
+                - cell [ref=e370]:
+                  - generic [ref=e371]:
+                    - button "Ver detalle" [ref=e372]:
+                      - img [ref=e373]
+                    - button "Editar" [ref=e376]:
+                      - img [ref=e377]
+                    - button "Eliminar" [ref=e379]:
+                      - img [ref=e380]
+              - row "PO polera polera YoungLA polera 94 Bs220.00 Bs180.00 —" [ref=e383]:
+                - cell "PO polera polera YoungLA" [ref=e384]:
+                  - button "PO polera polera YoungLA" [ref=e385]:
+                    - generic [ref=e386]: PO
+                    - generic [ref=e387]:
+                      - generic [ref=e388]: polera
+                      - generic [ref=e389]: polera YoungLA
+                - cell "polera" [ref=e390]:
+                  - generic [ref=e391]: polera
+                - cell "94" [ref=e392]:
+                  - generic [ref=e393]: "94"
+                - cell "Bs220.00" [ref=e394]
+                - cell "Bs180.00" [ref=e395]
+                - cell "—" [ref=e396]
+                - cell [ref=e397]:
+                  - generic [ref=e398]:
+                    - button "Ver detalle" [ref=e399]:
+                      - img [ref=e400]
+                    - button "Editar" [ref=e403]:
+                      - img [ref=e404]
+                    - button "Eliminar" [ref=e406]:
+                      - img [ref=e407]
+          - generic [ref=e411]: Mostrando 5 de 5 productos

@@ -1,0 +1,118 @@
+<div class="p-6 max-w-3xl mx-auto space-y-6">
+
+  <div class="flex items-center gap-3">
+    <a routerLink="/admin/purchases"
+       class="p-1.5 rounded-lg text-foreground-muted hover:bg-muted hover:text-foreground transition">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </a>
+    <div>
+      <h1 class="text-xl font-bold text-foreground">Nuevo pedido de compra</h1>
+      <p class="text-sm text-foreground-subtle">El stock se actualiza cuando marques el pedido como recibido.</p>
+    </div>
+  </div>
+
+  @if (loadingData()) {
+    <div class="text-center py-10 text-sm text-foreground-muted">Cargando…</div>
+  } @else {
+
+    <form (ngSubmit)="onSubmit()" class="space-y-6">
+
+      <div class="bg-surface border border-border-subtle rounded-2xl p-6 space-y-4">
+        <h2 class="text-sm font-semibold text-foreground">Datos del pedido</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-foreground-muted mb-1">Proveedor</label>
+            <select [ngModel]="supplierId()" (ngModelChange)="supplierId.set($event)"
+                    [ngModelOptions]="{standalone: true}"
+                    class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              <option value="">— Sin proveedor —</option>
+              @for (s of suppliers(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-foreground-muted mb-1">Fecha esperada</label>
+            <input type="date" [ngModel]="expectedDate()" (ngModelChange)="expectedDate.set($event)"
+                   [ngModelOptions]="{standalone: true}"
+                   class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-sm font-medium text-foreground-muted mb-1">Notas (opcional)</label>
+            <input type="text" [ngModel]="notes()" (ngModelChange)="notes.set($event)"
+                   [ngModelOptions]="{standalone: true}"
+                   placeholder="Observaciones del pedido…"
+                   class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-surface border border-border-subtle rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-foreground">Productos a pedir</h2>
+          <button type="button" (click)="addItem()"
+                  class="px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition">
+            + Agregar producto
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          @for (item of items(); track $index; let i = $index) {
+            <div class="grid grid-cols-12 gap-2 items-end">
+              <div class="col-span-12 md:col-span-5">
+                @if (i === 0) { <label class="block text-xs font-medium text-foreground-muted mb-1">Producto</label> }
+                <select [ngModel]="item.product_id" (ngModelChange)="updateItem(i, 'product_id', $event)"
+                        [ngModelOptions]="{standalone: true}"
+                        class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm">
+                  <option value="">— Seleccionar —</option>
+                  @for (p of products(); track p.id) {
+                    <option [value]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-span-4 md:col-span-2">
+                @if (i === 0) { <label class="block text-xs font-medium text-foreground-muted mb-1">Cantidad</label> }
+                <input type="number" min="1" [ngModel]="item.quantity_ordered" (ngModelChange)="updateItem(i, 'quantity_ordered', +$event)"
+                       [ngModelOptions]="{standalone: true}"
+                       class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm font-mono" />
+              </div>
+              <div class="col-span-6 md:col-span-4">
+                @if (i === 0) { <label class="block text-xs font-medium text-foreground-muted mb-1">Costo estimado (opcional)</label> }
+                <input type="number" min="0" step="0.01" placeholder="0.00"
+                       [ngModel]="item.unit_cost_estimate" (ngModelChange)="updateItem(i, 'unit_cost_estimate', $event !== '' ? +$event : null)"
+                       [ngModelOptions]="{standalone: true}"
+                       class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm font-mono" />
+              </div>
+              <div class="col-span-2 md:col-span-1 flex items-end">
+                @if (i === 0) { <div class="mb-1 h-4"></div> }
+                <button type="button" (click)="removeItem(i)" [disabled]="items().length === 1"
+                        class="w-full h-10 flex items-center justify-center text-foreground-muted hover:text-danger disabled:opacity-30 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (submitError(); as msg) {
+        <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+      }
+
+      <div class="flex justify-end gap-3">
+        <a routerLink="/admin/purchases"
+           class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
+          Cancelar
+        </a>
+        <button type="submit" [disabled]="!isValid || submitting()"
+                class="px-5 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg hover:bg-primary/90 disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed transition shadow-md shadow-primary/20 disabled:shadow-none">
+          @if (submitting()) { Creando… } @else { Crear pedido }
+        </button>
+      </div>
+    </form>
+  }
+</div>

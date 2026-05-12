@@ -20,6 +20,13 @@ export const CajaRoutes: Routes = [
       ),
   },
   {
+    path: 'sales/new',
+    loadComponent: () =>
+      import('./pages/sales/new/component').then(
+        (m) => m.CajaSalesNewComponent,
+      ),
+  },
+  {
     path: 'clients',
     loadComponent: () =>
       import('../admin/pages/clients/container/component').then(

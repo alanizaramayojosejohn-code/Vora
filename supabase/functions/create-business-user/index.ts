@@ -12,8 +12,8 @@
 //   · admin               → crea en SU PROPIO business; ignora body.business_id.
 //   · super_admin         → debe pasar body.business_id.
 //
-// Si la creación del profile falla (RPC create_user_for_business), revierte
-// el auth.user para no dejar registros huérfanos.
+// Si la creación del profile falla, revierte el auth.user para no dejar
+// registros huérfanos.
 // =============================================================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     return json({ error: 'La password debe tener al menos 6 caracteres' }, 400);
   }
 
-  // Cliente con permisos del caller — para auth.getUser() y la RPC posterior.
+  // Cliente con permisos del caller — valida identidad y lee su profile.
   const supabaseUser = createClient(SUPABASE_URL, ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false },
@@ -124,19 +124,24 @@ Deno.serve(async (req) => {
     return json({ error: createErr?.message ?? 'No se pudo crear el auth.user' }, 400);
   }
 
-  // 4. Crear profile via RPC (con JWT del caller; la RPC valida permisos) ----
-  const { error: rpcErr } = await supabaseUser.rpc('create_user_for_business', {
-    p_user_id: created.user.id,
-    p_business_id: targetBusinessId,
-    p_name: name,
-    p_ci: ci,
-    p_role: role,
-  });
+  // 4. Crear profile directo via admin (service_role bypasea RLS) --------------
+  const { error: insertErr } = await supabaseAdmin
+    .from('profiles')
+    .insert({
+      id: created.user.id,
+      business_id: targetBusinessId,
+      name,
+      ci,
+      role,
+    });
 
-  if (rpcErr) {
-    // Rollback: el auth.user quedaría huérfano si dejamos pasar.
-    await supabaseAdmin.auth.admin.deleteUser(created.user.id);
-    return json({ error: rpcErr.message }, 400);
+  if (insertErr) {
+    // Rollback: borrar el auth.user para no dejar huérfanos.
+    const { error: deleteErr } = await supabaseAdmin.auth.admin.deleteUser(created.user.id);
+    if (deleteErr) {
+      console.error('[create-business-user] Rollback falló — usuario huérfano:', created.user.id, deleteErr.message);
+    }
+    return json({ error: insertErr.message }, 400);
   }
 
   return json({ user_id: created.user.id, email }, 200);

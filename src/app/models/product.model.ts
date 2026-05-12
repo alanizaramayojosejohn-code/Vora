@@ -8,6 +8,7 @@ export interface Product {
   price: number;
   cost: number;
   stock: number;
+  has_stock: boolean;
   provider: string | null;
   created_at: string;
   deleted_at: string | null;

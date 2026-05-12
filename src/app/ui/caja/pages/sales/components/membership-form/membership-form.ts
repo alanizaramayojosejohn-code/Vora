@@ -3,7 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Client } from '../../../../../../models/client.model';
 import { MembershipPlan } from '../../../../../../models/membership-plan.model';
-import { RegisterSaleMembershipInput } from '../../../../../../services/sale/sale.service';
+import { MembershipOrderInput } from '../../../../../../services/order/order.service';
 
 @Component({
   selector: 'app-caja-sales-membership-form',
@@ -19,7 +19,7 @@ export class SalesMembershipFormComponent {
   readonly plans = input.required<MembershipPlan[]>();
   readonly submitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
-  readonly submitForm = output<RegisterSaleMembershipInput>();
+  readonly submitForm = output<MembershipOrderInput>();
   readonly cancel = output<void>();
 
   readonly form = this.fb.nonNullable.group({

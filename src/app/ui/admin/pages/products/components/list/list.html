@@ -143,15 +143,21 @@
                 }
               </td>
               <td class="px-5 py-3 text-right">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono font-bold"
-                      [class.bg-success/10]="product.stock >= 5"
-                      [class.text-success]="product.stock >= 5"
-                      [class.bg-warning/10]="product.stock > 0 && product.stock < 5"
-                      [class.text-warning]="product.stock > 0 && product.stock < 5"
-                      [class.bg-danger/10]="product.stock === 0"
-                      [class.text-danger]="product.stock === 0">
-                  {{ product.stock }}
-                </span>
+                @if (!product.has_stock) {
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-muted text-foreground-muted">
+                    libre
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono font-bold"
+                        [class.bg-success/10]="product.stock >= 5"
+                        [class.text-success]="product.stock >= 5"
+                        [class.bg-warning/10]="product.stock > 0 && product.stock < 5"
+                        [class.text-warning]="product.stock > 0 && product.stock < 5"
+                        [class.bg-danger/10]="product.stock === 0"
+                        [class.text-danger]="product.stock === 0">
+                    {{ product.stock }}
+                  </span>
+                }
               </td>
               <td class="px-5 py-3 text-right font-mono text-foreground text-xs">{{ product.price | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
               <td class="px-5 py-3 text-right font-mono text-foreground-subtle text-xs">{{ product.cost | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>

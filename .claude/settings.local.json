@@ -48,7 +48,19 @@
       "Bash(xargs grep -l \"categoria\\\\|category\")",
       "Bash(Get-ChildItem *)",
       "Bash(xargs grep -l \"profile\\\\|password\\\\|update.*user\")",
-      "Bash(xargs grep -l \"profile\\\\|account\\\\|settings\")"
+      "Bash(xargs grep -l \"profile\\\\|account\\\\|settings\")",
+      "Bash(grep -E \"\\\\.\\(ts|html\\)$\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\Jose\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Jose-Desktop-SaasGym-SaasGym\\\\70c1388a-dfc7-4c8f-b844-19922f404f1d\\\\tasks\\\\b0qnqhgo8.output\")",
+      "Bash(Select-Object -Last 15)",
+      "Bash(mkdir \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\landing\")",
+      "Bash(mkdir \"C:\\\\Users\\\\Jose\\\\Desktop\\\\SaasGym\\\\landing\\\\assets\")",
+      "PowerShell(supabase *)",
+      "PowerShell(npx supabase --version 2>&1)",
+      "PowerShell(npx supabase functions deploy create-business-user --project-ref jwoqcvynwkfdnomwzrhf 2>&1)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "nanobanana-mcp"
+  ]
 }

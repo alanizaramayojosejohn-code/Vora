@@ -31,14 +31,14 @@ export class ProductsListComponent {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  // Bajo stock = (1, 5). Sin stock = 0.
+  // Bajo stock = (1, 5). Sin stock = 0. Solo aplica a productos con has_stock = true.
   readonly counts = computed(() => {
     const list = this.products();
     return {
       all: list.length,
-      inStock: list.filter((p) => p.stock >= 5).length,
-      lowStock: list.filter((p) => p.stock > 0 && p.stock < 5).length,
-      outOfStock: list.filter((p) => p.stock === 0).length,
+      inStock: list.filter((p) => p.has_stock && p.stock >= 5).length,
+      lowStock: list.filter((p) => p.has_stock && p.stock > 0 && p.stock < 5).length,
+      outOfStock: list.filter((p) => p.has_stock && p.stock === 0).length,
       noCategory: list.filter((p) => !p.category_id).length,
     };
   });
@@ -49,9 +49,9 @@ export class ProductsListComponent {
     const s = this.sort();
     let list = this.products().slice();
 
-    if (f === 'in-stock') list = list.filter((p) => p.stock >= 5);
-    else if (f === 'low-stock') list = list.filter((p) => p.stock > 0 && p.stock < 5);
-    else if (f === 'out-of-stock') list = list.filter((p) => p.stock === 0);
+    if (f === 'in-stock') list = list.filter((p) => p.has_stock && p.stock >= 5);
+    else if (f === 'low-stock') list = list.filter((p) => p.has_stock && p.stock > 0 && p.stock < 5);
+    else if (f === 'out-of-stock') list = list.filter((p) => p.has_stock && p.stock === 0);
     else if (f === 'no-category') list = list.filter((p) => !p.category_id);
 
     if (q) {
