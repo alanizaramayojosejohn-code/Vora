@@ -15,7 +15,7 @@ export class OrderInvoiceComponent {
   readonly order = input.required<OrderWithDetails>();
   readonly close = output<void>();
 
-  readonly businessName = computed(() => this.auth.businessName() ?? 'SaasGym');
+  readonly businessName = computed(() => this.auth.businessName() ?? 'SaasCafes');
   readonly businessInitial = computed(() => (this.businessName()[0] ?? 'S').toUpperCase());
 
   readonly orderNumber = computed(() => this.order().id.replace(/-/g, '').slice(-8).toUpperCase());

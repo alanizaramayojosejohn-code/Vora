@@ -1,7 +1,7 @@
 <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
   <header class="px-6 py-4 border-b border-border-subtle">
     <h3 class="font-semibold text-foreground">Productos con stock bajo</h3>
-    <p class="text-xs text-foreground-subtle">Stock ≤ 5 unidades. Considera reponer pronto.</p>
+    <p class="text-xs text-foreground-subtle">Productos sin stock (has_stock = true). Considera reponer pronto.</p>
   </header>
 
   @if (loading()) {
@@ -17,8 +17,6 @@
           <tr>
             <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Producto</th>
             <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Categoría</th>
-            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Proveedor</th>
-            <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Precio</th>
             <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Stock</th>
           </tr>
         </thead>
@@ -26,9 +24,7 @@
           @for (row of rows(); track row.id) {
             <tr class="hover:bg-muted/50 transition">
               <td class="px-6 py-2 font-medium text-foreground">{{ row.name }}</td>
-              <td class="px-6 py-2 text-foreground-muted">{{ row.category ?? '—' }}</td>
-              <td class="px-6 py-2 text-foreground-muted">{{ row.provider ?? '—' }}</td>
-              <td class="px-6 py-2 text-right font-mono text-foreground-muted">{{ row.price | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+              <td class="px-6 py-2 text-foreground-muted">{{ row.category_name ?? '—' }}</td>
               <td class="px-6 py-2 text-right font-mono"
                   [class.text-danger]="row.stock === 0"
                   [class.text-warning]="row.stock > 0">

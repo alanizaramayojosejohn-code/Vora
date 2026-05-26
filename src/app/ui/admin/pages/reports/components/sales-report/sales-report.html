@@ -1,0 +1,273 @@
+<div class="space-y-5">
+
+  <!-- =================== FILTROS =================== -->
+  <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 space-y-4">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <h4 class="font-semibold text-foreground text-sm">Filtros</h4>
+      <button type="button" (click)="clearFilters()"
+              class="text-xs text-foreground-muted hover:text-foreground transition">
+        Limpiar filtros
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+
+      <!-- Fecha desde -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-foreground-muted">Desde</label>
+        <input type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
+                      text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+      </div>
+
+      <!-- Fecha hasta -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-foreground-muted">Hasta</label>
+        <input type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
+                      text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+      </div>
+
+      <!-- Usuario -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-foreground-muted">Usuario</label>
+        <select [ngModel]="selectedUserId()" (ngModelChange)="selectedUserId.set($event)"
+                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
+                       text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          <option value="">Todos los usuarios</option>
+          @for (u of users(); track u.id) {
+            <option [value]="u.id">{{ u.name }} ({{ u.role }})</option>
+          }
+        </select>
+      </div>
+
+      <!-- Producto -->
+      <div class="space-y-1">
+        <label class="block text-xs font-medium text-foreground-muted">Producto</label>
+        <select [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)"
+                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
+                       text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          <option value="">Todos los productos</option>
+          @for (p of products(); track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Métodos de pago -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-xs font-medium text-foreground-muted">Pago:</span>
+
+      <button type="button" (click)="toggleAllMethods()"
+              [class.bg-primary]="allMethodsActive()"
+              [class.text-primary-fg]="allMethodsActive()"
+              [class.bg-muted]="!allMethodsActive()"
+              [class.text-foreground-muted]="!allMethodsActive()"
+              class="px-3 py-1 rounded-full text-xs font-semibold transition border border-transparent">
+        Todos
+      </button>
+
+      @for (m of allMethods; track m) {
+        <button type="button" (click)="toggleMethod(m)"
+                [class.bg-primary]="isMethodActive(m)"
+                [class.text-primary-fg]="isMethodActive(m)"
+                [class.bg-muted]="!isMethodActive(m)"
+                [class.text-foreground-muted]="!isMethodActive(m)"
+                class="px-3 py-1 rounded-full text-xs font-semibold transition border border-transparent">
+          {{ methodLabels[m] }}
+        </button>
+      }
+
+      <div class="flex-1"></div>
+
+      <button type="button" (click)="applyFilters()" [disabled]="loading()"
+              class="px-4 py-1.5 bg-primary text-primary-fg text-xs font-semibold rounded-lg
+                     hover:bg-primary/90 disabled:opacity-50 transition flex items-center gap-2">
+        @if (loading()) {
+          <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          Buscando…
+        } @else {
+          Aplicar filtros
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (error(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-xl px-4 py-3">{{ msg }}</div>
+  }
+
+  @if (hasQueried()) {
+
+    <!-- =================== TARJETAS DE RESUMEN =================== -->
+    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Total ingresos</p>
+        <p class="text-lg font-bold text-foreground mt-1">
+          {{ summary().total | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Transacciones</p>
+        <p class="text-lg font-bold text-foreground mt-1">{{ summary().transactions }}</p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Ticket promedio</p>
+        <p class="text-lg font-bold text-foreground mt-1">
+          {{ summary().avgTicket | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Efectivo</p>
+        <p class="text-lg font-bold text-foreground mt-1">
+          {{ summary().byMethod.cash | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Tarjeta</p>
+        <p class="text-lg font-bold text-foreground mt-1">
+          {{ summary().byMethod.card | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">QR</p>
+        <p class="text-lg font-bold text-foreground mt-1">
+          {{ summary().byMethod.qr | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- =================== TABLA DE VENTAS =================== -->
+    <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden">
+
+      <!-- Toolbar de la tabla -->
+      <div class="px-5 py-3.5 border-b border-border-subtle flex items-center gap-3 flex-wrap">
+        <span class="text-sm font-semibold text-foreground">
+          {{ rows().length }} ventas encontradas
+        </span>
+        <span class="text-xs text-foreground-subtle">· {{ dateRangeLabel() }}</span>
+        <div class="flex-1"></div>
+
+        @if (rows().length > 0) {
+          <!-- Exportar Excel -->
+          <button type="button" (click)="exportExcel()"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold
+                         bg-success/10 text-success border border-success/20 hover:bg-success/20
+                         rounded-lg transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/>
+            </svg>
+            Excel
+          </button>
+
+          <!-- Exportar PDF -->
+          <button type="button" (click)="exportPdf()"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold
+                         bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20
+                         rounded-lg transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <path d="M9 15v-4"/><path d="M15 15v-4"/><path d="M9 11h6"/>
+            </svg>
+            PDF
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Cargando ventas…</div>
+      } @else if (rows().length === 0) {
+        <div class="px-6 py-16 text-center">
+          <p class="text-sm text-foreground-muted">Sin ventas para los filtros seleccionados.</p>
+          <p class="text-xs text-foreground-faint mt-1">Prueba ampliar el rango de fechas o quitar algún filtro.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm min-w-[640px]">
+            <thead class="bg-muted/40 border-b border-border-subtle">
+              <tr>
+                <th class="text-left px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Fecha</th>
+                <th class="text-left px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Usuario</th>
+                <th class="text-left px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Productos</th>
+                <th class="text-left px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Método</th>
+                <th class="text-center px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Ítems</th>
+                <th class="text-right px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of paginated(); track row.id; let even = $even) {
+                <tr [class.bg-muted]="even" class="border-b border-border-subtle/50 last:border-b-0 hover:bg-muted/40 transition">
+                  <td class="px-4 py-2.5 text-foreground-muted whitespace-nowrap text-xs">
+                    {{ row.created_at | date: 'dd/MM/yy HH:mm' }}
+                  </td>
+                  <td class="px-4 py-2.5 text-foreground text-xs">
+                    {{ row.user_name ?? '—' }}
+                  </td>
+                  <td class="px-4 py-2.5 text-foreground-subtle text-xs max-w-[240px] truncate">
+                    {{ row.products_summary }}
+                  </td>
+                  <td class="px-4 py-2.5">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                          [class.bg-success/10]="row.payment_method === 'cash'"
+                          [class.text-success]="row.payment_method === 'cash'"
+                          [class.bg-primary/10]="row.payment_method === 'card'"
+                          [class.text-primary]="row.payment_method === 'card'"
+                          [class.bg-accent/10]="row.payment_method === 'qr'"
+                          [class.text-foreground]="row.payment_method === 'qr'">
+                      {{ methodLabels[row.payment_method] }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2.5 text-center font-mono text-xs text-foreground-muted">
+                    {{ row.item_count }}
+                  </td>
+                  <td class="px-4 py-2.5 text-right font-mono font-semibold text-foreground text-sm">
+                    {{ row.total_amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        @if (totalPages() > 1) {
+          <div class="px-5 py-3 border-t border-border-subtle flex items-center justify-between gap-3 bg-elevated/30">
+            <span class="text-[11px] text-foreground-muted font-medium">
+              Página {{ page() + 1 }} de {{ totalPages() }} · {{ rows().length }} resultados
+            </span>
+            <div class="flex items-center gap-1">
+              <button type="button" (click)="prevPage()" [disabled]="page() === 0"
+                      class="w-7 h-7 flex items-center justify-center rounded-md border border-border-subtle
+                             text-foreground-muted hover:text-foreground hover:bg-input disabled:opacity-40
+                             disabled:cursor-not-allowed transition text-xs">
+                ‹
+              </button>
+              <button type="button" (click)="nextPage()" [disabled]="page() >= totalPages() - 1"
+                      class="w-7 h-7 flex items-center justify-center rounded-md border border-border-subtle
+                             text-foreground-muted hover:text-foreground hover:bg-input disabled:opacity-40
+                             disabled:cursor-not-allowed transition text-xs">
+                ›
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+
+</div>

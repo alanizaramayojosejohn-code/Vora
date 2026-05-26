@@ -1,6 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth.service';
+import { BusinessService } from '../../../services/business/business.service';
+import { ThemeService } from '../../../services/theme/theme.service';
+import {
+  buildCustomPreset,
+  BusinessTheme,
+  contrastColor,
+  THEME_PRESET_LIST,
+  ThemePreset,
+  ThemePresetKey,
+} from '../../../services/theme/theme.presets';
 import { errorMessage } from '../../../utilities/error-message';
 
 function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -18,6 +28,8 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 export class ProfilePageComponent {
   private readonly fb = inject(FormBuilder);
   protected readonly auth = inject(AuthService);
+  private readonly businessService = inject(BusinessService);
+  private readonly themeService = inject(ThemeService);
 
   readonly email = computed(() => this.auth.session()?.user.email ?? '—');
   readonly name = computed(() => this.auth.profile()?.name ?? '');
@@ -80,6 +92,80 @@ export class ProfilePageComponent {
       this.pwError.set(errorMessage(err, 'Error al cambiar la contraseña'));
     } finally {
       this.pwSubmitting.set(false);
+    }
+  }
+
+  // ── Apariencia del negocio (solo rol admin) ────────────────────────────
+  readonly isAdmin = computed(() => this.auth.role() === 'admin');
+  readonly presets: readonly ThemePreset[] = THEME_PRESET_LIST;
+
+  // Paleta de colores: cada array interno = una columna (tono), de claro a oscuro
+  readonly COLOR_PALETTE: string[][] = [
+    ['#FCA5A5', '#F87171', '#EF4444', '#DC2626', '#B91C1C', '#7F1D1D'],
+    ['#FED7AA', '#FDBA74', '#F97316', '#EA580C', '#C2410C', '#7C2D12'],
+    ['#FEF08A', '#FDE047', '#EAB308', '#CA8A04', '#A16207', '#713F12'],
+    ['#BBF7D0', '#4ADE80', '#22C55E', '#16A34A', '#15803D', '#14532D'],
+    ['#99F6E4', '#2DD4BF', '#14B8A6', '#0D9488', '#0F766E', '#134E4A'],
+    ['#BAE6FD', '#60A5FA', '#3B82F6', '#2563EB', '#1D4ED8', '#1E3A8A'],
+    ['#C4B5FD', '#A78BFA', '#8B5CF6', '#7C3AED', '#6D28D9', '#4C1D95'],
+    ['#F0ABFC', '#E879F9', '#D946EF', '#C026D3', '#A21CAF', '#701A75'],
+    ['#FDA4AF', '#FB7185', '#F43F5E', '#E11D48', '#BE123C', '#881337'],
+    ['#CBD5E1', '#94A3B8', '#64748B', '#475569', '#334155', '#0F172A'],
+  ];
+
+  readonly selectedPreset = signal<ThemePresetKey>(
+    (this.auth.businessTheme()?.preset ?? 'monochrome') as ThemePresetKey,
+  );
+  readonly customPrimary = signal(this.auth.businessTheme()?.customColors?.primary ?? '#3B82F6');
+  readonly customAccent  = signal(this.auth.businessTheme()?.customColors?.accent  ?? '#60A5FA');
+
+  readonly customPresetPreview = computed(() =>
+    buildCustomPreset(this.customPrimary(), this.customAccent()),
+  );
+  readonly customPrimaryFg = computed(() => contrastColor(this.customPrimary()));
+  readonly customAccentFg  = computed(() => contrastColor(this.customAccent()));
+
+  readonly themeSubmitting = signal(false);
+  readonly themeError      = signal<string | null>(null);
+  readonly themeSuccess    = signal(false);
+
+  selectPreset(key: ThemePresetKey): void {
+    this.selectedPreset.set(key);
+    this.themeSuccess.set(false);
+    this.themeError.set(null);
+  }
+
+  onCustomPrimaryInput(event: Event): void {
+    this.customPrimary.set((event.target as HTMLInputElement).value);
+  }
+
+  onCustomAccentInput(event: Event): void {
+    this.customAccent.set((event.target as HTMLInputElement).value);
+  }
+
+  setPrimaryColor(hex: string): void { this.customPrimary.set(hex); }
+  setAccentColor(hex: string):  void { this.customAccent.set(hex); }
+
+  async saveTheme(): Promise<void> {
+    const businessId = this.auth.businessId();
+    if (!businessId || this.themeSubmitting()) return;
+
+    const theme: BusinessTheme =
+      this.selectedPreset() === 'custom'
+        ? { preset: 'custom', customColors: { primary: this.customPrimary(), accent: this.customAccent() } }
+        : { preset: this.selectedPreset() };
+
+    this.themeSubmitting.set(true);
+    this.themeError.set(null);
+    this.themeSuccess.set(false);
+    try {
+      await this.businessService.updateTheme(businessId, theme);
+      this.themeService.applyPreset(theme);
+      this.themeSuccess.set(true);
+    } catch (err: unknown) {
+      this.themeError.set(errorMessage(err, 'Error al guardar la apariencia'));
+    } finally {
+      this.themeSubmitting.set(false);
     }
   }
 }

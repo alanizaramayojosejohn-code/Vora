@@ -12,7 +12,8 @@ export type ThemePresetKey =
   | 'forest'
   | 'sunset'
   | 'plum'
-  | 'graphite';
+  | 'graphite'
+  | 'custom';
 
 // Mode es preferencia GLOBAL del usuario, no del negocio: lo guarda
 // theme.service en localStorage y aplica encima del preset asignado por
@@ -24,6 +25,11 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 // pero el codigo solo lee preset.
 export interface BusinessTheme {
   preset: ThemePresetKey;
+  // Solo relevante cuando preset === 'custom'
+  customColors?: {
+    primary: string;  // hex, ej: '#3B82F6'
+    accent: string;   // hex, ej: '#60A5FA'
+  };
 }
 
 export const DEFAULT_THEME: BusinessTheme = {
@@ -354,7 +360,7 @@ const graphite: ThemePreset = {
   },
 };
 
-export const THEME_PRESETS: Record<ThemePresetKey, ThemePreset> = {
+export const THEME_PRESETS: Record<Exclude<ThemePresetKey, 'custom'>, ThemePreset> = {
   monochrome,
   ocean,
   forest,
@@ -365,10 +371,61 @@ export const THEME_PRESETS: Record<ThemePresetKey, ThemePreset> = {
 
 export const THEME_PRESET_LIST: ThemePreset[] = Object.values(THEME_PRESETS);
 
-// Resuelve un preset por clave. Si la clave es invalida (ej: alguien
-// borro un preset y un negocio aun lo tenia asignado), cae a monochrome
-// para no romper la UI.
-export function getPreset(key: string | null | undefined): ThemePreset {
-  if (key && key in THEME_PRESETS) return THEME_PRESETS[key as ThemePresetKey];
-  return THEME_PRESETS.monochrome;
+// Devuelve '#FFFFFF' u '#0A0A0A' segun la luminancia percibida del color hex.
+export function contrastColor(hex: string): string {
+  const h = hex.replace('#', '');
+  if (h.length !== 6) return '#0A0A0A';
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.55 ? '#0A0A0A' : '#FFFFFF';
+}
+
+// Construye un preset de un solo color usando monochrome como base estructural
+// y sobreescribiendo primary/accent.
+export function buildCustomPreset(primary: string, accent: string): ThemePreset {
+  const base = THEME_PRESETS.monochrome;
+  return {
+    key: 'custom',
+    label: 'Personalizado',
+    description: 'Colores definidos por el negocio',
+    light: {
+      ...base.light,
+      primary,
+      primaryFg: contrastColor(primary),
+      accent,
+      accentFg: contrastColor(accent),
+    },
+    dark: {
+      ...base.dark,
+      primary,
+      primaryFg: contrastColor(primary),
+      accent,
+      accentFg: contrastColor(accent),
+    },
+  };
+}
+
+// Resuelve un BusinessTheme a ThemePreset concreto.
+// Acepta tambien una clave string para compatibilidad con code paths viejos.
+// Si la clave es invalida o falta, cae a monochrome.
+export function getPreset(themeOrKey: BusinessTheme | string | null | undefined): ThemePreset {
+  if (!themeOrKey) return THEME_PRESETS.monochrome;
+
+  if (typeof themeOrKey === 'string') {
+    return themeOrKey in THEME_PRESETS
+      ? THEME_PRESETS[themeOrKey as Exclude<ThemePresetKey, 'custom'>]
+      : THEME_PRESETS.monochrome;
+  }
+
+  if (themeOrKey.preset === 'custom') {
+    const c = themeOrKey.customColors;
+    if (c?.primary && c?.accent) return buildCustomPreset(c.primary, c.accent);
+    return THEME_PRESETS.monochrome;
+  }
+
+  return themeOrKey.preset in THEME_PRESETS
+    ? THEME_PRESETS[themeOrKey.preset as Exclude<ThemePresetKey, 'custom'>]
+    : THEME_PRESETS.monochrome;
 }

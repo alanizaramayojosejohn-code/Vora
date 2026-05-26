@@ -1,0 +1,150 @@
+<div class="space-y-5">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="bg-surface border border-border-subtle rounded-xl px-4 py-3">
+      <p class="text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Total</p>
+      <p class="text-2xl font-bold text-foreground mt-1">{{ stats().total }}</p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-xl px-4 py-3">
+      <p class="text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Activas</p>
+      <p class="text-2xl font-bold text-foreground mt-1">{{ stats().active }}</p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-xl px-4 py-3">
+      <p class="text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Por vencer</p>
+      <p class="text-2xl font-bold mt-1" [class.text-warning]="stats().expiringSoon > 0" [class.text-foreground]="stats().expiringSoon === 0">{{ stats().expiringSoon }}</p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-xl px-4 py-3">
+      <p class="text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Vencidas</p>
+      <p class="text-2xl font-bold mt-1" [class.text-danger]="stats().expired > 0" [class.text-foreground]="stats().expired === 0">{{ stats().expired }}</p>
+    </div>
+  </div>
+
+  <!-- Alertas de renovación -->
+  @if (alerts().length > 0) {
+    <div class="bg-warning/5 border border-warning/20 rounded-xl p-4 space-y-2">
+      <div class="flex items-center gap-2 mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-warning flex-shrink-0">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+        </svg>
+        <span class="text-xs font-bold text-warning uppercase tracking-wider">Requieren atención</span>
+      </div>
+      @for (item of alerts(); track item.business.id) {
+        <div class="flex items-center justify-between gap-3 bg-surface border border-border-subtle rounded-lg px-3 py-2.5">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-full bg-foreground text-base flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+              {{ initials(item.business.name) }}
+            </span>
+            <div>
+              <p class="text-sm font-semibold text-foreground">{{ item.business.name }}</p>
+              <p class="text-[11px] text-foreground-muted">
+                @if (item.isExpired) {
+                  Venció el {{ item.subscription!.end_date | date: 'dd MMM yyyy' }}
+                } @else {
+                  Vence el {{ item.subscription!.end_date | date: 'dd MMM yyyy' }} · {{ item.daysUntilExpiry }} día{{ item.daysUntilExpiry === 1 ? '' : 's' }}
+                }
+              </p>
+            </div>
+          </div>
+          <button type="button" (click)="select.emit(item)"
+                  class="px-3 py-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20 flex-shrink-0">
+            Registrar pago
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Buscador -->
+  <div class="flex items-center gap-2 bg-surface border border-border-subtle rounded-xl px-3.5 py-2.5 w-full md:w-80">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted flex-shrink-0">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+    </svg>
+    <input type="text" [value]="search()" (input)="setSearch($any($event.target).value)"
+           placeholder="Buscar negocio…"
+           class="bg-transparent text-foreground text-xs font-medium outline-none flex-1 min-w-0 placeholder:text-foreground-muted" />
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden">
+    @if (loading()) {
+      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+    } @else if (filtered().length === 0) {
+      <div class="px-6 py-16 text-center">
+        <p class="text-sm text-foreground-muted">Sin resultados.</p>
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead class="bg-muted/40 border-b border-border-subtle">
+          <tr>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Negocio</th>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Tarifa/mes</th>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Contratado</th>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Vence</th>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Estado</th>
+            <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filtered(); track item.business.id; let even = $even) {
+            <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-3">
+                  <span class="w-8 h-8 rounded-full bg-foreground text-base flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                    {{ initials(item.business.name) }}
+                  </span>
+                  <span class="font-semibold text-foreground">{{ item.business.name }}</span>
+                </div>
+              </td>
+              <td class="px-5 py-3 font-semibold text-foreground text-xs">
+                @if (item.subscription) {
+                  {{ item.subscription.monthly_fee | currency: 'ARS' : 'symbol' : '1.0-0' }}
+                } @else {
+                  <span class="text-foreground-faint">—</span>
+                }
+              </td>
+              <td class="px-5 py-3 text-foreground-subtle text-xs">
+                @if (item.subscription) {
+                  {{ item.subscription.start_date | date: 'dd MMM yyyy' }}
+                } @else {
+                  <span class="text-foreground-faint">—</span>
+                }
+              </td>
+              <td class="px-5 py-3 text-xs">
+                @if (item.subscription) {
+                  <span [class.text-danger]="item.isExpired" [class.text-warning]="item.isExpiringSoon && !item.isExpired" [class.text-foreground-subtle]="!item.isExpired && !item.isExpiringSoon">
+                    {{ item.subscription.end_date | date: 'dd MMM yyyy' }}
+                  </span>
+                } @else {
+                  <span class="text-foreground-faint">—</span>
+                }
+              </td>
+              <td class="px-5 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                      [ngClass]="statusClasses(item)">
+                  {{ statusLabel(item) }}
+                </span>
+              </td>
+              <td class="px-5 py-3 text-right">
+                <div class="inline-flex items-center gap-1">
+                  <button type="button" (click)="select.emit(item)" title="Ver pagos"
+                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+                    </svg>
+                  </button>
+                  <button type="button" (click)="configure.emit(item)" title="Configurar suscripción"
+                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

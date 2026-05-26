@@ -1,0 +1,60 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()"
+      class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 space-y-5 shadow-sm">
+  <div>
+    <h3 class="font-semibold text-foreground">Registrar pago de sueldo</h3>
+    <p class="text-sm text-foreground-subtle">{{ employee().name }} · {{ employee().position }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label for="period_month" class="block text-sm font-medium text-foreground-muted mb-1">Mes</label>
+      <select id="period_month" formControlName="period_month"
+              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+        @for (m of months; track m.v) {
+          <option [value]="m.v">{{ m.l }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="period_year" class="block text-sm font-medium text-foreground-muted mb-1">Año</label>
+      <input id="period_year" type="number" formControlName="period_year" min="2000"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+
+    <div>
+      <label for="amount" class="block text-sm font-medium text-foreground-muted mb-1">Monto pagado</label>
+      <input id="amount" type="number" formControlName="amount" min="1" step="100"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+
+    <div>
+      <label for="paid_at" class="block text-sm font-medium text-foreground-muted mb-1">Fecha de pago</label>
+      <input id="paid_at" type="date" formControlName="paid_at"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+
+    <div class="md:col-span-2">
+      <label for="notes" class="block text-sm font-medium text-foreground-muted mb-1">Notas <span class="text-foreground-faint">(opcional)</span></label>
+      <input id="notes" type="text" formControlName="notes" placeholder="Ej: Adelanto, descuento por falta…"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+  </div>
+
+  @if (errorMessage(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+      {{ msg }}
+    </div>
+  }
+
+  <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
+    <button type="button" (click)="cancel.emit()"
+            class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
+      Cancelar
+    </button>
+    <button type="submit" [disabled]="form.invalid || submitting()"
+            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
+      @if (submitting()) { Registrando… } @else { Registrar pago }
+    </button>
+  </div>
+</form>

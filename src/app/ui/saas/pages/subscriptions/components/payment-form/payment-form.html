@@ -1,0 +1,146 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()"
+      class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 space-y-5 shadow-sm">
+
+  <!-- Header con info del negocio -->
+  <div>
+    <h3 class="font-semibold text-foreground">Registrar pago</h3>
+    <p class="text-sm text-foreground-subtle font-medium">{{ item().business.name }}</p>
+    @if (item().subscription; as sub) {
+      <p class="text-xs text-foreground-faint mt-0.5">
+        Tarifa mensual: <span class="font-medium text-foreground-muted">Bs {{ sub.monthly_fee | number }}</span>
+        · Vence: <span class="font-medium" [class.text-danger]="item().isExpired" [class.text-warning]="item().isExpiringSoon && !item().isExpired" [class.text-foreground-muted]="!item().isExpired && !item().isExpiringSoon">{{ sub.end_date }}</span>
+      </p>
+    }
+  </div>
+
+  <!-- Meses a pagar -->
+  <div class="space-y-2">
+    <label class="block text-sm font-medium text-foreground-muted">Meses a pagar</label>
+    <div class="flex items-center gap-3">
+      <button type="button" (click)="decrementMonths()" [disabled]="monthsCount() <= 1"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-subtle bg-muted hover:bg-input disabled:opacity-35 disabled:cursor-not-allowed text-foreground transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+      </button>
+
+      <div class="flex-1 text-center">
+        <span class="text-2xl font-bold text-foreground">{{ monthsCount() }}</span>
+        <span class="text-sm text-foreground-muted ml-1.5">{{ monthsCount() === 1 ? 'mes' : 'meses' }}</span>
+      </div>
+
+      <button type="button" (click)="incrementMonths()" [disabled]="monthsCount() >= 12"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-subtle bg-muted hover:bg-input disabled:opacity-35 disabled:cursor-not-allowed text-foreground transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      </button>
+    </div>
+
+    @if (item().subscription; as sub) {
+      <div class="flex items-center justify-center gap-1.5 text-xs text-foreground-faint">
+        <span>{{ monthsCount() }} × Bs {{ sub.monthly_fee | number }}</span>
+        <span>=</span>
+        <span class="font-semibold text-foreground-muted text-sm">Bs {{ monthsCount() * sub.monthly_fee | number }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Método de pago -->
+  <div class="space-y-2">
+    <label class="block text-sm font-medium text-foreground-muted">Método de pago</label>
+    <div class="grid grid-cols-4 gap-2">
+      @for (method of paymentMethods; track method) {
+        <button type="button" (click)="selectMethod(method)"
+                [class.border-primary]="selectedMethod() === method"
+                [class.bg-primary\/5]="selectedMethod() === method"
+                [class.text-primary]="selectedMethod() === method"
+                [class.border-border-subtle]="selectedMethod() !== method"
+                [class.text-foreground-muted]="selectedMethod() !== method"
+                class="flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-xl border text-xs font-semibold transition hover:border-foreground-muted">
+          @switch (method) {
+            @case ('efectivo') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            }
+            @case ('tarjeta') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+              </svg>
+            }
+            @case ('qr') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/>
+                <path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>
+              </svg>
+            }
+            @case ('transferencia') {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>
+              </svg>
+            }
+          }
+          {{ PAYMENT_METHOD_LABELS[method] }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Campos principales -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label for="period_label" class="block text-sm font-medium text-foreground-muted mb-1">Período cubierto</label>
+      <input id="period_label" type="text" formControlName="period_label" placeholder="Ej: Mayo 2025"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+
+    <div>
+      <label for="paid_at" class="block text-sm font-medium text-foreground-muted mb-1">Fecha de cobro</label>
+      <input id="paid_at" type="date" formControlName="paid_at"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+
+    <div>
+      <label for="amount" class="block text-sm font-medium text-foreground-muted mb-1">Monto cobrado <span class="text-foreground-faint">(Bs)</span></label>
+      <input id="amount" type="number" formControlName="amount" min="1" step="10"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+
+    <div>
+      <label for="notes" class="block text-sm font-medium text-foreground-muted mb-1">Nota <span class="text-foreground-faint">(opcional)</span></label>
+      <input id="notes" type="text" formControlName="notes" placeholder="Ej: Descuento aplicado…"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+  </div>
+
+  <!-- Pago en atraso -->
+  <label class="flex items-center gap-3 cursor-pointer select-none group">
+    <div class="relative flex-shrink-0">
+      <input type="checkbox" formControlName="is_late" class="sr-only peer" />
+      <div class="w-10 h-5 bg-muted border border-border-subtle rounded-full peer-checked:bg-warning peer-checked:border-warning transition"></div>
+      <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+    </div>
+    <div>
+      <p class="text-sm font-medium text-foreground group-hover:text-foreground transition">Pago en atraso</p>
+      <p class="text-xs text-foreground-subtle">El negocio salda una deuda pendiente o pagó tarde</p>
+    </div>
+  </label>
+
+  <div class="bg-primary/5 border border-primary/15 rounded-lg px-3 py-2.5 text-xs text-foreground-muted">
+    Al registrar, la fecha de vencimiento se extenderá
+    <span class="font-semibold text-foreground-subtle">{{ monthsCount() }} {{ monthsCount() === 1 ? 'mes' : 'meses' }}</span>
+    desde la fecha de vencimiento actual.
+  </div>
+
+  @if (errorMessage(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">{{ msg }}</div>
+  }
+
+  <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
+    <button type="button" (click)="cancel.emit()"
+            class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
+      Cancelar
+    </button>
+    <button type="submit" [disabled]="form.invalid || submitting()"
+            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
+      @if (submitting()) { Registrando… } @else { Registrar y renovar }
+    </button>
+  </div>
+</form>

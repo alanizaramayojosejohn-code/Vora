@@ -20,6 +20,7 @@
   @if (showForm()) {
     <app-saas-businesses-form
       [value]="editing()"
+      [subscription]="editingSubscription()"
       [submitting]="submitting()"
       [errorMessage]="formError()"
       (submitForm)="handleSubmit($event)"
@@ -36,7 +37,7 @@
     <app-confirm-delete
       [open]="true"
       title="¿Eliminar este negocio?"
-      [description]="deletingError() ?? 'Borra TODO en cascada: usuarios, socios, productos, planes, ventas, membresías y asistencias. No se puede deshacer.'"
+      [description]="deletingError() ?? 'Borra TODO en cascada: usuarios, clientes, productos, planes, ventas, membresías y asistencias. No se puede deshacer.'"
       confirmLabel="Eliminar negocio"
       [entityLabel]="b.name"
       [entitySublabel]="deletingSublabel()"

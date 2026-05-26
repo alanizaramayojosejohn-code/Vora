@@ -21,21 +21,11 @@ export class SaasHomeComponent {
   readonly now = signal(new Date());
 
   readonly total = computed(() => this.businesses().length);
-  readonly gymCount = computed(() => this.businesses().filter((b) => b.type === 'gym').length);
-  readonly posCount = computed(() => this.businesses().filter((b) => b.type === 'pos').length);
 
-  // Negocios creados en los ultimos 30 dias.
   readonly recentCount = computed(() => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
     return this.businesses().filter((b) => new Date(b.created_at) >= cutoff).length;
-  });
-
-  // Distribucion para la barra apilada: % de gym sobre total.
-  readonly gymPct = computed(() => {
-    const t = this.total();
-    if (t === 0) return 0;
-    return (this.gymCount() / t) * 100;
   });
 
   // Top 5 negocios mas recientes (listBusinesses ya viene ordenado desc).
@@ -73,10 +63,10 @@ export class SaasHomeComponent {
   }
 
   primaryColor(business: Business): string {
-    return getPreset(business.theme?.preset).light.primary;
+    return getPreset(business.theme).light.primary;
   }
 
   presetLabel(business: Business): string {
-    return getPreset(business.theme?.preset).label;
+    return getPreset(business.theme).label;
   }
 }

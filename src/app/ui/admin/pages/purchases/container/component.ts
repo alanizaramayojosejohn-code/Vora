@@ -39,7 +39,7 @@ export class PurchasesDashboardComponent {
       this.acquisitions.set(acq);
       this.pendingOrders.set(orders);
     } catch (err: unknown) {
-      this.error.set(errorMessage(err, 'Error al cargar compras'));
+      this.error.set(errorMessage(err, 'Error al cargar provisiones'));
     } finally {
       this.loading.set(false);
     }

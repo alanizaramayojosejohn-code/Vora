@@ -34,17 +34,17 @@ export const AdminRoutes: Routes = [
       ),
   },
   {
-    path: 'membership-plans',
-    loadComponent: () =>
-      import('./pages/membership-plans/container/component').then(
-        (m) => m.AdminMembershipPlansContainerComponent,
-      ),
-  },
-  {
     path: 'users',
     loadComponent: () =>
       import('./pages/users/container/component').then(
         (m) => m.AdminUsersContainerComponent,
+      ),
+  },
+  {
+    path: 'staff',
+    loadComponent: () =>
+      import('./pages/staff/container/component').then(
+        (m) => m.AdminStaffContainerComponent,
       ),
   },
   {
@@ -94,13 +94,6 @@ export const AdminRoutes: Routes = [
     loadComponent: () =>
       import('../caja/pages/sales/new/component').then(
         (m) => m.CajaSalesNewComponent,
-      ),
-  },
-  {
-    path: 'attendance',
-    loadComponent: () =>
-      import('../caja/pages/attendance/container/component').then(
-        (m) => m.CajaAttendanceContainerComponent,
       ),
   },
 ];

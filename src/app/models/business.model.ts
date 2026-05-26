@@ -1,11 +1,9 @@
 import { BusinessTheme } from '../services/theme/theme.presets';
 
-export type BusinessType = 'pos' | 'gym';
-
 export interface Business {
   id: string;
   name: string;
-  type: BusinessType;
   theme: BusinessTheme;
+  logo_url: string | null;
   created_at: string;
 }

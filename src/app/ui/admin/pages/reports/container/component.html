@@ -1,19 +1,52 @@
-<div class="max-w-7xl mx-auto px-6 py-10 space-y-8">
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+
+  <!-- Header -->
   <div>
     <h2 class="text-2xl font-bold text-foreground tracking-tight">Reportes</h2>
-    @if (isGym()) {
-      <p class="text-foreground-muted text-sm">Resumen del negocio: ingresos, membresías vigentes y productos con stock bajo.</p>
-    } @else {
-      <p class="text-foreground-muted text-sm">Resumen del negocio: ingresos y productos con stock bajo.</p>
-    }
+    <p class="text-foreground-muted text-sm">Análisis de ventas, ingresos y estado del inventario.</p>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <app-admin-reports-monthly-income [rows]="monthly()" [loading]="loading()" />
-    <app-admin-reports-daily-income [rows]="daily()" [loading]="loading()" />
-    @if (isGym()) {
-      <app-admin-reports-active-memberships [rows]="active()" [loading]="loading()" />
-    }
-    <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
+  <!-- Tabs -->
+  <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit">
+    <button type="button" (click)="setTab('ventas')"
+            [class.bg-surface]="activeTab() === 'ventas'"
+            [class.shadow-sm]="activeTab() === 'ventas'"
+            [class.text-foreground]="activeTab() === 'ventas'"
+            [class.text-foreground-muted]="activeTab() !== 'ventas'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+      </svg>
+      Reporte de ventas
+    </button>
+    <button type="button" (click)="setTab('resumen')"
+            [class.bg-surface]="activeTab() === 'resumen'"
+            [class.shadow-sm]="activeTab() === 'resumen'"
+            [class.text-foreground]="activeTab() === 'resumen'"
+            [class.text-foreground-muted]="activeTab() !== 'resumen'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 3v18h18"/><path d="M7 12v5"/><path d="M12 8v9"/><path d="M17 5v12"/>
+      </svg>
+      Resumen general
+    </button>
   </div>
+
+  <!-- Tab: Reporte de ventas -->
+  @if (activeTab() === 'ventas') {
+    <app-admin-sales-report />
+  }
+
+  <!-- Tab: Resumen general -->
+  @if (activeTab() === 'resumen') {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <app-admin-reports-monthly-income [rows]="monthly()" [loading]="loading()" />
+      <app-admin-reports-daily-income [rows]="daily()" [loading]="loading()" />
+      <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
+    </div>
+  }
+
 </div>

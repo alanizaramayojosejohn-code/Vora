@@ -19,4 +19,11 @@ export const SaasRoutes: Routes = [
         (m) => m.SaasBusinessesContainerComponent,
       ),
   },
+  {
+    path: 'subscriptions',
+    loadComponent: () =>
+      import('./pages/subscriptions/container/component').then(
+        (m) => m.SaasSubscriptionsContainerComponent,
+      ),
+  },
 ];

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel, orderPrimaryType } from '../../../../../../models/order.model';
+import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../../../models/order.model';
 
 @Component({
   selector: 'app-caja-sales-list',
@@ -17,5 +17,4 @@ export class SalesListComponent {
 
   readonly paymentLabel = PAYMENT_METHOD_LABEL;
   readonly primaryLabel = orderPrimaryLabel;
-  readonly primaryType = orderPrimaryType;
 }

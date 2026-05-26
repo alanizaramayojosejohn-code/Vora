@@ -1,0 +1,71 @@
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h2 class="text-2xl font-bold text-foreground tracking-tight">Facturación</h2>
+      <p class="text-foreground-muted text-sm">Suscripciones, tarifas e historial de cobros por negocio.</p>
+    </div>
+    @if (selectedItem() || configuringItem()) {
+      <button (click)="closePayments(); closeConfigure()"
+              class="px-4 py-2 text-sm font-semibold bg-muted hover:bg-input text-foreground border border-border-subtle rounded-lg transition">
+        ← Volver a la lista
+      </button>
+    }
+  </div>
+
+  <!-- Vista: configurar suscripción -->
+  @if (configuringItem(); as item) {
+    <app-saas-subscription-form
+      [business]="item.business"
+      [subscription]="item.subscription"
+      [submitting]="configSubmitting()"
+      [errorMessage]="configError()"
+      (submitForm)="handleConfigure($event)"
+      (cancel)="closeConfigure()" />
+  }
+
+  <!-- Vista: panel de pagos -->
+  @else if (selectedItem(); as item) {
+    @if (showPaymentForm()) {
+      <app-saas-subscription-payment-form
+        [item]="item"
+        [submitting]="paymentSubmitting()"
+        [errorMessage]="paymentError()"
+        (submitForm)="handlePayment($event)"
+        (cancel)="showPaymentForm.set(false)" />
+    }
+
+    <app-saas-subscription-payments-history
+      [item]="item"
+      [payments]="payments()"
+      [loading]="paymentsLoading()"
+      (close)="closePayments()"
+      (addPayment)="showPaymentForm.set(true)"
+      (deletePayment)="handleDeletePayment($event)" />
+
+    @if (deletingPayment(); as p) {
+      <app-confirm-delete
+        [open]="true"
+        title="¿Eliminar este pago?"
+        [description]="deletingPaymentError() ?? 'Esta acción no se puede deshacer. El vencimiento NO se revierte automáticamente.'"
+        confirmLabel="Eliminar pago"
+        [entityLabel]="item.business.name"
+        [entitySublabel]="p.period_label + ' · ' + (p.paid_at | date: 'dd/MM/yyyy')"
+        confirmWord="ELIMINAR"
+        [submitting]="deletingPaymentSubmitting()"
+        (confirmed)="confirmDeletePayment()"
+        (cancelled)="cancelDeletePayment()" />
+    }
+  }
+
+  <!-- Vista: lista principal -->
+  @else {
+    <app-saas-subscriptions-list
+      [items]="items()"
+      [loading]="loading()"
+      (select)="openPayments($event)"
+      (configure)="openConfigure($event)" />
+  }
+
+</div>

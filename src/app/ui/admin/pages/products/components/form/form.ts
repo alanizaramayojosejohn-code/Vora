@@ -3,6 +3,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Category } from '../../../../../../models/category.model';
 import { Product } from '../../../../../../models/product.model';
 import { CreateProductInput } from '../../../../../../services/product/product.service';
+import { CategoryService } from '../../../../../../services/category/category.service';
+import { errorMessage } from '../../../../../../utilities/error-message';
 
 @Component({
   selector: 'app-admin-products-form',
@@ -13,6 +15,7 @@ import { CreateProductInput } from '../../../../../../services/product/product.s
 })
 export class ProductsFormComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly categoryService = inject(CategoryService);
 
   readonly value = input<Product | null>(null);
   readonly categories = input<Category[]>([]);
@@ -24,6 +27,23 @@ export class ProductsFormComponent {
   readonly isEdit = computed(() => this.value() !== null);
 
   readonly hasStock = signal(true);
+
+  readonly showCreateCategory = signal(false);
+  readonly creatingCategory = signal(false);
+  readonly createCategoryError = signal<string | null>(null);
+  readonly localNewCategories = signal<Category[]>([]);
+
+  readonly allCategories = computed(() => {
+    const base = this.categories();
+    const local = this.localNewCategories();
+    const ids = new Set(base.map((c) => c.id));
+    return [...base, ...local.filter((c) => !ids.has(c.id))];
+  });
+
+  readonly categoryForm = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    description: [''],
+  });
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -64,6 +84,38 @@ export class ProductsFormComponent {
   toggleHasStock(checked: boolean): void {
     this.hasStock.set(checked);
     this.form.controls.has_stock.setValue(checked);
+  }
+
+  openCreateCategory(): void {
+    this.showCreateCategory.set(true);
+    this.createCategoryError.set(null);
+    this.categoryForm.reset({ name: '', description: '' });
+  }
+
+  cancelCreateCategory(): void {
+    this.showCreateCategory.set(false);
+    this.createCategoryError.set(null);
+  }
+
+  async submitCreateCategory(): Promise<void> {
+    if (this.categoryForm.invalid || this.creatingCategory()) return;
+    this.creatingCategory.set(true);
+    this.createCategoryError.set(null);
+    try {
+      const raw = this.categoryForm.getRawValue();
+      const desc = raw.description.trim();
+      const cat = await this.categoryService.createCategory({
+        name: raw.name.trim(),
+        description: desc.length > 0 ? desc : null,
+      });
+      this.localNewCategories.update((list) => [...list, cat]);
+      this.form.controls.category_id.setValue(cat.id);
+      this.showCreateCategory.set(false);
+    } catch (err: unknown) {
+      this.createCategoryError.set(errorMessage(err, 'Error al crear categoría'));
+    } finally {
+      this.creatingCategory.set(false);
+    }
   }
 
   onSubmit(): void {

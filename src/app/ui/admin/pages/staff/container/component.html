@@ -1,0 +1,83 @@
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-foreground tracking-tight">Personal</h2>
+      <p class="text-foreground-muted text-sm">Empleados, sueldos e historial de pagos.</p>
+    </div>
+    @if (showForm()) {
+      <button (click)="closeForm()"
+              class="px-4 py-2 text-sm font-semibold bg-muted hover:bg-input text-foreground border border-border-subtle rounded-lg transition">
+        Cerrar formulario
+      </button>
+    } @else if (!selectedEmployee()) {
+      <button (click)="openCreate()"
+              class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
+        Nuevo empleado
+      </button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <app-admin-staff-form
+      [value]="editing()"
+      [submitting]="submitting()"
+      [errorMessage]="formError()"
+      (submitForm)="handleSubmit($event)"
+      (cancel)="closeForm()" />
+  }
+
+  @if (selectedEmployee(); as emp) {
+    @if (showPaymentForm()) {
+      <app-admin-staff-payment-form
+        [employee]="emp"
+        [submitting]="paymentSubmitting()"
+        [errorMessage]="paymentError()"
+        (submitForm)="handlePayment($event)"
+        (cancel)="showPaymentForm.set(false)" />
+    }
+
+    <app-admin-staff-payments-history
+      [employee]="emp"
+      [payments]="payments()"
+      [loading]="paymentsLoading()"
+      (close)="closePayments()"
+      (addPayment)="showPaymentForm.set(true)"
+      (deletePayment)="handleDeletePayment($event)" />
+
+    @if (deletingPayment(); as p) {
+      <app-confirm-delete
+        [open]="true"
+        title="¿Eliminar este pago?"
+        [description]="deletingPaymentError() ?? 'Esta acción no se puede deshacer.'"
+        confirmLabel="Eliminar pago"
+        [entityLabel]="emp.name"
+        [entitySublabel]="'Pago registrado el ' + (p.paid_at | date: 'dd/MM/yyyy')"
+        confirmWord="ELIMINAR"
+        [submitting]="deletingPaymentSubmitting()"
+        (confirmed)="confirmDeletePayment()"
+        (cancelled)="cancelDeletePayment()" />
+    }
+  } @else {
+    <app-admin-staff-list
+      [employees]="employees()"
+      [loading]="loading()"
+      (edit)="openEdit($event)"
+      (remove)="handleDelete($event)"
+      (payments)="openPayments($event)" />
+  }
+
+  @if (deleting(); as emp) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar este empleado?"
+      [description]="deletingError() ?? 'Se eliminarán también todos sus pagos registrados. Esta acción no se puede deshacer.'"
+      confirmLabel="Eliminar empleado"
+      [entityLabel]="emp.name"
+      [entitySublabel]="emp.position + ' · CI ' + emp.ci"
+      [entityInitials]="deletingInitials()"
+      confirmWord="ELIMINAR"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
+</div>

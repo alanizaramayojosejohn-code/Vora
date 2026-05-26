@@ -74,7 +74,7 @@ export class ThemeService {
 
   private applyToDom(): void {
     const root = document.documentElement;
-    const preset = getPreset(this.currentPreset().preset);
+    const preset = getPreset(this.currentPreset());
     root.dataset['preset'] = preset.key;
     this.applyModeResolution(this.currentMode(), preset);
   }

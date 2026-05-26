@@ -6,28 +6,19 @@
     </h3>
     <p class="text-sm text-foreground-subtle">
       @if (isEdit()) {
-        Modifica el nombre, tipo o paleta de colores. Para cambiar admin/servicios usa los CRUDs específicos.
+        Modifica el nombre, logo o la paleta de colores.
       } @else {
-        Crea un negocio (POS o gimnasio), asigna su primer admin y elige la apariencia que verán al entrar.
+        Crea un negocio, asigna su primer admin y elige la apariencia que verán al entrar.
       }
     </p>
   </div>
 
   <!-- ======================== Datos del negocio ======================== -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
+    <div class="md:col-span-2">
       <label for="businessName" class="block text-sm font-medium text-foreground-muted mb-1">Nombre del negocio</label>
       <input id="businessName" type="text" formControlName="businessName"
              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
-    </div>
-
-    <div>
-      <label for="businessType" class="block text-sm font-medium text-foreground-muted mb-1">Tipo de negocio</label>
-      <select id="businessType" formControlName="businessType"
-              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
-        <option value="pos">POS — productos + ventas</option>
-        <option value="gym">Gimnasio — POS + membresías + asistencia</option>
-      </select>
     </div>
 
     @if (!isEdit()) {
@@ -53,21 +44,72 @@
     }
   </div>
 
-  @if (!isEdit() && isGym()) {
+  <!-- ======================== Logo ======================== -->
+  <div class="space-y-3 pt-5 border-t border-border-subtle">
     <div>
-      <label for="services" class="block text-sm font-medium text-foreground-muted mb-1">Servicios disponibles</label>
-      <input id="services" type="text" formControlName="services"
-             placeholder="máquinas, zumba, entrenador personal, nutricionista"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
-      <p class="text-xs text-foreground-subtle mt-1">Sepáralos por comas. Puedes agregar más después.</p>
+      <h4 class="font-semibold text-foreground text-sm">Logo del negocio</h4>
+      <p class="text-xs text-foreground-subtle mt-0.5">
+        Se muestra en el header y en la lista de negocios. PNG, JPG, SVG o WebP · máx. 2 MB.
+      </p>
     </div>
-  }
 
-  <!-- ======================== Apariencia ========================
-       Solo paleta. El modo claro/oscuro es preferencia global de cada
-       usuario en su navegador (toggle en el header de la app), no se
-       asigna por negocio.
-  -->
+    <div class="flex items-start gap-4 flex-wrap">
+      <!-- Preview área -->
+      <div class="w-20 h-20 rounded-xl border border-border-subtle bg-input flex items-center justify-center overflow-hidden flex-shrink-0">
+        @if (logoPreview()) {
+          <img [src]="logoPreview()" alt="Logo preview" class="w-full h-full object-contain" />
+        } @else if (showExistingLogo()) {
+          <img [src]="existingLogoUrl()" alt="Logo actual" class="w-full h-full object-contain" />
+        } @else if (removeLogo()) {
+          <span class="text-[10px] text-foreground-faint text-center px-1">Sin logo</span>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+               stroke-linejoin="round" class="text-foreground-faint">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+        }
+      </div>
+
+      <!-- Controles -->
+      <div class="flex flex-col gap-2 flex-1 min-w-[160px]">
+        <label class="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold
+                      bg-primary text-primary-fg rounded-lg cursor-pointer
+                      hover:bg-primary/90 transition w-fit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/>
+            <line x1="12" x2="12" y1="3" y2="15"/>
+          </svg>
+          Subir imagen
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                 class="hidden" (change)="onLogoFileChange($event)" />
+        </label>
+
+        @if (logoPreview()) {
+          <button type="button" (click)="clearLogo()"
+                  class="text-xs text-foreground-muted hover:text-foreground transition w-fit">
+            Cancelar selección
+          </button>
+        }
+        @if (!removeLogo() && existingLogoUrl() && !logoPreview()) {
+          <button type="button" (click)="removeExistingLogo()"
+                  class="text-xs text-danger hover:text-danger/80 transition w-fit">
+            Quitar logo
+          </button>
+        }
+        @if (removeLogo()) {
+          <button type="button" (click)="removeLogo.set(false)"
+                  class="text-xs text-foreground-muted hover:text-foreground transition w-fit">
+            Restaurar logo anterior
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== Paleta de colores ======================== -->
   <div class="space-y-4 pt-5 border-t border-border-subtle">
     <div>
       <h4 class="font-semibold text-foreground text-sm">Paleta del negocio</h4>
@@ -77,10 +119,10 @@
       </p>
     </div>
 
-    <!-- Grid de presets. 6 cards, 3 cols en desktop / 2 en tablet / 1 en mobile.
-         Cada card es un button (form picker semantico). El @if del check usa
-         selectedPreset() para reaccionar al cambio. -->
+    <!-- Grid de presets + opción custom -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+      <!-- Presets fijos -->
       @for (preset of presets; track preset.key) {
         <button type="button"
                 (click)="selectPreset(preset.key)"
@@ -89,46 +131,255 @@
                 [class.ring-primary/30]="selectedPreset() === preset.key"
                 [class.border-border-subtle]="selectedPreset() !== preset.key"
                 class="text-left rounded-2xl border p-3 transition hover:border-foreground-muted bg-elevated">
-          <!-- Mini preview del preset usando sus hex reales -->
+          <!-- Mini preview del preset -->
           <div class="rounded-xl p-3 mb-3 border"
                [style.background]="preset.light.base"
                [style.borderColor]="preset.light.borderSubtle">
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-6 h-6 rounded-full shadow-sm"
-                   [style.background]="preset.light.primary"></div>
+              <div class="w-6 h-6 rounded-full shadow-sm" [style.background]="preset.light.primary"></div>
               <div class="w-6 h-6 rounded-full shadow-sm"
                    [style.background]="preset.light.accent"
                    [style.border]="'1px solid ' + preset.light.borderSubtle"></div>
-              <div class="flex-1 h-1.5 rounded-full"
-                   [style.background]="preset.light.foreground"
-                   style="opacity: 0.15"></div>
+              <div class="flex-1 h-1.5 rounded-full" [style.background]="preset.light.foreground" style="opacity: 0.15"></div>
             </div>
             <div class="space-y-1">
-              <div class="h-1.5 rounded-full w-3/4"
-                   [style.background]="preset.light.foreground"
-                   style="opacity: 0.5"></div>
-              <div class="h-1.5 rounded-full w-1/2"
-                   [style.background]="preset.light.foreground"
-                   style="opacity: 0.25"></div>
+              <div class="h-1.5 rounded-full w-3/4" [style.background]="preset.light.foreground" style="opacity: 0.5"></div>
+              <div class="h-1.5 rounded-full w-1/2" [style.background]="preset.light.foreground" style="opacity: 0.25"></div>
             </div>
           </div>
-
-          <!-- Label + selected indicator -->
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1">
               <p class="font-semibold text-foreground text-sm truncate">{{ preset.label }}</p>
               <p class="text-xs text-foreground-subtle mt-0.5 leading-tight">{{ preset.description }}</p>
             </div>
             @if (selectedPreset() === preset.key) {
-              <div class="w-5 h-5 rounded-full bg-primary text-primary-fg flex items-center justify-center text-[10px] font-bold flex-shrink-0">
-                ✓
-              </div>
+              <div class="w-5 h-5 rounded-full bg-primary text-primary-fg flex items-center justify-center text-[10px] font-bold flex-shrink-0">✓</div>
             }
           </div>
         </button>
       }
+
+      <!-- Opción Personalizado -->
+      <button type="button"
+              (click)="selectPreset('custom')"
+              [class.border-primary]="selectedPreset() === 'custom'"
+              [class.ring-2]="selectedPreset() === 'custom'"
+              [class.ring-primary/30]="selectedPreset() === 'custom'"
+              [class.border-border-subtle]="selectedPreset() !== 'custom'"
+              class="text-left rounded-2xl border p-3 transition hover:border-foreground-muted bg-elevated">
+        <!-- Preview dinámico con los colores elegidos -->
+        <div class="rounded-xl p-3 mb-3 border"
+             style="background: #FAFAFA; border-color: rgba(0,0,0,0.08)">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 rounded-full shadow-sm" [style.background]="customPrimary()"></div>
+            <div class="w-6 h-6 rounded-full shadow-sm border"
+                 [style.background]="customAccent()"
+                 style="border-color: rgba(0,0,0,0.08)"></div>
+            <div class="flex-1 h-1.5 rounded-full" style="background:#0A0A0A; opacity:0.15"></div>
+          </div>
+          <div class="space-y-1">
+            <div class="h-1.5 rounded-full w-3/4" style="background:#0A0A0A; opacity:0.5"></div>
+            <div class="h-1.5 rounded-full w-1/2" style="background:#0A0A0A; opacity:0.25"></div>
+          </div>
+        </div>
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <p class="font-semibold text-foreground text-sm truncate">Personalizado</p>
+            <p class="text-xs text-foreground-subtle mt-0.5 leading-tight">Elige tus propios colores</p>
+          </div>
+          @if (selectedPreset() === 'custom') {
+            <div class="w-5 h-5 rounded-full bg-primary text-primary-fg flex items-center justify-center text-[10px] font-bold flex-shrink-0">✓</div>
+          }
+        </div>
+      </button>
     </div>
 
+    <!-- Panel de colores custom (visible solo cuando preset === 'custom') -->
+    @if (selectedPreset() === 'custom') {
+      <div class="rounded-2xl border border-border-subtle bg-elevated p-4 space-y-4 mt-1">
+        <p class="text-xs font-semibold text-foreground-muted uppercase tracking-wider">Colores personalizados</p>
+
+        <div class="grid grid-cols-2 gap-5">
+          <!-- Color primario -->
+          <div class="space-y-3">
+            <label class="block text-xs font-medium text-foreground-muted">Color primario</label>
+            <div class="flex items-center gap-3">
+              <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-border-subtle cursor-pointer flex-shrink-0"
+                   [style.background]="customPrimary()">
+                <input type="color" formControlName="customPrimary"
+                       class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+              </div>
+              <input type="text" formControlName="customPrimary" maxlength="7"
+                     class="flex-1 min-w-0 px-2 py-1.5 bg-input text-foreground border border-border-subtle
+                            rounded-md text-xs font-mono outline-none focus:ring-2
+                            focus:ring-primary/30 focus:border-primary uppercase" />
+            </div>
+
+            <!-- Paleta -->
+            <div class="flex gap-1">
+              @for (hue of COLOR_PALETTE; track $index) {
+                <div class="flex flex-col gap-1">
+                  @for (shade of hue; track shade) {
+                    <button type="button"
+                            (click)="form.controls.customPrimary.setValue(shade)"
+                            [style.background]="shade"
+                            [attr.title]="shade"
+                            class="w-4 h-4 rounded-sm transition-transform hover:scale-125 hover:z-10 relative"
+                            [class.ring-2]="customPrimary() === shade"
+                            [class.ring-offset-1]="customPrimary() === shade"
+                            [class.ring-foreground]="customPrimary() === shade">
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded text-[8px] font-bold flex items-center justify-center flex-shrink-0"
+                   [style.background]="customPrimary()" [style.color]="customPrimaryFg()">Aa</div>
+              <span class="text-[11px] text-foreground-subtle">Contraste: {{ customPrimaryFg() }}</span>
+            </div>
+          </div>
+
+          <!-- Color de acento -->
+          <div class="space-y-3">
+            <label class="block text-xs font-medium text-foreground-muted">Color de acento</label>
+            <div class="flex items-center gap-3">
+              <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-border-subtle cursor-pointer flex-shrink-0"
+                   [style.background]="customAccent()">
+                <input type="color" formControlName="customAccent"
+                       class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+              </div>
+              <input type="text" formControlName="customAccent" maxlength="7"
+                     class="flex-1 min-w-0 px-2 py-1.5 bg-input text-foreground border border-border-subtle
+                            rounded-md text-xs font-mono outline-none focus:ring-2
+                            focus:ring-primary/30 focus:border-primary uppercase" />
+            </div>
+
+            <!-- Paleta -->
+            <div class="flex gap-1">
+              @for (hue of COLOR_PALETTE; track $index) {
+                <div class="flex flex-col gap-1">
+                  @for (shade of hue; track shade) {
+                    <button type="button"
+                            (click)="form.controls.customAccent.setValue(shade)"
+                            [style.background]="shade"
+                            [attr.title]="shade"
+                            class="w-4 h-4 rounded-sm transition-transform hover:scale-125 hover:z-10 relative"
+                            [class.ring-2]="customAccent() === shade"
+                            [class.ring-offset-1]="customAccent() === shade"
+                            [class.ring-foreground]="customAccent() === shade">
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded text-[8px] font-bold flex items-center justify-center flex-shrink-0"
+                   [style.background]="customAccent()" [style.color]="customAccentFg()">Aa</div>
+              <span class="text-[11px] text-foreground-subtle">Contraste: {{ customAccentFg() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview grande -->
+        <div class="rounded-xl p-4 border space-y-3"
+             [style.background]="customPresetPreview().light.base"
+             [style.borderColor]="customPresetPreview().light.border">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg shadow-sm flex items-center justify-center text-xs font-bold"
+                 [style.background]="customPrimary()"
+                 [style.color]="customPrimaryFg()">A</div>
+            <div class="flex-1 space-y-1">
+              <div class="h-2 rounded-full w-32" [style.background]="customPresetPreview().light.foreground" style="opacity:0.6"></div>
+              <div class="h-1.5 rounded-full w-20" [style.background]="customPresetPreview().light.foreground" style="opacity:0.3"></div>
+            </div>
+            <div class="px-3 py-1 rounded-full text-[10px] font-semibold"
+                 [style.background]="customAccent()"
+                 [style.color]="customAccentFg()">Acento</div>
+          </div>
+          <div class="h-px" [style.background]="customPresetPreview().light.border"></div>
+          <div class="flex gap-2">
+            <div class="px-3 py-1.5 rounded-lg text-[10px] font-semibold shadow-sm"
+                 [style.background]="customPrimary()"
+                 [style.color]="customPrimaryFg()">Botón primario</div>
+            <div class="px-3 py-1.5 rounded-lg text-[10px] border"
+                 [style.borderColor]="customPresetPreview().light.border"
+                 [style.color]="customPresetPreview().light.foregroundMuted">Cancelar</div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ======================== Plan de suscripción ======================== -->
+  <div class="space-y-4 pt-5 border-t border-border-subtle">
+    <div>
+      <h4 class="font-semibold text-foreground text-sm">Plan de suscripción</h4>
+      <p class="text-xs text-foreground-subtle mt-0.5">
+        @if (isEdit()) {
+          Plan y tarifa mensual del negocio. Al guardar se actualizará la suscripción.
+        } @else {
+          Elige el plan inicial del negocio. Podrás cambiarlo después desde Facturación.
+        }
+      </p>
+    </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <!-- Planes preset -->
+        @for (plan of planOptions; track plan) {
+          @if (plan !== null) {
+            <button type="button" (click)="selectPlan(plan)"
+                    [class.border-primary]="selectedPlan() === plan"
+                    [class.ring-2]="selectedPlan() === plan"
+                    [class.ring-primary\/30]="selectedPlan() === plan"
+                    [class.border-border-subtle]="selectedPlan() !== plan"
+                    class="text-left rounded-xl border p-3 transition hover:border-foreground-muted bg-elevated space-y-1">
+              <div class="flex items-start justify-between gap-1">
+                <p class="font-semibold text-foreground text-xs">{{ PLAN_LABELS[plan] }}</p>
+                @if (selectedPlan() === plan) {
+                  <div class="w-3.5 h-3.5 rounded-full bg-primary text-primary-fg flex items-center justify-center text-[8px] font-bold flex-shrink-0">✓</div>
+                }
+              </div>
+              @if (plan !== 'custom') {
+                <p class="text-sm font-bold text-foreground">{{ PLAN_FEES[plan] }} <span class="text-[10px] font-normal text-foreground-muted">Bs/mes</span></p>
+              } @else {
+                <p class="text-xs text-foreground-muted">Monto libre</p>
+              }
+              <p class="text-[10px] text-foreground-subtle leading-tight">{{ PLAN_DESCRIPTIONS[plan] }}</p>
+            </button>
+          } @else {
+            <!-- Sin plan -->
+            <button type="button" (click)="selectPlan(null)"
+                    [class.border-primary]="selectedPlan() === null"
+                    [class.ring-2]="selectedPlan() === null"
+                    [class.ring-primary\/30]="selectedPlan() === null"
+                    [class.border-border-subtle]="selectedPlan() !== null"
+                    class="text-left rounded-xl border p-3 transition hover:border-foreground-muted bg-elevated space-y-1">
+              <div class="flex items-start justify-between gap-1">
+                <p class="font-semibold text-foreground text-xs">Sin plan</p>
+                @if (selectedPlan() === null) {
+                  <div class="w-3.5 h-3.5 rounded-full bg-primary text-primary-fg flex items-center justify-center text-[8px] font-bold flex-shrink-0">✓</div>
+                }
+              </div>
+              <p class="text-xs text-foreground-muted">—</p>
+              <p class="text-[10px] text-foreground-subtle leading-tight">Configura después en Facturación</p>
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Monto personalizado -->
+      @if (selectedPlan() === 'custom') {
+        <div class="flex items-center gap-3">
+          <label for="customFee" class="text-sm font-medium text-foreground-muted flex-shrink-0">Tarifa mensual (Bs)</label>
+          <input id="customFee" type="number" min="1" step="10"
+                 [value]="customFee()"
+                 (input)="customFee.set(+($any($event.target).value))"
+                 class="w-36 px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+      }
   </div>
 
   @if (errorMessage(); as msg) {
@@ -143,7 +394,9 @@
       Cancelar
     </button>
     <button type="submit" [disabled]="form.invalid || submitting()"
-            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
+            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg
+                   disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed
+                   rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
       @if (submitting()) {
         @if (isEdit()) { Guardando… } @else { Creando… }
       } @else {

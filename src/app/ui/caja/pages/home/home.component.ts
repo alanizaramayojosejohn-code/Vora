@@ -5,7 +5,7 @@ import { AuthService } from '../../../../services/auth/auth.service';
 import { ReportQueryService } from '../../../../services/report/query.service';
 import { OrderQueryService } from '../../../../services/order/query.service';
 import { DailyIncome } from '../../../../models/daily-income.model';
-import { OrderWithDetails, orderPrimaryLabel, orderPrimaryType } from '../../../../models/order.model';
+import { OrderWithDetails, orderPrimaryLabel } from '../../../../models/order.model';
 
 @Component({
   selector: 'app-caja-home',
@@ -23,26 +23,15 @@ export class CajaHomeComponent {
   readonly recentOrders = signal<OrderWithDetails[]>([]);
   readonly now = signal(new Date());
 
-  readonly isGym = computed(() => this.auth.businessType() === 'gym');
-
   readonly primaryLabel = orderPrimaryLabel;
-  readonly primaryType = orderPrimaryType;
 
   private readonly today = new Date().toISOString().slice(0, 10);
 
-  readonly todayProductTotal = computed(() =>
+  readonly todayTotal = computed(() =>
     this.daily()
-      .filter((d) => d.day === this.today && d.type === 'product')
+      .filter((d) => d.day === this.today)
       .reduce((s, d) => s + Number(d.total), 0),
   );
-
-  readonly todayMembershipTotal = computed(() =>
-    this.daily()
-      .filter((d) => d.day === this.today && d.type === 'membership')
-      .reduce((s, d) => s + Number(d.total), 0),
-  );
-
-  readonly todayTotal = computed(() => this.todayProductTotal() + this.todayMembershipTotal());
 
   readonly todayTransactions = computed(() =>
     this.daily().filter((d) => d.day === this.today).reduce((s, d) => s + d.transactions, 0),
@@ -64,12 +53,6 @@ export class CajaHomeComponent {
     const yest = this.yesterdayTotal();
     if (yest === 0) return null;
     return ((this.todayTotal() - yest) / yest) * 100;
-  });
-
-  readonly productPct = computed(() => {
-    const total = this.todayTotal();
-    if (total === 0) return 0;
-    return (this.todayProductTotal() / total) * 100;
   });
 
   readonly latestOrders = computed(() => this.recentOrders().slice(0, 8));

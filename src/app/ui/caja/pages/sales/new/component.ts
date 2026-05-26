@@ -1,16 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Category } from '../../../../../models/category.model';
 import { Client } from '../../../../../models/client.model';
-import { MembershipPlan } from '../../../../../models/membership-plan.model';
 import { Product } from '../../../../../models/product.model';
-import { AuthService } from '../../../../../services/auth/auth.service';
+import { CategoryQueryService } from '../../../../../services/category/query.service';
 import { ClientQueryService } from '../../../../../services/client/query.service';
-import { MembershipPlanQueryService } from '../../../../../services/membership-plan/query.service';
 import { ProductQueryService } from '../../../../../services/product/query.service';
-import { MembershipOrderInput, OrderService } from '../../../../../services/order/order.service';
+import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
+import { OrderService } from '../../../../../services/order/order.service';
+import { NetworkService } from '../../../../../services/network/network.service';
+import { OfflineQueueService } from '../../../../../services/offline/offline-queue.service';
+import { ProductCacheService } from '../../../../../services/offline/product-cache.service';
 import { errorMessage } from '../../../../../utilities/error-message';
-import { SalesMembershipFormComponent } from '../components/membership-form/membership-form';
+import { ProductsFormComponent } from '../../../../admin/pages/products/components/form/form';
 
 const PRODUCT_PAGE_SIZE = 20;
 
@@ -25,29 +29,36 @@ interface CartItem {
 }
 
 type PaymentMethod = 'cash' | 'card' | 'qr';
-type Mode = 'products' | 'membership';
 
 @Component({
   selector: 'app-caja-sales-new',
-  imports: [CurrencyPipe, DecimalPipe, SalesMembershipFormComponent],
+  imports: [CurrencyPipe, DecimalPipe, FormsModule, ProductsFormComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CajaSalesNewComponent {
-  private readonly orderService = inject(OrderService);
-  private readonly productQuery = inject(ProductQueryService);
-  private readonly clientQuery = inject(ClientQueryService);
-  private readonly planQuery = inject(MembershipPlanQueryService);
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly orderService   = inject(OrderService);
+  private readonly productQuery   = inject(ProductQueryService);
+  private readonly productService = inject(ProductService);
+  private readonly categoryQuery  = inject(CategoryQueryService);
+  private readonly clientQuery    = inject(ClientQueryService);
+  private readonly router         = inject(Router);
+  private readonly route          = inject(ActivatedRoute);
+  private readonly network        = inject(NetworkService);
+  private readonly offlineQueue   = inject(OfflineQueueService);
+  private readonly productCache   = inject(ProductCacheService);
 
   readonly products = signal<Product[]>([]);
   readonly clients = signal<Client[]>([]);
-  readonly plans = signal<MembershipPlan[]>([]);
+  readonly modalCategories = signal<Category[]>([]);
   readonly loading = signal(false);
+  readonly fromCache = signal(false);
+  readonly queuedMessage = signal<string | null>(null);
 
-  readonly mode = signal<Mode>('products');
+  readonly showNewProductModal = signal(false);
+  readonly newProductSubmitting = signal(false);
+  readonly newProductError = signal<string | null>(null);
+
   readonly cart = signal<CartItem[]>([]);
   readonly cartCustomerId = signal<string>('');
   readonly paymentMethod = signal<PaymentMethod>('cash');
@@ -57,9 +68,9 @@ export class CajaSalesNewComponent {
   readonly activeCategory = signal<string | null>(null);
   readonly productPage = signal(1);
 
+  readonly orderNote = signal('');
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
-  readonly isGym = computed(() => this.auth.businessType() === 'gym');
 
   readonly availableProducts = computed(() =>
     this.products().filter((p) => !p.has_stock || p.stock > 0)
@@ -127,29 +138,64 @@ export class CajaSalesNewComponent {
 
   async load(): Promise<void> {
     this.loading.set(true);
-    try {
-      const tasks: Promise<unknown>[] = [
-        this.productQuery.listProducts().then((v) => this.products.set(v)),
-        this.clientQuery.listClients().then((v) => this.clients.set(v)),
-      ];
-      if (this.isGym()) {
-        tasks.push(this.planQuery.listPlans().then((v) => this.plans.set(v)));
+    this.fromCache.set(false);
+
+    if (!this.network.isOnline()) {
+      const cached = this.productCache.load();
+      if (cached) {
+        this.products.set(cached);
+        this.fromCache.set(true);
       }
-      await Promise.all(tasks);
+      this.loading.set(false);
+      return;
+    }
+
+    try {
+      await Promise.all([
+        this.productQuery.listProducts().then((v) => {
+          this.products.set(v);
+          this.productCache.save(v);
+        }),
+        this.clientQuery.listClients().then((v) => this.clients.set(v)),
+        this.categoryQuery.listCategories().then((v) => this.modalCategories.set(v)),
+      ]);
     } catch (err) {
       console.error('Error cargando datos', err);
+      const cached = this.productCache.load();
+      if (cached) {
+        this.products.set(cached);
+        this.fromCache.set(true);
+      }
     } finally {
       this.loading.set(false);
     }
   }
 
-  goBack(): void {
-    void this.router.navigate(['..'], { relativeTo: this.route });
+  openNewProductModal(): void {
+    this.showNewProductModal.set(true);
+    this.newProductError.set(null);
   }
 
-  setMode(m: Mode): void {
-    this.mode.set(m);
-    this.formError.set(null);
+  closeNewProductModal(): void {
+    this.showNewProductModal.set(false);
+    this.newProductError.set(null);
+  }
+
+  async handleQuickProduct(input: CreateProductInput): Promise<void> {
+    this.newProductSubmitting.set(true);
+    this.newProductError.set(null);
+    try {
+      const newProduct = await this.productService.createProduct(input);
+      this.products.update((list) => [...list, newProduct]);
+      this.closeNewProductModal();
+    } catch (err: unknown) {
+      this.newProductError.set(errorMessage(err, 'Error al crear producto'));
+      this.newProductSubmitting.set(false);
+    }
+  }
+
+  goBack(): void {
+    void this.router.navigate(['..'], { relativeTo: this.route });
   }
 
   setProductPage(p: number): void {
@@ -198,6 +244,7 @@ export class CajaSalesNewComponent {
     this.cart.set([]);
     this.cartCustomerId.set('');
     this.cashReceived.set(0);
+    this.orderNote.set('');
     this.formError.set(null);
   }
 
@@ -222,41 +269,36 @@ export class CajaSalesNewComponent {
     this.cashReceived.set(Math.max(0, isFinite(value) ? value : 0));
   }
 
-  // Un solo RPC atómico — ya no hay N llamadas secuenciales.
   async charge(): Promise<void> {
     if (!this.canCharge()) return;
     this.submitting.set(true);
     this.formError.set(null);
 
+    const orderInput = {
+      client_id:      this.cartCustomerId() || null,
+      payment_method: this.paymentMethod(),
+      notes:          this.orderNote().trim() || null,
+      items:          this.cart().map((item) => ({
+        product_id: item.product_id,
+        quantity:   item.quantity,
+        unit_price: item.unit_price,
+      })),
+    };
+
+    if (!this.network.isOnline()) {
+      this.offlineQueue.enqueue(orderInput);
+      this.clearCart();
+      this.submitting.set(false);
+      this.queuedMessage.set('Venta guardada localmente — se sincronizará al recuperar conexión');
+      setTimeout(() => this.queuedMessage.set(null), 4000);
+      return;
+    }
+
     try {
-      await this.orderService.registerOrder({
-        client_id: this.cartCustomerId() || null,
-        payment_method: this.paymentMethod(),
-        items: this.cart().map((item) => ({
-          type: 'product' as const,
-          product_id: item.product_id,
-          quantity: item.quantity,
-        })),
-      });
+      await this.orderService.registerOrder(orderInput);
       this.goBack();
     } catch (err: unknown) {
       this.formError.set(errorMessage(err, 'Error al procesar la venta'));
-      this.submitting.set(false);
-    }
-  }
-
-  async handleSaleMembership(input: MembershipOrderInput): Promise<void> {
-    this.submitting.set(true);
-    this.formError.set(null);
-    try {
-      await this.orderService.registerOrder({
-        client_id: input.client_id,
-        payment_method: this.paymentMethod(),
-        items: [{ type: 'membership', plan_id: input.plan_id, start_date: input.start_date }],
-      });
-      this.goBack();
-    } catch (err: unknown) {
-      this.formError.set(errorMessage(err, 'Error al registrar membresía'));
       this.submitting.set(false);
     }
   }

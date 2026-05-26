@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/SaasGym/browser",
+    "public": "dist/SaasCafes/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

@@ -11,7 +11,7 @@
       </svg>
     </button>
     <div class="w-7 h-7 rounded-lg bg-primary text-primary-fg flex items-center justify-center font-bold text-xs flex-shrink-0">S</div>
-    <span class="font-bold text-foreground tracking-tight">SaasGym</span>
+    <span class="font-bold text-foreground tracking-tight">SaasCafes</span>
     <span class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest px-1.5 py-0.5 rounded bg-muted border border-border-subtle">{{ audienceLabel }}</span>
   </header>
 
@@ -27,7 +27,7 @@
     <!-- Brand -->
     <div class="px-5 py-5 flex items-center gap-2.5">
       <div class="w-9 h-9 rounded-lg bg-primary text-primary-fg flex items-center justify-center font-bold text-sm">S</div>
-      <span class="font-bold text-foreground tracking-tight">SaasGym</span>
+      <span class="font-bold text-foreground tracking-tight">SaasCafes</span>
       <span class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest px-1.5 py-0.5 rounded bg-muted border border-border-subtle">{{ audienceLabel }}</span>
     </div>
 
@@ -52,6 +52,15 @@
           <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
         </svg>
         Negocios
+      </a>
+
+      <a routerLink="/saas/subscriptions" routerLinkActive="bg-primary text-primary-fg shadow-sm"
+         (click)="sidebarOpen.set(false)"
+         class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+        </svg>
+        Facturación
       </a>
     </nav>
 

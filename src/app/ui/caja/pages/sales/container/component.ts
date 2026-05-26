@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { OrderWithDetails, orderPrimaryLabel, orderPrimaryType } from '../../../../../models/order.model';
+import { OrderWithDetails, orderPrimaryLabel } from '../../../../../models/order.model';
 import { OrderService } from '../../../../../services/order/order.service';
 import { OrderQueryService } from '../../../../../services/order/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
-import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
 import { OrderInvoiceComponent } from '../components/invoice/invoice';
 import { SalesListComponent } from '../components/list/list';
 
@@ -12,7 +11,7 @@ const PAGE_SIZE = 15;
 
 @Component({
   selector: 'app-caja-sales',
-  imports: [ConfirmDeleteModalComponent, SalesListComponent, OrderInvoiceComponent],
+  imports: [SalesListComponent, OrderInvoiceComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,6 +41,13 @@ export class CajaSalesContainerComponent {
   readonly cancelling = signal<OrderWithDetails | null>(null);
   readonly cancellingError = signal<string | null>(null);
   readonly cancellingSubmitting = signal(false);
+  readonly cancelReason = signal('');
+  readonly cancelReasonTouched = signal(false);
+
+  readonly canConfirmCancel = computed(() => {
+    if (this.cancellingSubmitting()) return false;
+    return this.cancelReason().trim().length > 0;
+  });
 
   readonly cancellingLabel = computed(() => {
     const o = this.cancelling();
@@ -60,9 +66,8 @@ export class CajaSalesContainerComponent {
   readonly cancellingSublabel = computed(() => {
     const o = this.cancelling();
     if (!o) return null;
-    const type = orderPrimaryType(o) === 'product' ? 'Productos' : 'Membresía';
     const count = o.items.length;
-    const itemsLabel = count > 1 ? `${count} ítems` : type;
+    const itemsLabel = count > 1 ? `${count} ítems` : 'Productos';
     return o.client_label ? `${itemsLabel} · ${o.client_label}` : itemsLabel;
   });
 
@@ -76,16 +81,10 @@ export class CajaSalesContainerComponent {
     if (error) return error;
     const o = this.cancelling();
     if (!o) return '';
-    const products = o.items.filter((i) => i.type === 'product');
-    const memberships = o.items.filter((i) => i.type === 'membership');
-    const parts: string[] = [];
-    if (products.length > 0) {
-      parts.push(`Se devolverá el stock de ${products.length} producto${products.length > 1 ? 's' : ''}.`);
-    }
-    if (memberships.length > 0) {
-      parts.push(`${memberships.length} membresía${memberships.length > 1 ? 's' : ''} quedarán desactivadas.`);
-    }
-    return parts.join(' ') || 'Esta acción no se puede deshacer.';
+    const count = o.items.length;
+    return count > 0
+      ? `Se devolverá el stock de ${count} producto${count > 1 ? 's' : ''}.`
+      : 'Esta acción no se puede deshacer.';
   });
 
   constructor() {
@@ -124,21 +123,29 @@ export class CajaSalesContainerComponent {
   handleCancel(order: OrderWithDetails): void {
     this.cancelling.set(order);
     this.cancellingError.set(null);
+    this.cancelReason.set('');
+    this.cancelReasonTouched.set(false);
   }
 
   abortCancel(): void {
     if (this.cancellingSubmitting()) return;
     this.cancelling.set(null);
     this.cancellingError.set(null);
+    this.cancelReason.set('');
+    this.cancelReasonTouched.set(false);
   }
 
   async confirmCancel(): Promise<void> {
     const order = this.cancelling();
-    if (!order) return;
+    const reason = this.cancelReason().trim();
+    if (!order || !reason) {
+      this.cancelReasonTouched.set(true);
+      return;
+    }
     this.cancellingSubmitting.set(true);
     this.cancellingError.set(null);
     try {
-      await this.orderService.cancelOrder(order.id);
+      await this.orderService.cancelOrder(order.id, reason);
       this.cancelling.set(null);
       await this.load();
     } catch (err: unknown) {

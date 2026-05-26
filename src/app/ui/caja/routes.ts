@@ -33,11 +33,4 @@ export const CajaRoutes: Routes = [
         (m) => m.AdminClientsContainerComponent,
       ),
   },
-  {
-    path: 'attendance',
-    loadComponent: () =>
-      import('./pages/attendance/container/component').then(
-        (m) => m.CajaAttendanceContainerComponent,
-      ),
-  },
 ];

@@ -1,5 +1,5 @@
 {
-  "name": "saas-gym",
+  "name": "saas-cafes",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -17,9 +17,13 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@angular/service-worker": "^21.2.14",
     "@supabase/supabase-js": "^2.104.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@angular/build": "^21.2.7",

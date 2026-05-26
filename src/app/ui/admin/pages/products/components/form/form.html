@@ -23,14 +23,49 @@
     </div>
 
     <div>
-      <label for="category_id" class="block text-sm font-medium text-foreground-muted mb-1">Categoría <span class="text-foreground-faint">(opcional)</span></label>
-      <select id="category_id" formControlName="category_id"
-              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
-        <option value="">— Sin categoría —</option>
-        @for (cat of categories(); track cat.id) {
-          <option [value]="cat.id">{{ cat.name }}</option>
+      <div class="flex items-center justify-between mb-1">
+        <label for="category_id" class="text-sm font-medium text-foreground-muted">Categoría <span class="text-foreground-faint">(opcional)</span></label>
+        @if (!showCreateCategory()) {
+          <button type="button" (click)="openCreateCategory()"
+                  class="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+            Nueva
+          </button>
         }
-      </select>
+      </div>
+      @if (showCreateCategory()) {
+        <div class="bg-elevated border border-primary/30 rounded-xl p-3 space-y-2" [formGroup]="categoryForm">
+          <p class="text-xs font-semibold text-primary">Nueva categoría</p>
+          <input type="text" formControlName="name" placeholder="Nombre de la categoría"
+                 class="w-full px-3 py-1.5 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+          <input type="text" formControlName="description" placeholder="Descripción (opcional)"
+                 class="w-full px-3 py-1.5 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+          @if (createCategoryError(); as err) {
+            <p class="text-xs text-danger">{{ err }}</p>
+          }
+          <div class="flex gap-2 pt-1">
+            <button type="button" (click)="cancelCreateCategory()"
+                    class="px-3 py-1.5 text-xs font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
+              Cancelar
+            </button>
+            <button type="button" (click)="submitCreateCategory()"
+                    [disabled]="categoryForm.invalid || creatingCategory()"
+                    class="px-3 py-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition">
+              @if (creatingCategory()) { Creando… } @else { Crear categoría }
+            </button>
+          </div>
+        </div>
+      } @else {
+        <select id="category_id" formControlName="category_id"
+                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          <option value="">— Sin categoría —</option>
+          @for (cat of allCategories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      }
     </div>
 
     <div>

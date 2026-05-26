@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { ActiveMembership } from '../../models/active-membership.model';
 import { DailyIncome } from '../../models/daily-income.model';
 import { LowStockProduct } from '../../models/low-stock-product.model';
 import { MonthlyIncome } from '../../models/monthly-income.model';
@@ -40,15 +39,6 @@ export class ReportQueryService {
     return (data ?? []) as MonthlyIncome[];
   }
 
-  async listActiveMemberships(): Promise<ActiveMembership[]> {
-    const { data, error } = await this.client
-      .from('active_memberships')
-      .select('*')
-      .order('end_date', { ascending: true });
-    if (error) throw error;
-    return (data ?? []) as ActiveMembership[];
-  }
-
   async listLowStockProducts(): Promise<LowStockProduct[]> {
     const { data, error } = await this.client
       .from('low_stock_products')
@@ -58,33 +48,29 @@ export class ReportQueryService {
     return (data ?? []) as LowStockProduct[];
   }
 
-  async listRevenueByCategoryThisMonth(): Promise<{ category: string; total: number; type: 'product' | 'membership' }[]> {
+  async listRevenueByCategoryThisMonth(): Promise<{ category: string; total: number }[]> {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
 
     const { data, error } = await this.client
       .from('orders')
-      .select('order_items(unit_price, quantity, type, products(category:categories(name)), membership_plans(name))')
+      .select('order_items(unit_price, quantity, products(category:categories(name)))')
       .is('cancelled_at', null)
       .gte('created_at', firstDay)
       .lt('created_at', nextMonth);
     if (error) throw error;
 
     const totals = new Map<string, number>();
-    const types = new Map<string, 'product' | 'membership'>();
     for (const order of (data ?? []) as any[]) {
       for (const item of (order.order_items ?? []) as any[]) {
-        const cat: string = item.type === 'product'
-          ? (item.products?.category?.name ?? 'Otros')
-          : (item.membership_plans?.name ?? 'Membresía');
+        const cat: string = item.products?.category?.name ?? 'Otros';
         const lineTotal = Number(item.unit_price) * Number(item.quantity);
         totals.set(cat, (totals.get(cat) ?? 0) + lineTotal);
-        if (!types.has(cat)) types.set(cat, item.type as 'product' | 'membership');
       }
     }
     return Array.from(totals.entries())
-      .map(([category, total]) => ({ category, total, type: types.get(category)! }))
+      .map(([category, total]) => ({ category, total }))
       .sort((a, b) => b.total - a.total);
   }
 }

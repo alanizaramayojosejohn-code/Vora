@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
   <div class="flex items-center justify-between">
     <div>
-      <h2 class="text-2xl font-bold text-foreground tracking-tight">Socios</h2>
-      <p class="text-foreground-muted text-sm">Socios registrados en tu negocio.</p>
+      <h2 class="text-2xl font-bold text-foreground tracking-tight">Clientes</h2>
+      <p class="text-foreground-muted text-sm">Clientes registrados en tu negocio.</p>
     </div>
     @if (showForm()) {
       <button (click)="closeForm()"
@@ -12,7 +12,7 @@
     } @else {
       <button (click)="openCreate()"
               class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
-        Nuevo socio
+        Nuevo cliente
       </button>
     }
   </div>
@@ -35,9 +35,9 @@
   @if (deleting(); as c) {
     <app-confirm-delete
       [open]="true"
-      title="¿Eliminar este socio?"
+      title="¿Eliminar este cliente?"
       [description]="deletingError() ?? 'Esta acción no se puede deshacer. Si tiene membresías asignadas, la operación fallará.'"
-      confirmLabel="Eliminar socio"
+      confirmLabel="Eliminar cliente"
       [entityLabel]="c.name"
       [entitySublabel]="'CI ' + c.ci"
       [entityInitials]="deletingInitials()"

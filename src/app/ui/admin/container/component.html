@@ -10,9 +10,7 @@
         <line x1="4" x2="20" y1="18" y2="18"/>
       </svg>
     </button>
-    <div class="w-7 h-7 rounded-lg bg-primary text-primary-fg flex items-center justify-center font-bold text-xs flex-shrink-0">S</div>
-    <span class="font-bold text-foreground tracking-tight">SaasGym</span>
-    <span class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest px-1.5 py-0.5 rounded bg-muted border border-border-subtle">{{ audienceLabel }}</span>
+    <app-brand-logo [small]="true" [badge]="audienceLabel" class="flex items-center gap-2.5 min-w-0" />
   </header>
 
   <!-- Backdrop -->
@@ -25,14 +23,18 @@
          [class.-translate-x-full]="!sidebarOpen()">
 
     <!-- Brand -->
-    <div class="px-5 py-5 flex items-center gap-2.5">
-      <div class="w-9 h-9 rounded-lg bg-primary text-primary-fg flex items-center justify-center font-bold text-sm">S</div>
-      <span class="font-bold text-foreground tracking-tight">SaasGym</span>
-      <span class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest px-1.5 py-0.5 rounded bg-muted border border-border-subtle">{{ audienceLabel }}</span>
+    <div class="px-5 py-5 flex items-center gap-2.5 min-w-0">
+      <app-brand-logo [badge]="audienceLabel" class="flex items-center gap-2.5 min-w-0" />
     </div>
 
     <!-- Nav -->
-    <nav class="px-3 flex-1 overflow-y-auto pb-4">
+    <div class="flex-1 relative overflow-hidden">
+      <nav class="px-3 h-full overflow-y-auto pb-6 scroll-smooth overscroll-contain
+                  [&::-webkit-scrollbar]:w-1
+                  [&::-webkit-scrollbar-track]:bg-transparent
+                  [&::-webkit-scrollbar-thumb]:rounded-full
+                  [&::-webkit-scrollbar-thumb]:bg-border-subtle
+                  hover:[&::-webkit-scrollbar-thumb]:bg-border">
       <p class="px-3 pt-3 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">General</p>
 
       <a routerLink="/admin/home" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -53,7 +55,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
-        Socios
+        Clientes
       </a>
 
       <a routerLink="/admin/products" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -74,27 +76,27 @@
         Categorías
       </a>
 
-      @if (isGym()) {
-        <a routerLink="/admin/membership-plans" routerLinkActive="bg-primary text-primary-fg shadow-sm"
-           (click)="sidebarOpen.set(false)"
-           class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
-          </svg>
-          Planes
-        </a>
-      }
-
       <a routerLink="/admin/users" routerLinkActive="bg-primary text-primary-fg shadow-sm"
          (click)="sidebarOpen.set(false)"
          class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><circle cx="19" cy="11" r="2"/><path d="M19 8v1"/><path d="M19 13v1"/>
         </svg>
+        Usuarios
+      </a>
+
+      <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Personal</p>
+
+      <a routerLink="/admin/staff" routerLinkActive="bg-primary text-primary-fg shadow-sm"
+         (click)="sidebarOpen.set(false)"
+         class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
         Personal
       </a>
 
-      <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Compras</p>
+      <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Provisiones</p>
 
       <a routerLink="/admin/purchases" routerLinkActive="bg-primary text-primary-fg shadow-sm"
          (click)="sidebarOpen.set(false)"
@@ -102,7 +104,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
-        Compras
+        Provisiones
       </a>
 
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Ventas</p>
@@ -116,17 +118,6 @@
         Ventas
       </a>
 
-      @if (isGym()) {
-        <a routerLink="/admin/attendance" routerLinkActive="bg-primary text-primary-fg shadow-sm"
-           (click)="sidebarOpen.set(false)"
-           class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>
-          </svg>
-          Asistencia
-        </a>
-      }
-
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Análisis</p>
 
       <a routerLink="/admin/reports" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -137,7 +128,10 @@
         </svg>
         Reportes
       </a>
-    </nav>
+      </nav>
+      <!-- Fade inferior para indicar scroll -->
+      <div class="pointer-events-none absolute bottom-0 inset-x-0 h-8 bg-gradient-to-t from-surface to-transparent"></div>
+    </div>
 
     <!-- Footer: theme toggle + user profile + logout -->
     <div class="p-3 border-t border-border-subtle space-y-3">

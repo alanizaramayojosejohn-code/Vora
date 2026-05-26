@@ -1,13 +1,12 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
-import { BusinessType } from '../../models/business.model';
 import { Profile, UserRole } from '../../models/profile.model';
 import { SupabaseService } from '../supabase/supabase.service';
 import { BusinessTheme, DEFAULT_THEME } from '../theme/theme.presets';
 import { ThemeService } from '../theme/theme.service';
 
 interface ProfileWithBusiness extends Profile {
-  businesses: { type: BusinessType; theme: BusinessTheme | null; name: string } | null;
+  businesses: { theme: BusinessTheme | null; name: string; logo_url: string | null } | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,13 +16,9 @@ export class AuthService {
 
   readonly session = signal<Session | null>(null);
   readonly profile = signal<Profile | null>(null);
-  readonly businessType = signal<BusinessType | null>(null);
   readonly businessName = signal<string | null>(null);
-  // Tema actual del negocio. Lo expone aqui (en lugar de meterlo en theme.service)
-  // porque el theme se deriva del profile y se actualiza con el mismo loadProfile().
+  readonly businessLogoUrl = signal<string | null>(null);
   readonly businessTheme = signal<BusinessTheme | null>(null);
-  // Set cuando una sesión válida no tiene profile asignado.
-  // Lo lee el login para mostrar "Tu cuenta no está autorizada".
   readonly unauthorizedEmail = signal<string | null>(null);
 
   readonly role = computed<UserRole | null>(() => this.profile()?.role ?? null);
@@ -38,12 +33,17 @@ export class AuthService {
     this.session.set(data.session);
     if (data.session) await this.loadProfile(data.session.user.id);
 
-    this.client.auth.onAuthStateChange(async (_event, session) => {
+    // Only update session signal here — never make DB queries inside this
+    // callback. Making a Supabase query (loadProfile) while the auth-state
+    // lock is held causes every concurrent RPC/query to hang indefinitely.
+    // Login flows (email, Google OAuth) call loadProfile() directly after
+    // sign-in, so no data is lost by omitting it here.
+    this.client.auth.onAuthStateChange((_event, session) => {
       this.session.set(session);
-      if (session) await this.loadProfile(session.user.id);
-      else {
+      if (!session) {
         this.profile.set(null);
-        this.businessType.set(null);
+        this.businessName.set(null);
+        this.businessLogoUrl.set(null);
         this.businessTheme.set(null);
         this.theme.reset();
       }
@@ -58,7 +58,7 @@ export class AuthService {
     this.session.set(data.session);
     await this.loadProfile(data.session.user.id);
     if (this.profile() === null) {
-      throw new Error('Tu cuenta no está autorizada en SaasGym. Contacta al administrador.');
+      throw new Error('Tu cuenta no está autorizada en SaasCafes. Contacta al administrador.');
     }
   }
 
@@ -79,8 +79,8 @@ export class AuthService {
     await this.client.auth.signOut();
     this.session.set(null);
     this.profile.set(null);
-    this.businessType.set(null);
     this.businessName.set(null);
+    this.businessLogoUrl.set(null);
     this.businessTheme.set(null);
     this.unauthorizedEmail.set(null);
     this.theme.reset();
@@ -104,15 +104,15 @@ export class AuthService {
   private async loadProfile(userId: string): Promise<void> {
     const { data, error } = await this.client
       .from('profiles')
-      .select('*, businesses(type, theme, name)')
+      .select('*, businesses(theme, name, logo_url)')
       .eq('id', userId)
       .maybeSingle();
 
     if (error) {
       console.error('Error cargando profile', error);
       this.profile.set(null);
-      this.businessType.set(null);
       this.businessName.set(null);
+      this.businessLogoUrl.set(null);
       this.businessTheme.set(null);
       this.theme.reset();
       return;
@@ -127,8 +127,8 @@ export class AuthService {
       await this.client.auth.signOut();
       this.session.set(null);
       this.profile.set(null);
-      this.businessType.set(null);
       this.businessName.set(null);
+      this.businessLogoUrl.set(null);
       this.businessTheme.set(null);
       this.theme.reset();
       return;
@@ -136,15 +136,20 @@ export class AuthService {
 
     const { businesses, ...profile } = data as ProfileWithBusiness;
     this.profile.set(profile);
-    this.businessType.set(businesses?.type ?? null);
     this.businessName.set(businesses?.name ?? null);
+    this.businessLogoUrl.set(businesses?.logo_url ?? null);
 
-    // Aplica el preset del negocio. El mode (light/dark/system) lo gestiona
-    // el theme.service por su cuenta desde localStorage — es preferencia
-    // del usuario, no del negocio.
+    // Aplica el preset del negocio (incluyendo customColors si es 'custom').
+    // El mode (light/dark/system) lo gestiona el theme.service por su cuenta
+    // desde localStorage — es preferencia del usuario, no del negocio.
     // super_admin no tiene business asignado → cae a default monochrome.
-    const businessTheme = businesses?.theme
-      ? { preset: businesses.theme.preset }
+    const businessTheme: BusinessTheme = businesses?.theme
+      ? {
+          preset: businesses.theme.preset,
+          ...(businesses.theme.customColors
+            ? { customColors: businesses.theme.customColors }
+            : {}),
+        }
       : DEFAULT_THEME;
     this.businessTheme.set(businessTheme);
     this.theme.applyPreset(businessTheme);

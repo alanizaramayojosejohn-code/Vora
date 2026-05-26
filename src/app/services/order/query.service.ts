@@ -13,12 +13,7 @@ export class OrderQueryService {
       .select(`
         *,
         clients(ci, name),
-        order_items(
-          *,
-          products(name),
-          membership_plans(name),
-          client_memberships(start_date, end_date)
-        )
+        order_items(*, products(name))
       `)
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -27,14 +22,8 @@ export class OrderQueryService {
     return (data ?? []).map((row: any) => {
       const { clients, order_items, ...order } = row;
       const items: OrderItemWithDetails[] = (order_items ?? []).map((item: any) => {
-        const { products, membership_plans, client_memberships, ...rest } = item;
-        return {
-          ...rest,
-          product_name: products?.name ?? null,
-          plan_name: membership_plans?.name ?? null,
-          start_date: client_memberships?.start_date ?? null,
-          end_date: client_memberships?.end_date ?? null,
-        };
+        const { products, ...rest } = item;
+        return { ...rest, product_name: products?.name ?? null };
       });
       return {
         ...order,

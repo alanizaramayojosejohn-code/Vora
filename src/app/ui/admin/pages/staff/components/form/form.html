@@ -1,0 +1,70 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()"
+      class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 space-y-5 shadow-sm">
+  <div>
+    <h3 class="font-semibold text-foreground">
+      @if (isEdit()) { Editar empleado } @else { Nuevo empleado }
+    </h3>
+    <p class="text-sm text-foreground-subtle">
+      @if (isEdit()) { Modifica los datos del empleado. } @else { Registra un empleado del negocio. }
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label for="name" class="block text-sm font-medium text-foreground-muted mb-1">Nombre completo</label>
+      <input id="name" type="text" formControlName="name"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+
+    <div>
+      <label for="ci" class="block text-sm font-medium text-foreground-muted mb-1">CI</label>
+      <input id="ci" type="text" formControlName="ci"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+    </div>
+
+    <div>
+      <label for="phone" class="block text-sm font-medium text-foreground-muted mb-1">Teléfono <span class="text-foreground-faint">(opcional)</span></label>
+      <input id="phone" type="text" formControlName="phone"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+
+    <div>
+      <label for="position" class="block text-sm font-medium text-foreground-muted mb-1">Cargo</label>
+      <input id="position" type="text" formControlName="position" placeholder="Ej: Barista, Encargado…"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+
+    <div>
+      <label for="salary" class="block text-sm font-medium text-foreground-muted mb-1">Sueldo mensual</label>
+      <input id="salary" type="number" formControlName="salary" min="0" step="100"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+    </div>
+
+    <div>
+      <label for="hired_at" class="block text-sm font-medium text-foreground-muted mb-1">Fecha de ingreso</label>
+      <input id="hired_at" type="date" formControlName="hired_at"
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+    </div>
+  </div>
+
+  @if (errorMessage(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+      {{ msg }}
+    </div>
+  }
+
+  <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
+    <button type="button" (click)="cancel.emit()"
+            class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
+      Cancelar
+    </button>
+    <button type="submit" [disabled]="form.invalid || submitting()"
+            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
+      @if (submitting()) {
+        @if (isEdit()) { Guardando… } @else { Creando… }
+      } @else {
+        @if (isEdit()) { Guardar cambios } @else { Crear empleado }
+      }
+    </button>
+  </div>
+</form>
