@@ -8,10 +8,32 @@
       </h2>
       <p class="text-sm text-foreground-muted">Resumen del negocio · {{ now() | date: 'EEEE d MMM' }}</p>
     </div>
-    <a routerLink="/admin/sales"
-       class="px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg transition hover:opacity-90 shadow-sm">
-      + Nueva venta
-    </a>
+    <div class="flex items-center gap-2">
+      <button (click)="exportExcel()"
+              [disabled]="loading()"
+              title="Exportar a Excel"
+              class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground-muted border border-border-subtle rounded-lg hover:bg-muted disabled:opacity-40 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 17v-2m3 2v-4m3 4v-6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+        </svg>
+        Excel
+      </button>
+      <button (click)="exportPdf()"
+              [disabled]="loading()"
+              title="Exportar a PDF"
+              class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground-muted border border-border-subtle rounded-lg hover:bg-muted disabled:opacity-40 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+        PDF
+      </button>
+      <a routerLink="/admin/sales"
+         class="px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg transition hover:opacity-90 shadow-sm">
+        + Nueva venta
+      </a>
+    </div>
   </div>
 
   <!-- KPIs: 2 cards -->

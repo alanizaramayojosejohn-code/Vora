@@ -141,7 +141,7 @@ export class CajaSalesNewComponent {
     this.fromCache.set(false);
 
     if (!this.network.isOnline()) {
-      const cached = this.productCache.load();
+      const cached = await this.productCache.load();
       if (cached) {
         this.products.set(cached);
         this.fromCache.set(true);
@@ -161,7 +161,7 @@ export class CajaSalesNewComponent {
       ]);
     } catch (err) {
       console.error('Error cargando datos', err);
-      const cached = this.productCache.load();
+      const cached = await this.productCache.load();
       if (cached) {
         this.products.set(cached);
         this.fromCache.set(true);

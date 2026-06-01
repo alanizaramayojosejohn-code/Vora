@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { RegisterOrderInput } from '../order/order.service';
+import { StorageEncryptionService } from './storage-encryption.service';
 
 export interface PendingOrder {
   id: string;
@@ -9,11 +10,30 @@ export interface PendingOrder {
   last_error: string | null;
 }
 
-const STORAGE_KEY = 'saas_offline_queue_v1';
+const STORAGE_KEY = 'saas_offline_queue_v2';
 
 @Injectable({ providedIn: 'root' })
 export class OfflineQueueService {
-  readonly pending = signal<PendingOrder[]>(this.loadFromStorage());
+  private readonly encryption = inject(StorageEncryptionService);
+  readonly pending = signal<PendingOrder[]>([]);
+
+  async loadFromStorage(): Promise<void> {
+    // One-time migration: discard old plaintext data
+    localStorage.removeItem('saas_offline_queue_v1');
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const orders = await this.encryption.decrypt<PendingOrder[]>(raw);
+      this.pending.set(orders);
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  clearStorage(): void {
+    localStorage.removeItem(STORAGE_KEY);
+    this.pending.set([]);
+  }
 
   enqueue(input: RegisterOrderInput): string {
     const order: PendingOrder = {
@@ -41,17 +61,10 @@ export class OfflineQueueService {
 
   private commit(orders: PendingOrder[]): void {
     this.pending.set(orders);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-    } catch { /* quota exceeded — data still available in memory */ }
-  }
-
-  private loadFromStorage(): PendingOrder[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as PendingOrder[]) : [];
-    } catch {
-      return [];
-    }
+    if (!this.encryption.isReady) return;
+    this.encryption
+      .encrypt(orders)
+      .then((encrypted) => localStorage.setItem(STORAGE_KEY, encrypted))
+      .catch(() => { /* quota exceeded or encryption error */ });
   }
 }

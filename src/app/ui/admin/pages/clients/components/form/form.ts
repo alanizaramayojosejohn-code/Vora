@@ -23,6 +23,7 @@ export class ClientsFormComponent {
 
   readonly form = this.fb.nonNullable.group({
     ci: ['', [Validators.required, Validators.minLength(3)]],
+    nit: [''],
     name: ['', [Validators.required, Validators.minLength(2)]],
     phone: [''],
   });
@@ -32,9 +33,9 @@ export class ClientsFormComponent {
     effect(() => {
       const v = this.value();
       if (v) {
-        this.form.reset({ ci: v.ci, name: v.name, phone: v.phone ?? '' });
+        this.form.reset({ ci: v.ci, nit: v.nit ?? '', name: v.name, phone: v.phone ?? '' });
       } else {
-        this.form.reset({ ci: '', name: '', phone: '' });
+        this.form.reset({ ci: '', nit: '', name: '', phone: '' });
       }
     });
   }
@@ -43,8 +44,10 @@ export class ClientsFormComponent {
     if (this.form.invalid || this.submitting()) return;
     const raw = this.form.getRawValue();
     const phone = raw.phone.trim();
+    const nit = raw.nit.trim();
     this.submitForm.emit({
       ci: raw.ci.trim(),
+      nit: nit.length > 0 ? nit : null,
       name: raw.name.trim(),
       phone: phone.length > 0 ? phone : null,
     });

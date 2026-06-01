@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Business } from '../../../../../models/business.model';
 import { BusinessSubscription } from '../../../../../models/subscription.model';
 import { BusinessService } from '../../../../../services/business/business.service';
@@ -19,6 +20,7 @@ export class SaasBusinessesContainerComponent {
   private readonly businessService     = inject(BusinessService);
   private readonly businessQuery       = inject(BusinessQueryService);
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly router              = inject(Router);
 
   readonly businesses = signal<Business[]>([]);
   readonly loading    = signal(false);
@@ -116,6 +118,7 @@ export class SaasBusinessesContainerComponent {
         await this.businessService.updateBusiness(businessId, {
           name:  input.businessName,
           theme: input.theme,
+          owner: input.owner,
           ...(logo_url !== undefined ? { logo_url } : {}),
         });
         // Actualizar suscripción si se eligió un plan
@@ -139,6 +142,7 @@ export class SaasBusinessesContainerComponent {
           adminName:    input.adminName,
           adminCi:      input.adminCi,
           theme:        input.theme,
+          owner:        input.owner ?? undefined,
         });
         if (input.logoFile) {
           const logoUrl = await this.businessService.uploadLogo(input.logoFile, businessId);
@@ -164,6 +168,10 @@ export class SaasBusinessesContainerComponent {
       this.formState.set(null);
       await this.refresh();
     } catch (err: unknown) {
+      if (err instanceof Error && (err as any)['code'] === 'SESSION_EXPIRED') {
+        await this.router.navigate(['/login']);
+        return;
+      }
       this.formError.set(
         errorMessage(err, editing ? 'Error al guardar negocio' : 'Error al crear negocio'),
       );

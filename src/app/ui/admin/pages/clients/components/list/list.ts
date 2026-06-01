@@ -63,6 +63,7 @@ export class ClientsListComponent {
         (c) =>
           c.name.toLowerCase().includes(q) ||
           c.ci.toLowerCase().includes(q) ||
+          (c.nit ?? '').toLowerCase().includes(q) ||
           (c.phone ?? '').toLowerCase().includes(q),
       );
     }

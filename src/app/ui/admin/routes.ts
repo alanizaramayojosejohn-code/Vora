@@ -69,6 +69,13 @@ export const AdminRoutes: Routes = [
       ),
   },
   {
+    path: 'purchases/schedule',
+    loadComponent: () =>
+      import('./pages/purchases/schedule/component').then(
+        (m) => m.PurchasesScheduleComponent,
+      ),
+  },
+  {
     path: 'purchases/orders/new',
     loadComponent: () =>
       import('./pages/purchases/orders/new/component').then(

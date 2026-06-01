@@ -1,19 +1,22 @@
 import { inject, Injectable } from '@angular/core';
+import { BusinessOwner } from '../../models/business.model';
 import { SupabaseService } from '../supabase/supabase.service';
 import { BusinessTheme } from '../theme/theme.presets';
 
 export interface CreateBusinessWithAdminInput {
   businessName: string;
-  adminUserId: string;
-  adminName: string;
-  adminCi: string;
-  theme?: BusinessTheme;
+  adminUserId:  string;
+  adminName:    string;
+  adminCi:      string;
+  theme?:       BusinessTheme;
+  owner?:       BusinessOwner;
 }
 
 export interface UpdateBusinessInput {
-  name: string;
-  theme?: BusinessTheme;
+  name:      string;
+  theme?:    BusinessTheme;
   logo_url?: string | null;
+  owner?:    BusinessOwner | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +29,9 @@ export class BusinessService {
   // recibe — evita migrar la firma del RPC). El default 'monochrome system'
   // queda si no se pasa nada.
   async createBusinessWithAdmin(input: CreateBusinessWithAdminInput): Promise<string> {
+    const { data: { session } } = await this.client.auth.getSession();
+    if (!session) throw Object.assign(new Error('Tu sesión expiró. Por favor inicia sesión nuevamente.'), { code: 'SESSION_EXPIRED' });
+
     const { data, error } = await this.client.rpc('create_business_with_admin', {
       p_business_name: input.businessName,
       p_admin_user_id: input.adminUserId,
@@ -35,8 +41,15 @@ export class BusinessService {
     if (error) throw error;
     const businessId = data as string;
 
-    if (input.theme) {
-      await this.updateTheme(businessId, input.theme);
+    const extra: Record<string, unknown> = {};
+    if (input.theme) extra['theme'] = input.theme;
+    if (input.owner) extra['owner'] = input.owner;
+    if (Object.keys(extra).length > 0) {
+      const { error: updateError } = await this.client
+        .from('businesses')
+        .update(extra)
+        .eq('id', businessId);
+      if (updateError) throw updateError;
     }
     return businessId;
   }
@@ -45,6 +58,7 @@ export class BusinessService {
     const update: Record<string, unknown> = { name: input.name };
     if (input.theme) update['theme'] = input.theme;
     if ('logo_url' in input) update['logo_url'] = input.logo_url;
+    if ('owner' in input) update['owner'] = input.owner;
 
     const { error } = await this.client
       .from('businesses')

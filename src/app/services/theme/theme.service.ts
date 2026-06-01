@@ -4,6 +4,7 @@ import {
   DEFAULT_MODE,
   DEFAULT_THEME,
   getPreset,
+  PERSONAL_THEME_STORAGE_KEY,
   THEME_MODE_STORAGE_KEY,
   THEME_PRESET_LIST,
   ThemeMode,
@@ -128,6 +129,25 @@ export class ThemeService {
     }
     this.mediaQuery = null;
     this.mediaListener = null;
+  }
+
+  // Persiste el tema personal del super_admin en localStorage y lo aplica.
+  savePersonalPreset(theme: BusinessTheme): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(PERSONAL_THEME_STORAGE_KEY, JSON.stringify(theme));
+    }
+    this.applyPreset(theme);
+  }
+
+  // Lee el tema personal guardado. Devuelve null si no hay nada persistido.
+  loadPersonalPreset(): BusinessTheme | null {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(PERSONAL_THEME_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as BusinessTheme) : null;
+    } catch {
+      return null;
+    }
   }
 
   getPresets(): readonly ThemePreset[] {

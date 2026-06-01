@@ -1,0 +1,117 @@
+<div class="p-6 space-y-6 max-w-3xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <div class="flex items-center gap-2 mb-0.5">
+        <a routerLink="/admin/purchases" class="text-sm text-foreground-muted hover:text-foreground transition">Provisiones</a>
+        <span class="text-foreground-faint text-sm">/</span>
+        <span class="text-sm text-foreground">Agenda</span>
+      </div>
+      <h1 class="text-2xl font-bold text-foreground">Agenda de provisiones</h1>
+    </div>
+    <a routerLink="/admin/purchases/orders/new"
+       class="px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg hover:bg-primary/90 transition shadow-md shadow-primary/20">
+      + Programar pedido
+    </a>
+  </div>
+
+  @if (error(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+  }
+  @if (actionError(); as msg) {
+    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+  }
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-20 text-foreground-muted text-sm">Cargando agenda…</div>
+  } @else {
+
+    @let g = grouped();
+
+    @if (orders().length === 0) {
+      <div class="rounded-xl border border-border-subtle bg-surface px-6 py-16 text-center">
+        <p class="text-foreground-muted text-sm mb-1">No hay pedidos pendientes</p>
+        <a routerLink="/admin/purchases/orders/new" class="text-primary text-sm hover:underline">
+          Programar el primero
+        </a>
+      </div>
+    } @else {
+
+      @for (bucket of buckets; track bucket) {
+        @if (g[bucket].length > 0) {
+          <section>
+
+            <!-- Bucket header -->
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-2 h-2 rounded-full shrink-0" [class]="bucketMeta[bucket].dot"></span>
+              <h2 class="text-sm font-semibold" [class]="bucketMeta[bucket].color">
+                {{ bucketMeta[bucket].label }}
+              </h2>
+              <span class="text-xs text-foreground-faint font-medium ml-0.5">({{ g[bucket].length }})</span>
+            </div>
+
+            <!-- Orders list -->
+            <div class="rounded-xl border border-border-subtle bg-surface divide-y divide-border-subtle overflow-hidden">
+              @for (order of g[bucket]; track order.id) {
+                <div class="px-5 py-4 flex items-start gap-4">
+
+                  <!-- Date badge -->
+                  <div class="shrink-0 w-11 text-center pt-0.5">
+                    @if (order.expected_date) {
+                      <p class="text-lg font-bold text-foreground leading-none">
+                        {{ order.expected_date | date:'d' }}
+                      </p>
+                      <p class="text-[10px] uppercase font-medium text-foreground-muted tracking-wide">
+                        {{ order.expected_date | date:'MMM' }}
+                      </p>
+                    } @else {
+                      <p class="text-xs text-foreground-faint">—</p>
+                    }
+                  </div>
+
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-foreground leading-snug">
+                      {{ order.supplier?.name ?? 'Sin proveedor' }}
+                    </p>
+                    <p class="text-xs text-foreground-muted mt-0.5">
+                      {{ order.items.length === 1 ? '1 producto' : order.items.length + ' productos' }}
+                      @if (order.items.length > 0) {
+                        · {{ itemsSummary(order) }}
+                      }
+                    </p>
+                    @if (order.notes) {
+                      <p class="text-xs text-foreground-faint mt-1 truncate">{{ order.notes }}</p>
+                    }
+                    <p class="text-[11px] text-foreground-faint mt-1">
+                      Creado {{ order.created_at | date:'dd/MM/yy' }}
+                    </p>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex gap-2 shrink-0">
+                    <button (click)="cancel(order.id)"
+                            [disabled]="cancellingId() === order.id || receivingId() === order.id"
+                            class="px-3 py-1.5 text-xs font-medium text-foreground-muted border border-border-subtle rounded-lg hover:bg-muted disabled:opacity-50 transition">
+                      @if (cancellingId() === order.id) { Cancelando… } @else { Cancelar }
+                    </button>
+                    <button (click)="receive(order.id)"
+                            [disabled]="receivingId() === order.id || cancellingId() === order.id"
+                            class="px-3 py-1.5 text-xs font-semibold bg-success/15 text-success border border-success/25 rounded-lg hover:bg-success/25 disabled:opacity-50 transition">
+                      @if (receivingId() === order.id) { Recibiendo… } @else { Recibir }
+                    </button>
+                  </div>
+
+                </div>
+              }
+            </div>
+
+          </section>
+        }
+      }
+
+    }
+  }
+
+</div>

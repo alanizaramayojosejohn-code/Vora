@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Va
 import { AuthService } from '../../../services/auth/auth.service';
 import { BusinessService } from '../../../services/business/business.service';
 import { ThemeService } from '../../../services/theme/theme.service';
+import { HsvPickerComponent } from '../hsv-picker/hsv-picker.component';
 import {
   buildCustomPreset,
   BusinessTheme,
@@ -21,7 +22,7 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 
 @Component({
   selector: 'app-profile-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, HsvPickerComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -95,8 +96,8 @@ export class ProfilePageComponent {
     }
   }
 
-  // ── Apariencia del negocio (solo rol admin) ────────────────────────────
-  readonly isAdmin = computed(() => this.auth.role() === 'admin');
+  // ── Apariencia del negocio (solo super_admin) ────────────────────────────
+  readonly isSuperAdmin = computed(() => this.auth.role() === 'super_admin');
   readonly presets: readonly ThemePreset[] = THEME_PRESET_LIST;
 
   // Paleta de colores: cada array interno = una columna (tono), de claro a oscuro
@@ -135,20 +136,16 @@ export class ProfilePageComponent {
     this.themeError.set(null);
   }
 
-  onCustomPrimaryInput(event: Event): void {
-    this.customPrimary.set((event.target as HTMLInputElement).value);
-  }
-
-  onCustomAccentInput(event: Event): void {
-    this.customAccent.set((event.target as HTMLInputElement).value);
-  }
-
   setPrimaryColor(hex: string): void { this.customPrimary.set(hex); }
   setAccentColor(hex: string):  void { this.customAccent.set(hex); }
 
   async saveTheme(): Promise<void> {
-    const businessId = this.auth.businessId();
-    if (!businessId || this.themeSubmitting()) return;
+    const businessId   = this.auth.businessId();
+    const isSuperAdmin = this.isSuperAdmin();
+
+    // super_admin no tiene business_id → guarda en localStorage personal.
+    // admin normal → guarda en la DB del negocio.
+    if ((!businessId && !isSuperAdmin) || this.themeSubmitting()) return;
 
     const theme: BusinessTheme =
       this.selectedPreset() === 'custom'
@@ -159,8 +156,14 @@ export class ProfilePageComponent {
     this.themeError.set(null);
     this.themeSuccess.set(false);
     try {
-      await this.businessService.updateTheme(businessId, theme);
-      this.themeService.applyPreset(theme);
+      if (businessId) {
+        await this.businessService.updateTheme(businessId, theme);
+        this.themeService.applyPreset(theme);
+      } else {
+        // super_admin: persiste en localStorage y aplica al DOM
+        this.themeService.savePersonalPreset(theme);
+        this.auth.businessTheme.set(theme);
+      }
       this.themeSuccess.set(true);
     } catch (err: unknown) {
       this.themeError.set(errorMessage(err, 'Error al guardar la apariencia'));

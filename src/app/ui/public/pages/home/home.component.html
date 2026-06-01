@@ -1,0 +1,137 @@
+<div class="min-h-screen flex flex-col" style="background:#0d0d0d; color:#fff">
+
+  <!-- Navbar -->
+  <nav class="flex items-center justify-between px-6 md:px-12 py-5 shrink-0">
+    <img src="img/logo_dark.png" alt="VORA" class="h-9 w-auto">
+    <a routerLink="/login"
+       class="px-5 py-2 rounded-xl text-sm font-semibold
+              bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09]
+              text-white/80 hover:text-white transition-colors duration-150">
+      Entrar
+    </a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="flex-1 flex flex-col items-center justify-center text-center px-6 py-16 md:py-24 relative overflow-hidden">
+
+    <!-- Glows -->
+    <div class="absolute pointer-events-none" style="
+      width:600px; height:600px; border-radius:50%;
+      background:radial-gradient(circle, rgba(109,40,217,0.13) 0%, transparent 65%);
+      top:50%; left:50%; transform:translate(-50%,-55%);
+    "></div>
+    <div class="absolute pointer-events-none" style="
+      width:360px; height:360px; border-radius:50%;
+      background:radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 65%);
+      top:44%; left:56%; transform:translate(-50%,-50%);
+    "></div>
+
+    <!-- Tag -->
+    <span class="relative z-10 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-semibold tracking-widest uppercase mb-8"
+          style="background:rgba(109,40,217,0.12); border:1px solid rgba(109,40,217,0.28); color:rgba(167,139,250,0.9)">
+      <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
+      Sistema POS para cafés y restaurantes
+    </span>
+
+    <!-- Headline -->
+    <h1 class="relative z-10 text-4xl md:text-6xl font-bold leading-[1.1] tracking-tight mb-6 max-w-2xl"
+        style="color:rgba(255,255,255,0.93)">
+      Todo tu negocio,<br>
+      <span style="background:linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+        en una sola pantalla
+      </span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="relative z-10 text-base md:text-lg max-w-md leading-relaxed mb-10"
+       style="color:rgba(255,255,255,0.42)">
+      Caja, inventario, clientes y reportes — diseñado para cafés
+      que quieren operar rápido y sin complicaciones.
+    </p>
+
+    <!-- CTAs -->
+    <div class="relative z-10 flex flex-col sm:flex-row items-center gap-3">
+      <a routerLink="/login"
+         class="px-7 py-3.5 rounded-xl text-sm font-semibold text-white
+                bg-violet-700 hover:bg-violet-600 active:bg-violet-800
+                shadow-lg shadow-violet-900/50
+                transition-colors duration-150">
+        Comenzar ahora
+      </a>
+      <a href="#features"
+         class="px-7 py-3.5 rounded-xl text-sm font-medium
+                bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08]
+                text-white/60 hover:text-white/85
+                transition-colors duration-150">
+        Ver funciones
+      </a>
+    </div>
+
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="px-6 md:px-12 pb-20 pt-4">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      <!-- POS -->
+      <div class="rounded-2xl p-6" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+             style="background:rgba(109,40,217,0.14); border:1px solid rgba(109,40,217,0.22)">
+          <svg class="w-5 h-5" style="color:rgba(167,139,250,0.85)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-sm mb-1.5" style="color:rgba(255,255,255,0.85)">Punto de venta</h3>
+        <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.38)">
+          Cobra en segundos. Efectivo, tarjeta o QR. Imprime facturas al instante.
+        </p>
+      </div>
+
+      <!-- Inventario -->
+      <div class="rounded-2xl p-6" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+             style="background:rgba(6,182,212,0.10); border:1px solid rgba(6,182,212,0.18)">
+          <svg class="w-5 h-5" style="color:rgba(103,232,249,0.85)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-sm mb-1.5" style="color:rgba(255,255,255,0.85)">Control de inventario</h3>
+        <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.38)">
+          Stock en tiempo real. Alertas de bajo inventario. Compras y proveedores.
+        </p>
+      </div>
+
+      <!-- Offline -->
+      <div class="rounded-2xl p-6" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+             style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.18)">
+          <svg class="w-5 h-5" style="color:rgba(134,239,172,0.85)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+              d="M12 18h.01M8.93 10.11A4 4 0 0115.07 10M5.07 7.07A8 8 0 0118.93 7M1.5 4.5l21 15"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-sm mb-1.5" style="color:rgba(255,255,255,0.85)">Funciona sin internet</h3>
+        <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.38)">
+          Sigue vendiendo aunque se corte la señal. Se sincroniza automáticamente al reconectar.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-6 md:px-12 py-6 border-t flex items-center justify-between"
+          style="border-color:rgba(255,255,255,0.06)">
+    <span class="text-xs" style="color:rgba(255,255,255,0.22)">© 2025 Vora</span>
+    <a routerLink="/login"
+       class="text-xs font-medium transition-colors duration-150"
+       style="color:rgba(167,139,250,0.7)"
+       onmouseover="this.style.color='rgba(167,139,250,1)'"
+       onmouseout="this.style.color='rgba(167,139,250,0.7)'">
+      Iniciar sesión →
+    </a>
+  </footer>
+
+</div>

@@ -95,6 +95,7 @@
           <tr>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Cliente</th>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">CI</th>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">NIT</th>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Teléfono</th>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Alta</th>
             <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
@@ -115,6 +116,9 @@
                 </button>
               </td>
               <td class="px-5 py-3 font-mono text-foreground-muted text-xs">{{ client.ci }}</td>
+              <td class="px-5 py-3 font-mono text-foreground-muted text-xs">
+                @if (client.nit) { {{ client.nit }} } @else { <span class="text-foreground-faint">—</span> }
+              </td>
               <td class="px-5 py-3 text-foreground-muted">
                 @if (client.phone) {
                   <span class="font-mono text-xs">{{ client.phone }}</span>

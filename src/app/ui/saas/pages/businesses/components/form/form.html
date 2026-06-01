@@ -44,6 +44,63 @@
     }
   </div>
 
+  <!-- ======================== Propietario / Contrato ======================== -->
+  <div class="space-y-4 pt-5 border-t border-border-subtle">
+    <div>
+      <h4 class="font-semibold text-foreground text-sm">Propietario / Contacto del contrato</h4>
+      <p class="text-xs text-foreground-subtle mt-0.5">
+        Datos de la persona con quien se realizó el acuerdo comercial.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="ownerFirstName" class="block text-sm font-medium text-foreground-muted mb-1">Nombre</label>
+        <input id="ownerFirstName" type="text" formControlName="ownerFirstName"
+               placeholder="Juan"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+      </div>
+
+      <div>
+        <label for="ownerLastName" class="block text-sm font-medium text-foreground-muted mb-1">Apellido</label>
+        <input id="ownerLastName" type="text" formControlName="ownerLastName"
+               placeholder="Pérez"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+      </div>
+
+      <div>
+        <label for="ownerPhone" class="block text-sm font-medium text-foreground-muted mb-1">Celular</label>
+        <input id="ownerPhone" type="tel" formControlName="ownerPhone"
+               placeholder="70000000"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+      </div>
+
+      <div>
+        <label for="ownerSex" class="block text-sm font-medium text-foreground-muted mb-1">Sexo</label>
+        <select id="ownerSex" formControlName="ownerSex"
+                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          <option value="">Sin especificar</option>
+          <option value="masculino">Masculino</option>
+          <option value="femenino">Femenino</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="ownerCity" class="block text-sm font-medium text-foreground-muted mb-1">Ciudad</label>
+        <input id="ownerCity" type="text" formControlName="ownerCity"
+               placeholder="Santa Cruz"
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+      </div>
+
+      <div>
+        <label for="businessLocation" class="block text-sm font-medium text-foreground-muted mb-1">Ubicación del negocio</label>
+        <input id="businessLocation" type="text" formControlName="businessLocation"
+               placeholder="Av. Cañoto entre calles..."
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+      </div>
+    </div>
+  </div>
+
   <!-- ======================== Logo ======================== -->
   <div class="space-y-3 pt-5 border-t border-border-subtle">
     <div>

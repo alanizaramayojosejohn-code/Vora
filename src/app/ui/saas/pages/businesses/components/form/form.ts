@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Business } from '../../../../../../models/business.model';
+import { Business, BusinessOwner } from '../../../../../../models/business.model';
 import { BusinessSubscription, PLAN_FEES, PLAN_LABELS, PlanType } from '../../../../../../models/subscription.model';
 import {
   buildCustomPreset,
@@ -32,13 +32,14 @@ const PLAN_DESCRIPTIONS: Record<PlanType, string> = {
 
 export interface BusinessFormValue {
   businessName: string;
-  adminUserId: string;
-  adminName: string;
-  adminCi: string;
-  theme: BusinessTheme;
-  logoFile: File | null;
-  removeLogo: boolean;
-  plan: { plan_type: PlanType; monthly_fee: number } | null;
+  adminUserId:  string;
+  adminName:    string;
+  adminCi:      string;
+  theme:        BusinessTheme;
+  logoFile:     File | null;
+  removeLogo:   boolean;
+  plan:         { plan_type: PlanType; monthly_fee: number } | null;
+  owner:        BusinessOwner | null;
 }
 
 @Component({
@@ -98,13 +99,20 @@ export class BusinessesFormComponent {
   );
 
   readonly form = this.fb.nonNullable.group({
-    businessName: ['', [Validators.required, Validators.minLength(2)]],
-    adminUserId: ['', [Validators.required, Validators.pattern(UUID_REGEX)]],
-    adminName: ['', [Validators.required, Validators.minLength(2)]],
-    adminCi: ['', [Validators.required]],
-    themePreset: ['monochrome' as ThemePresetKey, [Validators.required]],
-    customPrimary: ['#3B82F6'],
-    customAccent: ['#60A5FA'],
+    businessName:     ['', [Validators.required, Validators.minLength(2)]],
+    adminUserId:      ['', [Validators.required, Validators.pattern(UUID_REGEX)]],
+    adminName:        ['', [Validators.required, Validators.minLength(2)]],
+    adminCi:          ['', [Validators.required]],
+    themePreset:      ['monochrome' as ThemePresetKey, [Validators.required]],
+    customPrimary:    ['#3B82F6'],
+    customAccent:     ['#60A5FA'],
+    // Propietario / contacto del contrato
+    ownerFirstName:   [''],
+    ownerLastName:    [''],
+    ownerPhone:       [''],
+    ownerSex:         ['' as 'masculino' | 'femenino' | ''],
+    ownerCity:        [''],
+    businessLocation: [''],
   });
 
   readonly selectedPreset = signal<ThemePresetKey>(this.form.controls.themePreset.value);
@@ -143,14 +151,21 @@ export class BusinessesFormComponent {
         const theme = v.theme ?? DEFAULT_THEME;
         const customPrimary = theme.customColors?.primary ?? '#3B82F6';
         const customAccent  = theme.customColors?.accent  ?? '#60A5FA';
+        const owner = v.owner;
         this.form.reset({
-          businessName:  v.name,
-          adminUserId:   '',
-          adminName:     '',
-          adminCi:       '',
-          themePreset:   theme.preset,
+          businessName:     v.name,
+          adminUserId:      '',
+          adminName:        '',
+          adminCi:          '',
+          themePreset:      theme.preset,
           customPrimary,
           customAccent,
+          ownerFirstName:   owner?.first_name        ?? '',
+          ownerLastName:    owner?.last_name          ?? '',
+          ownerPhone:       owner?.phone              ?? '',
+          ownerSex:         owner?.sex                ?? '',
+          ownerCity:        owner?.city               ?? '',
+          businessLocation: owner?.business_location  ?? '',
         });
         this.selectedPreset.set(theme.preset);
         this.customPrimary.set(customPrimary);
@@ -167,13 +182,19 @@ export class BusinessesFormComponent {
         this.form.controls.adminName.enable({ emitEvent: false });
         this.form.controls.adminCi.enable({ emitEvent: false });
         this.form.reset({
-          businessName: '',
-          adminUserId: '',
-          adminName: '',
-          adminCi: '',
-          themePreset: DEFAULT_THEME.preset,
-          customPrimary: '#3B82F6',
-          customAccent: '#60A5FA',
+          businessName:     '',
+          adminUserId:      '',
+          adminName:        '',
+          adminCi:          '',
+          themePreset:      DEFAULT_THEME.preset,
+          customPrimary:    '#3B82F6',
+          customAccent:     '#60A5FA',
+          ownerFirstName:   '',
+          ownerLastName:    '',
+          ownerPhone:       '',
+          ownerSex:         '',
+          ownerCity:        '',
+          businessLocation: '',
         });
         this.selectedPreset.set(DEFAULT_THEME.preset);
         this.customPrimary.set('#3B82F6');
@@ -217,6 +238,16 @@ export class BusinessesFormComponent {
         ? { preset: 'custom', customColors: { primary: raw.customPrimary, accent: raw.customAccent } }
         : { preset: raw.themePreset };
 
+    const ownerData: BusinessOwner = {
+      first_name:        raw.ownerFirstName.trim(),
+      last_name:         raw.ownerLastName.trim(),
+      phone:             raw.ownerPhone.trim(),
+      sex:               raw.ownerSex as 'masculino' | 'femenino' | '',
+      city:              raw.ownerCity.trim(),
+      business_location: raw.businessLocation.trim(),
+    };
+    const hasOwner = Object.values(ownerData).some((v) => v !== '');
+
     const plan = this.selectedPlan();
     this.submitForm.emit({
       businessName: raw.businessName.trim(),
@@ -229,6 +260,7 @@ export class BusinessesFormComponent {
       plan: plan
         ? { plan_type: plan, monthly_fee: plan === 'custom' ? this.customFee() : PLAN_FEES[plan] }
         : null,
+      owner: hasOwner ? ownerData : null,
     });
   }
 }

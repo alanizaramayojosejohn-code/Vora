@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ThemeService } from '../../../services/theme/theme.service';
 
 @Component({
   selector: 'app-public-container',
@@ -8,6 +7,4 @@ import { ThemeService } from '../../../services/theme/theme.service';
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PublicContainerComponent {
-  protected readonly theme = inject(ThemeService);
-}
+export class PublicContainerComponent {}

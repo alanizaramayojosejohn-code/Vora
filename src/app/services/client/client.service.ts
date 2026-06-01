@@ -5,6 +5,7 @@ import { SupabaseService } from '../supabase/supabase.service';
 
 export interface CreateClientInput {
   ci: string;
+  nit: string | null;
   name: string;
   phone: string | null;
 }
@@ -25,6 +26,7 @@ export class ClientService {
       .insert({
         business_id: businessId,
         ci: input.ci,
+        nit: input.nit,
         name: input.name,
         phone: input.phone,
       })
@@ -37,7 +39,7 @@ export class ClientService {
   async updateClient(id: string, input: UpdateClientInput): Promise<Client> {
     const { data, error } = await this.client
       .from('clients')
-      .update({ ci: input.ci, name: input.name, phone: input.phone })
+      .update({ ci: input.ci, nit: input.nit, name: input.name, phone: input.phone })
       .eq('id', id)
       .select('*')
       .single();

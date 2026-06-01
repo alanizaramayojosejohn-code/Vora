@@ -4,9 +4,10 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { ReportQueryService } from '../../../../services/report/query.service';
 import { OrderQueryService } from '../../../../services/order/query.service';
+import { ExportService, SalesReportRow, SalesSummary } from '../../../../services/export/export.service';
 import { DailyIncome } from '../../../../models/daily-income.model';
 import { MonthlyIncome } from '../../../../models/monthly-income.model';
-import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../models/order.model';
+import { OrderWithDetails, PaymentMethod, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../models/order.model';
 
 @Component({
   selector: 'app-admin-home',
@@ -15,9 +16,10 @@ import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../..
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminHomeComponent {
-  private readonly reportQuery = inject(ReportQueryService);
-  private readonly orderQuery  = inject(OrderQueryService);
-  protected readonly auth      = inject(AuthService);
+  private readonly reportQuery  = inject(ReportQueryService);
+  private readonly orderQuery   = inject(OrderQueryService);
+  private readonly exportService = inject(ExportService);
+  protected readonly auth       = inject(AuthService);
 
   readonly loading         = signal(true);
   readonly daily           = signal<DailyIncome[]>([]);
@@ -153,6 +155,43 @@ export class AdminHomeComponent {
 
   // ── Ventas recientes ───────────────────────────────────────────────────
   readonly recentSales = computed(() => this.orders().slice(0, 8));
+
+  // ── Export ─────────────────────────────────────────────────────────────
+  private readonly exportRows = computed<SalesReportRow[]>(() => {
+    const ms = this.monthStart();
+    return this.orders()
+      .filter(o => !o.cancelled_at && new Date(o.created_at) >= ms)
+      .map(o => ({
+        id: o.id,
+        created_at: o.created_at,
+        user_name: null,
+        products_summary: o.items.map(i => `${i.product_name ?? '—'} ×${i.quantity}`).join(', '),
+        payment_method: o.payment_method,
+        total_amount: o.total_amount,
+        item_count: o.items.length,
+      }));
+  });
+
+  private readonly exportSummary = computed<SalesSummary>(() => {
+    const rows = this.exportRows();
+    const total = rows.reduce((s, r) => s + r.total_amount, 0);
+    const byMethod: Record<PaymentMethod, number> = { cash: 0, card: 0, qr: 0 };
+    rows.forEach(r => { byMethod[r.payment_method] += r.total_amount; });
+    return { total, transactions: rows.length, avgTicket: rows.length ? total / rows.length : 0, byMethod };
+  });
+
+  private get dateRangeLabel(): string {
+    const now = new Date();
+    return `${now.toLocaleString('es-BO', { month: 'long', year: 'numeric' })}`;
+  }
+
+  exportExcel(): void {
+    this.exportService.exportSalesToExcel(this.exportRows(), this.exportSummary(), this.dateRangeLabel);
+  }
+
+  exportPdf(): void {
+    this.exportService.exportSalesToPdf(this.exportRows(), this.exportSummary(), this.dateRangeLabel);
+  }
 
   constructor() {
     void this.refresh();

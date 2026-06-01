@@ -115,20 +115,3 @@
     </div>
   </div>
 </div>
-
-<!-- Print styles: muestra solo .invoice-print-area -->
-<style>
-  @media print {
-    body > * { visibility: hidden; }
-    .invoice-print-area,
-    .invoice-print-area * { visibility: visible; }
-    .invoice-print-area {
-      position: fixed !important;
-      inset: 0 !important;
-      max-height: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-    }
-  }
-</style>

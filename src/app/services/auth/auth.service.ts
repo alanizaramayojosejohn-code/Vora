@@ -4,6 +4,8 @@ import { Profile, UserRole } from '../../models/profile.model';
 import { SupabaseService } from '../supabase/supabase.service';
 import { BusinessTheme, DEFAULT_THEME } from '../theme/theme.presets';
 import { ThemeService } from '../theme/theme.service';
+import { StorageEncryptionService } from '../offline/storage-encryption.service';
+import { OfflineQueueService } from '../offline/offline-queue.service';
 
 interface ProfileWithBusiness extends Profile {
   businesses: { theme: BusinessTheme | null; name: string; logo_url: string | null } | null;
@@ -13,6 +15,8 @@ interface ProfileWithBusiness extends Profile {
 export class AuthService {
   private readonly client = inject(SupabaseService).client;
   private readonly theme = inject(ThemeService);
+  private readonly encryption = inject(StorageEncryptionService);
+  private readonly offlineQueue = inject(OfflineQueueService);
 
   readonly session = signal<Session | null>(null);
   readonly profile = signal<Profile | null>(null);
@@ -31,7 +35,13 @@ export class AuthService {
   async initialize(): Promise<void> {
     const { data } = await this.client.auth.getSession();
     this.session.set(data.session);
-    if (data.session) await this.loadProfile(data.session.user.id);
+    if (data.session) {
+      await this.encryption.setup(data.session.user.id);
+      await Promise.all([
+        this.loadProfile(data.session.user.id),
+        this.offlineQueue.loadFromStorage(),
+      ]);
+    }
 
     // Only update session signal here — never make DB queries inside this
     // callback. Making a Supabase query (loadProfile) while the auth-state
@@ -41,6 +51,8 @@ export class AuthService {
     this.client.auth.onAuthStateChange((_event, session) => {
       this.session.set(session);
       if (!session) {
+        this.encryption.clear();
+        this.offlineQueue.clearStorage();
         this.profile.set(null);
         this.businessName.set(null);
         this.businessLogoUrl.set(null);
@@ -56,9 +68,13 @@ export class AuthService {
     if (error) throw error;
     if (!data.session) throw new Error('No se pudo iniciar sesión');
     this.session.set(data.session);
-    await this.loadProfile(data.session.user.id);
+    await this.encryption.setup(data.session.user.id);
+    await Promise.all([
+      this.loadProfile(data.session.user.id),
+      this.offlineQueue.loadFromStorage(),
+    ]);
     if (this.profile() === null) {
-      throw new Error('Tu cuenta no está autorizada en SaasCafes. Contacta al administrador.');
+      throw new Error('Tu cuenta no está autorizada en Vora. Contacta al administrador.');
     }
   }
 
@@ -76,6 +92,8 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
+    this.offlineQueue.clearStorage();
+    this.encryption.clear();
     await this.client.auth.signOut();
     this.session.set(null);
     this.profile.set(null);
@@ -142,15 +160,21 @@ export class AuthService {
     // Aplica el preset del negocio (incluyendo customColors si es 'custom').
     // El mode (light/dark/system) lo gestiona el theme.service por su cuenta
     // desde localStorage — es preferencia del usuario, no del negocio.
-    // super_admin no tiene business asignado → cae a default monochrome.
-    const businessTheme: BusinessTheme = businesses?.theme
-      ? {
-          preset: businesses.theme.preset,
-          ...(businesses.theme.customColors
-            ? { customColors: businesses.theme.customColors }
-            : {}),
-        }
-      : DEFAULT_THEME;
+    // super_admin no tiene business asignado → usa su tema personal en
+    // localStorage (guardado desde la página de perfil), o cae a default.
+    let businessTheme: BusinessTheme;
+    if (businesses?.theme) {
+      businessTheme = {
+        preset: businesses.theme.preset,
+        ...(businesses.theme.customColors
+          ? { customColors: businesses.theme.customColors }
+          : {}),
+      };
+    } else if (profile.role === 'super_admin') {
+      businessTheme = this.theme.loadPersonalPreset() ?? DEFAULT_THEME;
+    } else {
+      businessTheme = DEFAULT_THEME;
+    }
     this.businessTheme.set(businessTheme);
     this.theme.applyPreset(businessTheme);
   }

@@ -7,6 +7,7 @@
 // que lo tuvieran asignado (o caer al default por seguridad — ver getPreset()).
 
 export type ThemePresetKey =
+  | 'vora'
   | 'monochrome'
   | 'ocean'
   | 'forest'
@@ -38,9 +39,10 @@ export const DEFAULT_THEME: BusinessTheme = {
 
 export const DEFAULT_MODE: ThemeMode = 'system';
 
-// Clave localStorage. Cambiar este string es breaking: descarta la
-// preferencia que tuvieran los usuarios.
-export const THEME_MODE_STORAGE_KEY = 'saasgym.theme.mode';
+// Claves localStorage. Cambiar estos strings es breaking.
+export const THEME_MODE_STORAGE_KEY     = 'saasgym.theme.mode';
+// Tema personal del super_admin (no tiene business asignado).
+export const PERSONAL_THEME_STORAGE_KEY = 'saasgym.theme.personal';
 
 // Tokens semánticos. Mantener este shape sincronizado con styles.css.
 // Los nombres mapean a utilities Tailwind (bg-base, text-foreground, etc.).
@@ -81,6 +83,56 @@ export interface ThemePreset {
   light: ThemeTokens;
   dark: ThemeTokens;
 }
+
+// ── VORA — paleta oficial de marca ────────────────────────────────────────
+// Extraída del logo: violeta profundo (#5B21B6) como primary,
+// cyan eléctrico (#0891B2) como accent. Dark mode usa el fondo
+// del logo (#0D0B14) con violeta luminoso + cyan brillante.
+const vora: ThemePreset = {
+  key: 'vora',
+  label: 'VORA',
+  description: 'Violeta y cian · paleta oficial',
+  light: {
+    base: '#F6F3FF',
+    surface: 'rgba(255, 255, 255, 0.82)',
+    elevated: 'rgba(255, 255, 255, 0.95)',
+    input: 'rgba(91, 33, 182, 0.04)',
+    muted: 'rgba(91, 33, 182, 0.07)',
+    foreground: '#1A0F2E',
+    foregroundMuted: 'rgba(26, 15, 46, 0.70)',
+    foregroundSubtle: 'rgba(26, 15, 46, 0.50)',
+    foregroundFaint: 'rgba(26, 15, 46, 0.36)',
+    border: 'rgba(91, 33, 182, 0.18)',
+    borderSubtle: 'rgba(91, 33, 182, 0.10)',
+    primary: '#5B21B6',
+    primaryFg: '#FFFFFF',
+    accent: '#0891B2',
+    accentFg: '#FFFFFF',
+    success: '#059669',
+    danger: '#DC2626',
+    warning: '#D97706',
+  },
+  dark: {
+    base: '#0D0B14',
+    surface: 'rgba(124, 58, 237, 0.08)',
+    elevated: 'rgba(124, 58, 237, 0.13)',
+    input: 'rgba(196, 181, 253, 0.05)',
+    muted: 'rgba(196, 181, 253, 0.08)',
+    foreground: '#EDE9FE',
+    foregroundMuted: 'rgba(237, 233, 254, 0.72)',
+    foregroundSubtle: 'rgba(237, 233, 254, 0.50)',
+    foregroundFaint: 'rgba(237, 233, 254, 0.36)',
+    border: 'rgba(196, 181, 253, 0.16)',
+    borderSubtle: 'rgba(196, 181, 253, 0.09)',
+    primary: '#8B5CF6',
+    primaryFg: '#FFFFFF',
+    accent: '#22D3EE',
+    accentFg: '#0D0B14',
+    success: '#10B981',
+    danger: '#EF4444',
+    warning: '#F59E0B',
+  },
+};
 
 // Helper para construir paletas con menos repetición.
 // El preset monochrome es el diseño base B&W glass del pencil.
@@ -361,6 +413,7 @@ const graphite: ThemePreset = {
 };
 
 export const THEME_PRESETS: Record<Exclude<ThemePresetKey, 'custom'>, ThemePreset> = {
+  vora,
   monochrome,
   ocean,
   forest,

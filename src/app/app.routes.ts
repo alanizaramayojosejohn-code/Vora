@@ -13,6 +13,14 @@ import { SaasRoutes } from './ui/saas/routes';
 export const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./ui/public/pages/home/home.component').then(
+        (m) => m.HomeComponent,
+      ),
+  },
+  {
+    path: 'login',
     loadComponent: () =>
       import('./ui/public/container/component').then(
         (m) => m.PublicContainerComponent,
