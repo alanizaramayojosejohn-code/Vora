@@ -5,10 +5,9 @@ import { BusinessSubscription, PLAN_FEES, PLAN_LABELS, PlanType } from '../../..
 import { UpsertSubscriptionInput } from '../../../../../../services/subscription/subscription.service';
 
 const PLAN_DESCRIPTIONS: Record<PlanType, string> = {
-  basico:     'Funciones esenciales para empezar',
-  pro:        'Más herramientas para crecer',
-  enterprise: 'Acceso completo y soporte prioritario',
-  custom:     'Tarifa negociada con el negocio',
+  caja:    'Punto de venta y ventas offline',
+  negocio: 'Inventario, compras, reportes y personal',
+  custom:  'Tarifa negociada con el negocio',
 };
 
 @Component({
@@ -32,15 +31,15 @@ export class SubscriptionFormComponent {
   readonly PLAN_LABELS       = PLAN_LABELS;
   readonly PLAN_FEES         = PLAN_FEES;
   readonly PLAN_DESCRIPTIONS = PLAN_DESCRIPTIONS;
-  readonly planOptions: PlanType[] = ['basico', 'pro', 'enterprise', 'custom'];
+  readonly planOptions: PlanType[] = ['caja', 'negocio', 'custom'];
 
-  readonly selectedPlan = signal<PlanType>('basico');
+  readonly selectedPlan = signal<PlanType>('caja');
 
   readonly form = this.fb.nonNullable.group({
-    plan_type:   ['basico' as PlanType, Validators.required],
-    monthly_fee: [150,                  [Validators.required, Validators.min(1)]],
-    start_date:  ['',                   Validators.required],
-    end_date:    ['',                   Validators.required],
+    plan_type:   ['caja' as PlanType, Validators.required],
+    monthly_fee: [PLAN_FEES.caja,     [Validators.required, Validators.min(1)]],
+    start_date:  ['',                 Validators.required],
+    end_date:    ['',                 Validators.required],
   });
 
   constructor() {
@@ -59,10 +58,10 @@ export class SubscriptionFormComponent {
         const today     = new Date().toISOString().slice(0, 10);
         const nextMonth = new Date();
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-        this.selectedPlan.set('basico');
+        this.selectedPlan.set('caja');
         this.form.reset({
-          plan_type:   'basico',
-          monthly_fee: PLAN_FEES.basico,
+          plan_type:   'caja',
+          monthly_fee: PLAN_FEES.caja,
           start_date:  today,
           end_date:    nextMonth.toISOString().slice(0, 10),
         });

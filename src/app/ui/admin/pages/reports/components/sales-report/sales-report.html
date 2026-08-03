@@ -222,13 +222,13 @@
                     {{ row.products_summary }}
                   </td>
                   <td class="px-4 py-2.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                          [class.bg-success/10]="row.payment_method === 'cash'"
-                          [class.text-success]="row.payment_method === 'cash'"
-                          [class.bg-primary/10]="row.payment_method === 'card'"
-                          [class.text-primary]="row.payment_method === 'card'"
-                          [class.bg-accent/10]="row.payment_method === 'qr'"
-                          [class.text-foreground]="row.payment_method === 'qr'">
+                    <!-- Relleno sólido con su color de texto pareado: el acento
+                         puede ser blanco o negro según el preset, así que solo
+                         el par bg-accent/text-accent-fg garantiza contraste. -->
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border border-border-subtle"
+                          [class]="row.payment_method === 'cash' ? 'bg-success text-white'
+                                 : row.payment_method === 'card' ? 'bg-primary text-primary-fg'
+                                 : 'bg-accent text-accent-fg'">
                       {{ methodLabels[row.payment_method] }}
                     </span>
                   </td>

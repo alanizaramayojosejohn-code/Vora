@@ -4,12 +4,13 @@ import { ClientService, CreateClientInput } from '../../../../../services/client
 import { ClientQueryService } from '../../../../../services/client/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { ClientsFormComponent } from '../components/form/form';
 import { ClientsListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-admin-clients',
-  imports: [ClientsListComponent, ClientsFormComponent, ConfirmDeleteModalComponent],
+  imports: [ClientsListComponent, ClientsFormComponent, ConfirmDeleteModalComponent, ReadonlyDisabledDirective],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

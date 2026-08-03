@@ -85,6 +85,7 @@
         Usuarios
       </a>
 
+      <ng-container *appIfPlan="'staff'">
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Personal</p>
 
       <a routerLink="/admin/staff" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -95,7 +96,9 @@
         </svg>
         Personal
       </a>
+      </ng-container>
 
+      <ng-container *appIfPlan="'purchases'">
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Provisiones</p>
 
       <a routerLink="/admin/purchases" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -106,6 +109,7 @@
         </svg>
         Provisiones
       </a>
+      </ng-container>
 
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Ventas</p>
 
@@ -161,6 +165,7 @@
 
   <!-- ============================== Main ============================== -->
   <main class="flex-1 min-w-0">
+    <app-subscription-status />
     <router-outlet />
   </main>
 </div>

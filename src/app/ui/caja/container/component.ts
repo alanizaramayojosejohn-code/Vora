@@ -5,10 +5,11 @@ import { SyncService } from '../../../services/offline/sync.service';
 import { BrandLogoComponent } from '../../shared/brand-logo.component';
 import { ThemeModeToggleComponent } from '../../shared/theme-mode-toggle.component';
 import { OfflineStatusComponent } from '../../shared/offline-status.component';
+import { SubscriptionStatusComponent } from '../../shared/subscription-status.component';
 
 @Component({
   selector: 'app-caja-container',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeModeToggleComponent, BrandLogoComponent, OfflineStatusComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeModeToggleComponent, BrandLogoComponent, OfflineStatusComponent, SubscriptionStatusComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

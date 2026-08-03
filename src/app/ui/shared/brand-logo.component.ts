@@ -21,9 +21,13 @@ import { ThemeService } from '../../services/theme/theme.service';
     <!-- Nombre del negocio -->
     <span class="font-bold text-foreground tracking-tight truncate min-w-0">{{ name() }}</span>
 
-    <!-- Badge de rol (Admin / Caja) -->
+    <!-- Badge de rol (Admin / Caja). Usa el color de acento del negocio: es un
+         elemento de marca, sale en todas las pantallas y el par
+         bg-accent/text-accent-fg tiene contraste garantizado en cualquier
+         preset. El borde lo salva de desaparecer cuando el acento coincide
+         con el fondo (preset mono: acento blanco en modo claro). -->
     @if (badge()) {
-      <span class="text-[10px] font-bold text-foreground-muted uppercase tracking-widest px-1.5 py-0.5 rounded bg-muted border border-border-subtle flex-shrink-0">
+      <span class="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-accent text-accent-fg border border-border-subtle flex-shrink-0">
         {{ badge() }}
       </span>
     }

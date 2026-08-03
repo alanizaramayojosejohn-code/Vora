@@ -50,6 +50,15 @@
         Ventas
       </a>
 
+      <a routerLink="/caja/turno" routerLinkActive="bg-primary text-primary-fg shadow-sm"
+         (click)="sidebarOpen.set(false)"
+         class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
+        </svg>
+        Caja
+      </a>
+
       <a routerLink="/caja/clients" routerLinkActive="bg-primary text-primary-fg shadow-sm"
          (click)="sidebarOpen.set(false)"
          class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
@@ -89,6 +98,7 @@
 
   <!-- ============================== Main ============================== -->
   <main class="flex-1 min-w-0 flex flex-col">
+    <app-subscription-status />
     <app-offline-status />
     <div class="flex-1">
       <router-outlet />

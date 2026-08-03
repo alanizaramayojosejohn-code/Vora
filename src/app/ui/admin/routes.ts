@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { planGuard } from '../../guards/plan-guard';
 
 export const AdminRoutes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
@@ -42,6 +43,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path: 'staff',
+    canActivate: [planGuard('staff')],
     loadComponent: () =>
       import('./pages/staff/container/component').then(
         (m) => m.AdminStaffContainerComponent,
@@ -49,6 +51,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path: 'purchases',
+    canActivate: [planGuard('purchases')],
     loadComponent: () =>
       import('./pages/purchases/container/component').then(
         (m) => m.PurchasesDashboardComponent,
@@ -56,6 +59,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path: 'purchases/suppliers',
+    canActivate: [planGuard('purchases')],
     loadComponent: () =>
       import('./pages/purchases/suppliers/component').then(
         (m) => m.PurchasesSuppliersComponent,
@@ -63,6 +67,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path: 'purchases/acquisitions/new',
+    canActivate: [planGuard('purchases')],
     loadComponent: () =>
       import('./pages/purchases/acquisitions/new/component').then(
         (m) => m.NewAcquisitionComponent,
@@ -70,6 +75,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path: 'purchases/schedule',
+    canActivate: [planGuard('purchases')],
     loadComponent: () =>
       import('./pages/purchases/schedule/component').then(
         (m) => m.PurchasesScheduleComponent,
@@ -77,6 +83,7 @@ export const AdminRoutes: Routes = [
   },
   {
     path: 'purchases/orders/new',
+    canActivate: [planGuard('purchases')],
     loadComponent: () =>
       import('./pages/purchases/orders/new/component').then(
         (m) => m.NewPurchaseOrderComponent,

@@ -13,6 +13,11 @@ export const CajaRoutes: Routes = [
       import('./pages/home/home.component').then((m) => m.CajaHomeComponent),
   },
   {
+    path: 'turno',
+    loadComponent: () =>
+      import('./pages/shift/shift.component').then((m) => m.CajaShiftComponent),
+  },
+  {
     path: 'sales',
     loadComponent: () =>
       import('./pages/sales/container/component').then(

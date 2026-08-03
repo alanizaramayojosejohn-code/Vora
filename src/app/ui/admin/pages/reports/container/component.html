@@ -8,6 +8,7 @@
 
   <!-- Tabs -->
   <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit">
+    @if (hasAdvancedReports()) {
     <button type="button" (click)="setTab('ventas')"
             [class.bg-surface]="activeTab() === 'ventas'"
             [class.shadow-sm]="activeTab() === 'ventas'"
@@ -33,20 +34,66 @@
       </svg>
       Resumen general
     </button>
+    }
+    <button type="button" (click)="setTab('arqueos')"
+            [class.bg-surface]="activeTab() === 'arqueos'"
+            [class.shadow-sm]="activeTab() === 'arqueos'"
+            [class.text-foreground]="activeTab() === 'arqueos'"
+            [class.text-foreground-muted]="activeTab() !== 'arqueos'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
+      </svg>
+      Arqueos de caja
+    </button>
+    @if (!hasAdvancedReports()) {
+      <button type="button" (click)="setTab('stock')"
+              [class.bg-surface]="activeTab() === 'stock'"
+              [class.shadow-sm]="activeTab() === 'stock'"
+              [class.text-foreground]="activeTab() === 'stock'"
+              [class.text-foreground-muted]="activeTab() !== 'stock'"
+              class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        Bajo stock
+      </button>
+    }
   </div>
 
+  @if (!hasAdvancedReports()) {
+    <div class="rounded-xl border border-border-subtle bg-elevated px-5 py-3 flex items-center justify-between gap-4">
+      <p class="text-xs text-foreground-muted">
+        Los reportes de ingresos diarios, mensuales, el detalle de ventas y la exportación
+        están incluidos en el plan Negocio.
+      </p>
+    </div>
+  }
+
   <!-- Tab: Reporte de ventas -->
-  @if (activeTab() === 'ventas') {
+  @if (activeTab() === 'ventas' && hasAdvancedReports()) {
     <app-admin-sales-report />
   }
 
   <!-- Tab: Resumen general -->
-  @if (activeTab() === 'resumen') {
+  @if (activeTab() === 'resumen' && hasAdvancedReports()) {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <app-admin-reports-monthly-income [rows]="monthly()" [loading]="loading()" />
       <app-admin-reports-daily-income [rows]="daily()" [loading]="loading()" />
       <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
     </div>
+  }
+
+  <!-- Plan Caja: solo bajo stock, que sí está incluido -->
+  @if (!hasAdvancedReports() && activeTab() === 'stock') {
+    <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
+  }
+
+  <!-- Tab: Arqueos de caja -->
+  @if (activeTab() === 'arqueos') {
+    <app-cash-sessions-report [sessions]="cashSessions()" [loading]="loadingSessions()" />
   }
 
 </div>

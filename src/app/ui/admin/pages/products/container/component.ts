@@ -6,12 +6,13 @@ import { CreateProductInput, ProductService } from '../../../../../services/prod
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { ProductsFormComponent } from '../components/form/form';
 import { ProductsListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-admin-products',
-  imports: [ProductsListComponent, ProductsFormComponent, ConfirmDeleteModalComponent],
+  imports: [ProductsListComponent, ProductsFormComponent, ConfirmDeleteModalComponent, ReadonlyDisabledDirective],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
