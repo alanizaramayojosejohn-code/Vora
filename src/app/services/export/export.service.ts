@@ -4,6 +4,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AuthService } from '../auth/auth.service';
 import { PAYMENT_METHOD_LABEL, PaymentMethod } from '../../models/order.model';
+import { ClientSalesSummary, daysSinceLastPurchase } from '../../models/client-sales.model';
+import { PayrollPayment, PayrollStatusRow } from '../../models/payroll.model';
 
 export interface SalesReportRow {
   id: string;
@@ -160,5 +162,216 @@ export class ExportService {
     }
 
     doc.save(filename);
+  }
+
+  // ── Clientes ────────────────────────────────────────────────────────────
+
+  exportClientsToExcel(rows: ClientSalesSummary[], viewLabel: string): void {
+    const businessName = this.auth.businessName() ?? 'Negocio';
+    const filename = `clientes_${businessName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+    const header = [
+      ['Reporte de Clientes — ' + businessName],
+      [viewLabel],
+      [],
+      ['Cliente', 'NIT', 'CI', 'Teléfono', 'Compras', 'Total gastado (Bs.)', 'Ticket promedio (Bs.)', 'Última compra', 'Días sin comprar'],
+    ];
+
+    const body = rows.map((r) => {
+      const days = daysSinceLastPurchase(r);
+      return [
+        r.name,
+        r.nit ?? '—',
+        r.ci ?? '—',
+        r.phone ?? '—',
+        r.orders_count,
+        r.total_spent,
+        r.avg_ticket,
+        r.last_purchase_at ? new Date(r.last_purchase_at).toLocaleDateString('es-BO') : 'Nunca',
+        days ?? '—',
+      ];
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet([...header, ...body]);
+    ws['!cols'] = [
+      { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
+      { wch: 10 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 16 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+    XLSX.writeFile(wb, filename);
+  }
+
+  exportClientsToPdf(rows: ClientSalesSummary[], viewLabel: string): void {
+    const businessName = this.auth.businessName() ?? 'Negocio';
+    const filename = `clientes_${businessName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+    const doc = new jsPDF();
+    this.pdfHeader(doc, 'Reporte de Clientes', businessName, viewLabel);
+
+    autoTable(doc, {
+      startY: 42,
+      head: [['Cliente', 'NIT / CI', 'Compras', 'Total (Bs.)', 'Ticket (Bs.)', 'Última compra']],
+      body: rows.map((r) => [
+        r.name,
+        r.nit ?? r.ci ?? '—',
+        r.orders_count,
+        r.total_spent.toFixed(2),
+        r.avg_ticket.toFixed(2),
+        r.last_purchase_at ? new Date(r.last_purchase_at).toLocaleDateString('es-BO') : 'Nunca',
+      ]),
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 248, 250] },
+      columnStyles: {
+        2: { halign: 'center' },
+        3: { halign: 'right' },
+        4: { halign: 'right' },
+      },
+    });
+
+    this.pdfFooter(doc);
+    doc.save(filename);
+  }
+
+  // ── Planilla ────────────────────────────────────────────────────────────
+
+  exportPayrollToExcel(
+    status: PayrollStatusRow[],
+    payments: PayrollPayment[],
+    periodLabel: string,
+  ): void {
+    const businessName = this.auth.businessName() ?? 'Negocio';
+    const filename = `planilla_${businessName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+    const totalExpected = status.reduce((s, r) => s + r.expected, 0);
+    const totalPaid = status.reduce((s, r) => s + r.paid, 0);
+    const totalPending = status.reduce((s, r) => s + r.pending, 0);
+
+    const statusSheet = [
+      ['Planilla — ' + businessName],
+      ['Período: ' + periodLabel],
+      [],
+      ['RESUMEN'],
+      ['Total esperado', totalExpected],
+      ['Total pagado', totalPaid],
+      ['Total pendiente', totalPending],
+      [],
+      ['Empleado', 'Cargo', 'Sueldo (Bs.)', 'Pagado (Bs.)', 'Pendiente (Bs.)', 'Estado'],
+      ...status.map((r) => [
+        r.employee.name,
+        r.employee.position,
+        r.expected,
+        r.paid,
+        r.pending,
+        r.isPaid ? 'Pagado' : r.paid > 0 ? 'Parcial' : 'Sin pagar',
+      ]),
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(statusSheet);
+    ws['!cols'] = [{ wch: 28 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 12 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
+
+    // El detalle va en su propia hoja: mezclar el estado por empleado con los
+    // pagos sueltos en una sola tabla haría ilegibles a las dos.
+    if (payments.length > 0) {
+      const detail = [
+        ['Fecha', 'Empleado', 'Cargo', 'Monto (Bs.)', 'Nota'],
+        ...payments.map((p) => [
+          new Date(p.paid_at).toLocaleDateString('es-BO'),
+          p.employee_name,
+          p.employee_position,
+          Number(p.amount),
+          p.notes ?? '',
+        ]),
+      ];
+      const wsDetail = XLSX.utils.aoa_to_sheet(detail);
+      wsDetail['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 20 }, { wch: 14 }, { wch: 40 }];
+      XLSX.utils.book_append_sheet(wb, wsDetail, 'Pagos');
+    }
+
+    XLSX.writeFile(wb, filename);
+  }
+
+  exportPayrollToPdf(
+    status: PayrollStatusRow[],
+    payments: PayrollPayment[],
+    periodLabel: string,
+  ): void {
+    const businessName = this.auth.businessName() ?? 'Negocio';
+    const filename = `planilla_${businessName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+    const doc = new jsPDF();
+    this.pdfHeader(doc, 'Planilla', businessName, 'Período: ' + periodLabel);
+
+    autoTable(doc, {
+      startY: 42,
+      head: [['Empleado', 'Cargo', 'Sueldo', 'Pagado', 'Pendiente', 'Estado']],
+      body: status.map((r) => [
+        r.employee.name,
+        r.employee.position,
+        r.expected.toFixed(2),
+        r.paid.toFixed(2),
+        r.pending.toFixed(2),
+        r.isPaid ? 'Pagado' : r.paid > 0 ? 'Parcial' : 'Sin pagar',
+      ]),
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [30, 30, 30], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 248, 250] },
+      columnStyles: {
+        2: { halign: 'right' },
+        3: { halign: 'right' },
+        4: { halign: 'right' },
+      },
+    });
+
+    if (payments.length > 0) {
+      autoTable(doc, {
+        head: [['Fecha', 'Empleado', 'Monto', 'Nota']],
+        body: payments.map((p) => [
+          new Date(p.paid_at).toLocaleDateString('es-BO'),
+          p.employee_name,
+          Number(p.amount).toFixed(2),
+          p.notes ?? '—',
+        ]),
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: [70, 70, 70], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 248, 250] },
+        columnStyles: { 2: { halign: 'right' } },
+      });
+    }
+
+    this.pdfFooter(doc);
+    doc.save(filename);
+  }
+
+  // ── Piezas compartidas de los PDF ───────────────────────────────────────
+
+  private pdfHeader(doc: jsPDF, title: string, businessName: string, subtitle: string): void {
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, 14, 18);
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(businessName, 14, 26);
+    doc.text(subtitle, 14, 32);
+  }
+
+  private pdfFooter(doc: jsPDF): void {
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(160);
+      doc.text(
+        `Página ${i} de ${pageCount} · Generado ${new Date().toLocaleString('es-BO')}`,
+        14,
+        doc.internal.pageSize.height - 6,
+      );
+    }
   }
 }

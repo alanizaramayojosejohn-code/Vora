@@ -7,12 +7,15 @@ import { MonthlyIncome } from '../../../../../models/monthly-income.model';
 import { CashSessionService } from '../../../../../services/cash-session/cash-session.service';
 import { ReportQueryService } from '../../../../../services/report/query.service';
 import { CashSessionsReportComponent } from '../components/cash-sessions/cash-sessions';
+import { ClientsReportComponent } from '../components/clients-report/clients-report';
 import { DailyIncomeCardComponent } from '../components/daily-income/daily-income';
+import { DailySalesReportComponent } from '../components/daily-sales/daily-sales';
 import { LowStockCardComponent } from '../components/low-stock/low-stock';
 import { MonthlyIncomeCardComponent } from '../components/monthly-income/monthly-income';
+import { PayrollReportComponent } from '../components/payroll-report/payroll-report';
 import { SalesReportComponent } from '../components/sales-report/sales-report';
 
-type ReportTab = 'resumen' | 'ventas' | 'arqueos' | 'stock';
+type ReportTab = 'dia' | 'resumen' | 'ventas' | 'clientes' | 'planilla' | 'arqueos' | 'stock';
 
 @Component({
   selector: 'app-admin-reports',
@@ -22,6 +25,9 @@ type ReportTab = 'resumen' | 'ventas' | 'arqueos' | 'stock';
     LowStockCardComponent,
     SalesReportComponent,
     CashSessionsReportComponent,
+    DailySalesReportComponent,
+    ClientsReportComponent,
+    PayrollReportComponent,
   ],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,11 +37,19 @@ export class AdminReportsContainerComponent {
   private readonly sessions = inject(CashSessionService);
   private readonly subscriptionState = inject(SubscriptionStateService);
 
-  // Plan Caja incluye "reportes básicos": bajo stock y arqueos de caja.
-  // Diario, mensual, reporte de ventas y exportación son de Negocio.
+  // Plan Caja incluye "reportes básicos": ventas del día, bajo stock y arqueos.
+  // El detalle de ventas con filtros libres, los ingresos diario/mensual, los
+  // reportes de clientes y la exportación son de Negocio.
   readonly hasAdvancedReports = computed(() => this.subscriptionState.allows('advanced_reports'));
 
-  readonly activeTab = signal<ReportTab>('ventas');
+  // La planilla se ata a la feature de personal, no a la de reportes: sin el
+  // módulo de personal no hay empleados que reportar.
+  readonly hasStaff = computed(() => this.subscriptionState.allows('staff'));
+
+  // Arranca en "Hoy", que existe en los dos planes. Antes el tab inicial era
+  // uno exclusivo de Negocio y había que corregirlo cuando resolvía la carga
+  // de la suscripción; con un default común esa carrera desaparece.
+  readonly activeTab = signal<ReportTab>('dia');
 
   readonly monthly = signal<MonthlyIncome[]>([]);
   readonly daily = signal<DailyIncome[]>([]);
@@ -46,12 +60,12 @@ export class AdminReportsContainerComponent {
   readonly loadingSessions = signal(false);
 
   constructor() {
-    void this.subscriptionState.ensureLoaded().then(() => {
-      // Sin reportes avanzados la pestaña de ventas no existe: se arranca en
-      // la que sí está disponible.
-      if (!this.hasAdvancedReports()) this.activeTab.set('arqueos');
-    });
-    void this.refreshResumen();
+    void this.subscriptionState.ensureLoaded();
+    // Solo el bajo stock se precarga: es lo único del resumen que los dos
+    // planes pueden ver. Los ingresos diario y mensual se piden recién al
+    // abrir su pestaña — antes se traían siempre, incluso en plan Caja, que
+    // ni siquiera los muestra.
+    void this.refreshLowStock();
   }
 
   setTab(tab: ReportTab): void {
@@ -72,6 +86,17 @@ export class AdminReportsContainerComponent {
       console.error('Error cargando arqueos', err);
     } finally {
       this.loadingSessions.set(false);
+    }
+  }
+
+  async refreshLowStock(): Promise<void> {
+    this.loading.set(true);
+    try {
+      this.lowStock.set(await this.reports.listLowStockProducts());
+    } catch (err: unknown) {
+      console.error('Error cargando bajo stock', err);
+    } finally {
+      this.loading.set(false);
     }
   }
 

@@ -1,0 +1,150 @@
+<div class="space-y-6">
+
+  @if (error()) {
+    <div class="rounded-xl border border-danger/30 bg-danger/10 px-5 py-3 text-sm text-danger">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Clientes registrados</p>
+      <p class="text-2xl font-bold text-foreground mt-1">{{ totalClients() | number }}</p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Con al menos una compra</p>
+      <p class="text-2xl font-bold text-foreground mt-1">{{ activeClients() | number }}</p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Ticket promedio</p>
+      <p class="text-2xl font-bold text-foreground mt-1">
+        {{ avgTicketOverall() | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Ventas identificadas</p>
+      @if (coverage(); as cov) {
+        <p class="text-2xl font-bold text-foreground mt-1">{{ cov.percentage | number: '1.0-0' }}%</p>
+        <p class="text-[11px] text-foreground-subtle mt-0.5">
+          {{ cov.identified | number }} de {{ cov.total | number }} ventas en 30 días
+        </p>
+      } @else {
+        <p class="text-2xl font-bold text-foreground mt-1">—</p>
+      }
+    </div>
+  </div>
+
+  <!-- Aviso cuando casi nada se registra: sin esto el resto del reporte
+       describe una muestra chica y el dueño no tiene cómo saberlo. -->
+  @if (coverage(); as cov) {
+    @if (cov.total > 0 && cov.percentage < 20) {
+      <div class="rounded-xl border border-warning/30 bg-warning/10 px-5 py-3">
+        <p class="text-xs text-foreground-muted">
+          Solo el {{ cov.percentage | number: '1.0-0' }}% de las ventas de los últimos 30 días quedó
+          asociada a un cliente. Los números de abajo describen esa porción, no todo el negocio:
+          para que sirvan, hay que registrar al cliente al cobrar.
+        </p>
+      </div>
+    }
+  }
+
+  <!-- Listado -->
+  <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+    <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit">
+        <button type="button" (click)="setView('top')"
+                [class.bg-surface]="view() === 'top'"
+                [class.shadow-sm]="view() === 'top'"
+                [class.text-foreground]="view() === 'top'"
+                [class.text-foreground-muted]="view() !== 'top'"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg transition">
+          Mejores clientes
+        </button>
+        <button type="button" (click)="setView('inactivos')"
+                [class.bg-surface]="view() === 'inactivos'"
+                [class.shadow-sm]="view() === 'inactivos'"
+                [class.text-foreground]="view() === 'inactivos'"
+                [class.text-foreground-muted]="view() !== 'inactivos'"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg transition">
+          Inactivos ({{ inactiveClients().length }})
+        </button>
+        <button type="button" (click)="setView('nuevos')"
+                [class.bg-surface]="view() === 'nuevos'"
+                [class.shadow-sm]="view() === 'nuevos'"
+                [class.text-foreground]="view() === 'nuevos'"
+                [class.text-foreground-muted]="view() !== 'nuevos'"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg transition">
+          Sin compras ({{ neverBought().length }})
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" (click)="exportExcel()" [disabled]="visibleRows().length === 0"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border-subtle text-foreground-muted hover:text-foreground hover:bg-muted transition disabled:opacity-50">
+          Excel
+        </button>
+        <button type="button" (click)="exportPdf()" [disabled]="visibleRows().length === 0"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border-subtle text-foreground-muted hover:text-foreground hover:bg-muted transition disabled:opacity-50">
+          PDF
+        </button>
+      </div>
+    </header>
+
+    @if (loading()) {
+      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+    } @else if (visibleRows().length === 0) {
+      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">
+        @if (view() === 'inactivos') {
+          Ningún cliente lleva {{ inactiveDays }} días o más sin comprar.
+        } @else if (view() === 'nuevos') {
+          Todos los clientes registrados ya compraron al menos una vez.
+        } @else {
+          Todavía no hay ventas asociadas a un cliente.
+        }
+      </div>
+    } @else {
+      <div class="max-h-[32rem] overflow-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-muted border-b border-border-subtle sticky top-0">
+            <tr>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cliente</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">NIT / CI</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Compras</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Total gastado</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Ticket prom.</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Última compra</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            @for (row of visibleRows(); track row.client_id) {
+              <tr class="hover:bg-muted/50 transition">
+                <td class="px-6 py-2 font-medium text-foreground">{{ row.name }}</td>
+                <td class="px-6 py-2 text-foreground-muted font-mono text-xs">
+                  {{ row.nit ?? row.ci ?? '—' }}
+                </td>
+                <td class="px-6 py-2 text-right font-mono text-foreground-muted">{{ row.orders_count }}</td>
+                <td class="px-6 py-2 text-right font-mono text-foreground">
+                  {{ row.total_spent | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-6 py-2 text-right font-mono text-foreground-muted">
+                  {{ row.avg_ticket | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-6 py-2 text-right text-foreground-muted whitespace-nowrap">
+                  @if (row.last_purchase_at) {
+                    {{ row.last_purchase_at | date: 'd MMM y' }}
+                    <span class="text-[11px] text-foreground-subtle block">
+                      hace {{ daysSince(row) }} días
+                    </span>
+                  } @else {
+                    <span class="text-foreground-subtle">Nunca</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

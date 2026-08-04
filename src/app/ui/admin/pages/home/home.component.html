@@ -9,6 +9,7 @@
       <p class="text-sm text-foreground-muted">Resumen del negocio · {{ now() | date: 'EEEE d MMM' }}</p>
     </div>
     <div class="flex items-center gap-2">
+      @if (hasAdvancedReports()) {
       <button (click)="exportExcel()"
               [disabled]="loading()"
               title="Exportar a Excel"
@@ -29,6 +30,7 @@
         </svg>
         PDF
       </button>
+      }
       <a routerLink="/admin/sales"
          class="px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg transition hover:opacity-90 shadow-sm">
         + Nueva venta
@@ -72,7 +74,8 @@
       </div>
     </div>
 
-    <!-- Ingresos del mes -->
+    <!-- Ingresos del mes — plan Negocio -->
+    @if (hasAdvancedReports()) {
     <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5">
       <div class="flex items-center gap-2.5 mb-3">
         <div class="w-8 h-8 rounded-[10px] bg-muted border border-border-subtle flex items-center justify-center flex-shrink-0">
@@ -101,12 +104,14 @@
       </p>
       <p class="text-xs text-foreground-muted">acumulado del mes en curso</p>
     </div>
+    }
   </div>
 
   <!-- Charts 3 columns -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-    <!-- Ingresos por categoría -->
+    <!-- Ingresos por categoría — plan Negocio -->
+    @if (hasAdvancedReports()) {
     <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 flex flex-col gap-4">
       <div>
         <h3 class="text-sm font-semibold text-foreground">Ingresos por categoría</h3>
@@ -137,6 +142,7 @@
         </div>
       }
     </div>
+    }
 
     <!-- Top 5 productos -->
     <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5 flex flex-col gap-4">

@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { ReportQueryService } from '../../../../services/report/query.service';
 import { OrderQueryService } from '../../../../services/order/query.service';
+import { SubscriptionStateService } from '../../../../services/subscription/subscription-state.service';
 import { ExportService, SalesReportRow, SalesSummary } from '../../../../services/export/export.service';
 import { DailyIncome } from '../../../../models/daily-income.model';
 import { MonthlyIncome } from '../../../../models/monthly-income.model';
@@ -19,7 +20,12 @@ export class AdminHomeComponent {
   private readonly reportQuery  = inject(ReportQueryService);
   private readonly orderQuery   = inject(OrderQueryService);
   private readonly exportService = inject(ExportService);
+  private readonly subscriptionState = inject(SubscriptionStateService);
   protected readonly auth       = inject(AuthService);
+
+  // Ingresos del mes, ingresos por categoría y exportación son del plan
+  // Negocio, igual que en /admin/reports.
+  readonly hasAdvancedReports = computed(() => this.subscriptionState.allows('advanced_reports'));
 
   readonly loading         = signal(true);
   readonly daily           = signal<DailyIncome[]>([]);
@@ -200,11 +206,22 @@ export class AdminHomeComponent {
   async refresh(): Promise<void> {
     this.loading.set(true);
     try {
+      // El dashboard mostraba ingresos del mes y por categoría a cualquier
+      // plan, justo lo que /admin/reports le bloquea al plan Caja: se estaba
+      // regalando en el home lo que se cobra en Reportes. Además de ocultarlo,
+      // ni se consulta — el corte no sirve de nada si el dato igual viaja.
+      await this.subscriptionState.ensureLoaded();
+      const advanced = this.hasAdvancedReports();
+
       await Promise.all([
         this.reportQuery.listDailyIncome(14).then(v => this.daily.set(v)),
-        this.reportQuery.listMonthlyIncome(2).then(v => this.monthly.set(v)),
         this.orderQuery.listOrders(100).then(v => this.orders.set(v)),
-        this.reportQuery.listRevenueByCategoryThisMonth().then(v => this.categoryRevenue.set(v)),
+        ...(advanced
+          ? [
+              this.reportQuery.listMonthlyIncome(2).then(v => this.monthly.set(v)),
+              this.reportQuery.listRevenueByCategoryThisMonth().then(v => this.categoryRevenue.set(v)),
+            ]
+          : []),
       ]);
     } catch (err) {
       console.error('Error cargando dashboard admin', err);

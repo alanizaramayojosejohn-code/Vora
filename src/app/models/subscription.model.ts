@@ -19,11 +19,12 @@ export const PLAN_FEES: Record<Exclude<PlanType, 'custom'>, number> = {
 //
 // Solo se listan las features RESTRINGIDAS. Todo lo que no está acá — POS,
 // offline, productos, categorías, clientes, stock y alertas, historial,
-// arqueos de caja — va en los dos planes.
+// arqueos de caja, ventas del día — va en los dos planes.
 export type PlanFeature =
   | 'purchases'         // proveedores, compras, órdenes de compra
-  | 'advanced_reports'  // reportes diario/mensual/ventas + exportación
-  | 'staff'             // personal y pago de sueldos
+  | 'advanced_reports'  // ingresos diario/mensual, detalle de ventas con
+                        // filtros, reportes de clientes y exportación
+  | 'staff'             // personal, sueldos y reporte de planilla
   | 'branding';         // tema y logo propios
 
 const RESTRICTED_FEATURES: readonly PlanFeature[] = [

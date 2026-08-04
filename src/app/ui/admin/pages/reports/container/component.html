@@ -7,7 +7,22 @@
   </div>
 
   <!-- Tabs -->
-  <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit">
+  <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit flex-wrap">
+
+    <!-- Hoy: en los dos planes -->
+    <button type="button" (click)="setTab('dia')"
+            [class.bg-surface]="activeTab() === 'dia'"
+            [class.shadow-sm]="activeTab() === 'dia'"
+            [class.text-foreground]="activeTab() === 'dia'"
+            [class.text-foreground-muted]="activeTab() !== 'dia'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+      Ventas del día
+    </button>
+
     @if (hasAdvancedReports()) {
     <button type="button" (click)="setTab('ventas')"
             [class.bg-surface]="activeTab() === 'ventas'"
@@ -34,7 +49,37 @@
       </svg>
       Resumen general
     </button>
+    <button type="button" (click)="setTab('clientes')"
+            [class.bg-surface]="activeTab() === 'clientes'"
+            [class.shadow-sm]="activeTab() === 'clientes'"
+            [class.text-foreground]="activeTab() === 'clientes'"
+            [class.text-foreground-muted]="activeTab() !== 'clientes'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Clientes
+    </button>
     }
+
+    @if (hasStaff()) {
+    <button type="button" (click)="setTab('planilla')"
+            [class.bg-surface]="activeTab() === 'planilla'"
+            [class.shadow-sm]="activeTab() === 'planilla'"
+            [class.text-foreground]="activeTab() === 'planilla'"
+            [class.text-foreground-muted]="activeTab() !== 'planilla'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
+        <path d="M8 2v4M16 2v4M8 14h.01M12 14h.01M16 14h.01"/>
+      </svg>
+      Planilla
+    </button>
+    }
+
     <button type="button" (click)="setTab('arqueos')"
             [class.bg-surface]="activeTab() === 'arqueos'"
             [class.shadow-sm]="activeTab() === 'arqueos'"
@@ -47,6 +92,7 @@
       </svg>
       Arqueos de caja
     </button>
+
     @if (!hasAdvancedReports()) {
       <button type="button" (click)="setTab('stock')"
               [class.bg-surface]="activeTab() === 'stock'"
@@ -66,10 +112,15 @@
   @if (!hasAdvancedReports()) {
     <div class="rounded-xl border border-border-subtle bg-elevated px-5 py-3 flex items-center justify-between gap-4">
       <p class="text-xs text-foreground-muted">
-        Los reportes de ingresos diarios, mensuales, el detalle de ventas y la exportación
-        están incluidos en el plan Negocio.
+        El detalle de ventas con filtros, los ingresos diarios y mensuales, los reportes de
+        clientes y la exportación están incluidos en el plan Negocio.
       </p>
     </div>
+  }
+
+  <!-- Tab: Ventas del día -->
+  @if (activeTab() === 'dia') {
+    <app-admin-reports-daily-sales />
   }
 
   <!-- Tab: Reporte de ventas -->
@@ -84,6 +135,16 @@
       <app-admin-reports-daily-income [rows]="daily()" [loading]="loading()" />
       <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
     </div>
+  }
+
+  <!-- Tab: Clientes -->
+  @if (activeTab() === 'clientes' && hasAdvancedReports()) {
+    <app-admin-reports-clients />
+  }
+
+  <!-- Tab: Planilla -->
+  @if (activeTab() === 'planilla' && hasStaff()) {
+    <app-admin-reports-payroll />
   }
 
   <!-- Plan Caja: solo bajo stock, que sí está incluido -->

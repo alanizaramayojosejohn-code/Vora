@@ -17,13 +17,15 @@ export class HomeComponent {
     'Stock en tiempo real y alertas de bajo inventario',
     'Clientes con NIT',
     'Cierre de caja y arqueo por turno',
+    'Ventas del día: totales, cómo te pagaron y lo más vendido',
     'Cajas y usuarios ilimitados',
   ];
 
   readonly planNegocio: readonly string[] = [
     'Proveedores, compras y órdenes de compra',
     'Reportes diarios, mensuales y de ventas, con exportación',
-    'Personal y pago de sueldos',
+    'Reportes de clientes: mejores, inactivos y ticket promedio',
+    'Personal, pago de sueldos y reporte de planilla',
     'Tema y logo de tu marca',
     'Soporte prioritario',
   ];
