@@ -55,63 +55,65 @@
         }
       </div>
     } @else {
-      <table class="w-full text-sm">
-        <thead class="bg-muted/40 border-b border-border-subtle">
-          <tr>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Empleado</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">CI</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Cargo</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Sueldo</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Ingreso</th>
-            <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (emp of filteredSorted(); track emp.id; let even = $even) {
-            <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-3">
-                  <span class="w-9 h-9 rounded-full bg-foreground text-base flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                    {{ initials(emp.name) }}
-                  </span>
-                  <span>
-                    <span class="block font-semibold text-foreground">{{ emp.name }}</span>
-                    @if (emp.phone) {
-                      <span class="block text-[11px] text-foreground-faint font-mono">{{ emp.phone }}</span>
-                    }
-                  </span>
-                </div>
-              </td>
-              <td class="px-5 py-3 font-mono text-foreground-muted text-xs">{{ emp.ci }}</td>
-              <td class="px-5 py-3 text-foreground-muted text-xs">{{ emp.position }}</td>
-              <td class="px-5 py-3 font-semibold text-foreground text-xs">{{ emp.salary | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
-              <td class="px-5 py-3 text-foreground-subtle text-xs">{{ emp.hired_at | date: 'dd MMM yyyy' }}</td>
-              <td class="px-5 py-3 text-right">
-                <div class="inline-flex items-center gap-1">
-                  <button type="button" (click)="payments.emit(emp)" title="Historial de pagos"
-                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
-                    </svg>
-                  </button>
-                  <button type="button" (click)="edit.emit(emp)" title="Editar"
-                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
-                    </svg>
-                  </button>
-                  <button type="button" (click)="remove.emit(emp)" title="Eliminar"
-                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                  </button>
-                </div>
-              </td>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-sm min-w-[660px]">
+          <thead class="bg-muted/40 border-b border-border-subtle whitespace-nowrap">
+            <tr>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Empleado</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">CI</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Cargo</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Sueldo</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Ingreso</th>
+              <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (emp of filteredSorted(); track emp.id; let even = $even) {
+              <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-full bg-foreground text-base flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                      {{ initials(emp.name) }}
+                    </span>
+                    <span>
+                      <span class="block font-semibold text-foreground">{{ emp.name }}</span>
+                      @if (emp.phone) {
+                        <span class="block text-[11px] text-foreground-faint font-mono">{{ emp.phone }}</span>
+                      }
+                    </span>
+                  </div>
+                </td>
+                <td class="px-5 py-3 font-mono text-foreground-muted text-xs">{{ emp.ci }}</td>
+                <td class="px-5 py-3 text-foreground-muted text-xs">{{ emp.position }}</td>
+                <td class="px-5 py-3 font-semibold text-foreground text-xs">{{ emp.salary | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+                <td class="px-5 py-3 text-foreground-subtle text-xs">{{ emp.hired_at | date: 'dd MMM yyyy' }}</td>
+                <td class="px-5 py-3 text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <button type="button" (click)="payments.emit(emp)" title="Historial de pagos"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+                      </svg>
+                    </button>
+                    <button type="button" (click)="edit.emit(emp)" title="Editar"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                      </svg>
+                    </button>
+                    <button type="button" (click)="remove.emit(emp)" title="Eliminar"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
       <div class="px-5 py-3 border-t border-border-subtle bg-elevated/30">
         <span class="text-[11px] text-foreground-muted font-medium">

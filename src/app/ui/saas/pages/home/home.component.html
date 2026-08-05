@@ -145,29 +145,31 @@
         <a routerLink="/saas/businesses" class="text-sm text-primary hover:underline mt-2 inline-block">Crear el primero</a>
       </div>
     } @else {
-      <table class="w-full text-sm">
-        <thead class="bg-muted border-b border-border-subtle">
-          <tr>
-            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Nombre</th>
-            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Paleta</th>
-            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Alta</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border-subtle">
-          @for (b of latestBusinesses(); track b.id) {
-            <tr class="hover:bg-muted/50 transition">
-              <td class="px-6 py-2.5 font-medium text-foreground">{{ b.name }}</td>
-              <td class="px-6 py-2.5">
-                <div class="inline-flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full ring-1 ring-border-subtle" [style.background]="primaryColor(b)"></span>
-                  <span class="text-xs text-foreground-muted">{{ presetLabel(b) }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-2.5 text-foreground-subtle">{{ b.created_at | date: 'dd MMM yyyy' }}</td>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-sm min-w-[440px]">
+          <thead class="bg-muted border-b border-border-subtle whitespace-nowrap">
+            <tr>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Nombre</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Paleta</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Alta</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            @for (b of latestBusinesses(); track b.id) {
+              <tr class="hover:bg-muted/50 transition">
+                <td class="px-6 py-2.5 font-medium text-foreground">{{ b.name }}</td>
+                <td class="px-6 py-2.5">
+                  <div class="inline-flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full ring-1 ring-border-subtle" [style.background]="primaryColor(b)"></span>
+                    <span class="text-xs text-foreground-muted">{{ presetLabel(b) }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-2.5 text-foreground-subtle">{{ b.created_at | date: 'dd MMM yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   </div>
 </div>

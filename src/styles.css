@@ -88,3 +88,40 @@ html, body {
   color: var(--c-foreground);
   min-height: 100vh;
 }
+
+/* =====================================================================
+   Tablas con scroll horizontal.
+
+   En un teléfono las tablas no entran. En vez de dejar que se aplasten
+   hasta ser ilegibles, desbordan dentro de su contenedor y se arrastran:
+   el `overflow-x-auto` va en el contenedor y el `min-width` en cada
+   <table>. Sin ese min-width la tabla se encoge al ancho disponible y la
+   barra de scroll nunca llega a existir.
+
+   Acá solo se afina la barra en pantallas táctiles, donde el navegador la
+   respete —iOS Safari y ventanas angostas de escritorio—. Android Chrome
+   ignora ::-webkit-scrollbar y usa una barra overlay que aparece al
+   arrastrar; es el comportamiento propio de la plataforma y la regla
+   simplemente no le hace nada.
+
+   Se evitó a propósito el truco de sombras con background-attachment:
+   diez de las tablas pintan las filas pares con bg-muted opaco, así que
+   la sombra quedaría tapada, y volver esas filas transparentes habría
+   borrado el rayado que ya tiene el diseño.
+   ===================================================================== */
+@media (hover: none) and (pointer: coarse) {
+  .table-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-border) transparent;
+  }
+
+  .table-scroll::-webkit-scrollbar {
+    height: 6px;
+    -webkit-appearance: none;
+  }
+
+  .table-scroll::-webkit-scrollbar-thumb {
+    background: var(--c-border);
+    border-radius: 3px;
+  }
+}
