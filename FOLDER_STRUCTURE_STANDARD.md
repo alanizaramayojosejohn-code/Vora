@@ -148,17 +148,17 @@ pages/<feature>/
 │   └── component.html
 └── components/              # dumb components: reciben @Input/emiten @Output
     ├── list/
-    │   ├── list.ts
-    │   ├── list.html
-    │   └── list.css
+    │   ├── component.ts
+    │   ├── component.html
+    │   └── component.css
     ├── detail/
-    │   ├── detail.ts
-    │   ├── detail.html
-    │   └── detail.css
+    │   ├── component.ts
+    │   ├── component.html
+    │   └── component.css
     └── form/
-        ├── form.ts
-        ├── form.html
-        └── form.css
+        ├── component.ts
+        ├── component.html
+        └── component.css
 ```
 
 Reglas:
@@ -238,9 +238,9 @@ ui/admin/pages/students/
 │   ├── component.ts         # inyecta StudentService + StudentQueryService
 │   └── component.html       # <app-students-list/> <app-students-form/>
 └── components/
-    ├── list/{list.ts,list.html,list.css}
-    ├── form/{form.ts,form.html,form.css}
-    └── detail/{detail.ts,detail.html,detail.css}
+    ├── list/{componente.ts,component.html,component.css}
+    ├── form/{component.ts,component.html,component.css}
+    └── detail/{component.ts,component.html,component.css}
 
 models/student.model.ts
 services/student/

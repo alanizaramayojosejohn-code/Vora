@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Client } from '../../../../../../models/client.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 // Tabs del listado: filtran sobre el array completo en memoria.
 type ClientFilter = 'all' | 'recent' | 'no-phone';
@@ -8,7 +9,7 @@ type ClientSort = 'name' | 'ci' | 'created';
 
 @Component({
   selector: 'app-admin-clients-list',
-  imports: [DatePipe],
+  imports: [SkeletonRowsComponent, DatePipe],
   templateUrl: './list.html',
   styleUrl: './list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

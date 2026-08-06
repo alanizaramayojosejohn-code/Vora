@@ -4,29 +4,62 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { ReportQueryService } from '../../../../services/report/query.service';
 import { OrderQueryService } from '../../../../services/order/query.service';
+import { SubscriptionStateService } from '../../../../services/subscription/subscription-state.service';
 import { ExportService, SalesReportRow, SalesSummary } from '../../../../services/export/export.service';
-import { DailyIncome } from '../../../../models/daily-income.model';
 import { MonthlyIncome } from '../../../../models/monthly-income.model';
+import { LowStockProduct } from '../../../../models/low-stock-product.model';
+import {
+  DailySalesSummary,
+  EMPTY_DAILY_SUMMARY,
+} from '../../../../models/daily-sales.model';
+import {
+  DailySalesQueryService,
+  OpenSessionSales,
+} from '../../../../services/report/daily-sales.query.service';
 import { OrderWithDetails, PaymentMethod, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../models/order.model';
+import { SkeletonBarsComponent } from '../../../shared/skeleton-bars.component';
+import { SkeletonRowsComponent } from '../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [SkeletonRowsComponent, SkeletonBarsComponent, CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminHomeComponent {
   private readonly reportQuery  = inject(ReportQueryService);
   private readonly orderQuery   = inject(OrderQueryService);
+  private readonly dailySales   = inject(DailySalesQueryService);
   private readonly exportService = inject(ExportService);
+  private readonly subscriptionState = inject(SubscriptionStateService);
   protected readonly auth       = inject(AuthService);
 
+  // Ingresos del mes, ingresos por categoría y exportación son del plan
+  // Negocio, igual que en /admin/reports.
+  readonly hasAdvancedReports = computed(() => this.subscriptionState.allows('advanced_reports'));
+
   readonly loading         = signal(true);
-  readonly daily           = signal<DailyIncome[]>([]);
   readonly monthly         = signal<MonthlyIncome[]>([]);
   readonly orders          = signal<OrderWithDetails[]>([]);
   readonly categoryRevenue = signal<{ category: string; total: number }[]>([]);
   readonly now             = signal(new Date());
+
+  // Datos que los DOS planes pueden ver. Sin esto el panel del plan Caja
+  // quedaba con la mitad de la grilla vacía: al ocultar lo que es de
+  // Negocio no entraba nada en su lugar.
+  readonly todaySummary = signal<DailySalesSummary>(EMPTY_DAILY_SUMMARY);
+  readonly openSessions = signal<OpenSessionSales[]>([]);
+  readonly lowStock     = signal<LowStockProduct[]>([]);
+
+  readonly openShiftCount = computed(() => this.openSessions().length);
+
+  // Efectivo que debería haber sumando todos los cajones abiertos.
+  readonly expectedCashNow = computed(() =>
+    this.openSessions().reduce(
+      (sum, s) => sum + Number(s.opening_float) + Number(s.cash_sales),
+      0,
+    ),
+  );
 
   readonly orderPrimaryLabel    = orderPrimaryLabel;
   readonly PAYMENT_METHOD_LABEL = PAYMENT_METHOD_LABEL;
@@ -82,11 +115,26 @@ export class AdminHomeComponent {
     return ((this.weekSalesCount() - prev) / prev) * 100;
   });
 
+  // Ventas por día de los últimos 7, contadas sobre las órdenes que ya están
+  // cargadas. Antes salía de income_daily, que es un reporte de ingresos y no
+  // está incluido en el plan Caja; además el KPI de al lado cuenta ventas, así
+  // que un sparkline de importes medía otra cosa que el número que acompaña.
   readonly weekSparkline = computed<number[]>(() => {
-    const agg = this.daily().slice(-7);
-    const max = agg.reduce((m, d) => Math.max(m, Number(d.total)), 0);
-    if (max === 0) return [4, 6, 5, 8, 10, 7, 9];
-    return agg.map(d => Math.max(4, Math.round((Number(d.total) / max) * 22)));
+    const counts = new Array<number>(7).fill(0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const o of this.orders()) {
+      if (o.cancelled_at) continue;
+      const d = new Date(o.created_at);
+      d.setHours(0, 0, 0, 0);
+      const daysAgo = Math.round((today.getTime() - d.getTime()) / 86_400_000);
+      if (daysAgo >= 0 && daysAgo < 7) counts[6 - daysAgo]++;
+    }
+
+    const max = Math.max(...counts);
+    if (max === 0) return counts.map(() => 4);
+    return counts.map(c => Math.max(4, Math.round((c / max) * 22)));
   });
 
   // ── Métodos de pago (donut) ────────────────────────────────────────────
@@ -200,11 +248,26 @@ export class AdminHomeComponent {
   async refresh(): Promise<void> {
     this.loading.set(true);
     try {
+      // El dashboard mostraba ingresos del mes y por categoría a cualquier
+      // plan, justo lo que /admin/reports le bloquea al plan Caja: se estaba
+      // regalando en el home lo que se cobra en Reportes. Además de ocultarlo,
+      // ni se consulta — el corte no sirve de nada si el dato igual viaja.
+      await this.subscriptionState.ensureLoaded();
+      const advanced = this.hasAdvancedReports();
+
       await Promise.all([
-        this.reportQuery.listDailyIncome(14).then(v => this.daily.set(v)),
-        this.reportQuery.listMonthlyIncome(2).then(v => this.monthly.set(v)),
         this.orderQuery.listOrders(100).then(v => this.orders.set(v)),
-        this.reportQuery.listRevenueByCategoryThisMonth().then(v => this.categoryRevenue.set(v)),
+        this.dailySales.summary('today').then(v => this.todaySummary.set(v)),
+        // Los turnos en curso los sirve una RPC que exige rol admin. Un fallo
+        // acá no debe tumbar el resto del panel.
+        this.dailySales.openSessions().then(v => this.openSessions.set(v)).catch(() => {}),
+        // El bajo stock solo se pinta en el plan Caja, así que solo ahí se pide.
+        ...(advanced
+          ? [
+              this.reportQuery.listMonthlyIncome(2).then(v => this.monthly.set(v)),
+              this.reportQuery.listRevenueByCategoryThisMonth().then(v => this.categoryRevenue.set(v)),
+            ]
+          : [this.reportQuery.listLowStockProducts().then(v => this.lowStock.set(v))]),
       ]);
     } catch (err) {
       console.error('Error cargando dashboard admin', err);

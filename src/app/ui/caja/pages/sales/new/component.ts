@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Category } from '../../../../../models/category.model';
 import { Client } from '../../../../../models/client.model';
 import { Product } from '../../../../../models/product.model';
@@ -10,11 +10,15 @@ import { ClientQueryService } from '../../../../../services/client/query.service
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
 import { OrderService } from '../../../../../services/order/order.service';
+import { AuthService } from '../../../../../services/auth/auth.service';
+import { CashSessionService } from '../../../../../services/cash-session/cash-session.service';
+import { SubscriptionStateService } from '../../../../../services/subscription/subscription-state.service';
 import { NetworkService } from '../../../../../services/network/network.service';
 import { OfflineQueueService } from '../../../../../services/offline/offline-queue.service';
 import { ProductCacheService } from '../../../../../services/offline/product-cache.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ProductsFormComponent } from '../../../../admin/pages/products/components/form/form';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
 
 const PRODUCT_PAGE_SIZE = 20;
 
@@ -32,7 +36,7 @@ type PaymentMethod = 'cash' | 'card' | 'qr';
 
 @Component({
   selector: 'app-caja-sales-new',
-  imports: [CurrencyPipe, DecimalPipe, FormsModule, ProductsFormComponent],
+  imports: [CurrencyPipe, DecimalPipe, FormsModule, RouterLink, ProductsFormComponent, FormModalComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -47,6 +51,20 @@ export class CajaSalesNewComponent {
   private readonly network        = inject(NetworkService);
   private readonly offlineQueue   = inject(OfflineQueueService);
   private readonly productCache   = inject(ProductCacheService);
+  private readonly cashSessions   = inject(CashSessionService);
+  private readonly subscriptionState = inject(SubscriptionStateService);
+  private readonly auth           = inject(AuthService);
+
+  // Turno abierto. Si no hay, la venta se registra igual pero queda fuera del
+  // arqueo — el aviso en pantalla hace visible el hueco en vez de callarlo.
+  readonly cashSession = this.cashSessions.current;
+
+  // Esta pantalla la comparten caja y admin. El enlace para abrir turno tiene
+  // que quedarse en el panel de quien está vendiendo: mandar al admin a /caja
+  // lo sacaría de su propio menú.
+  readonly shiftLink = computed(() =>
+    this.auth.role() === 'admin' ? '/admin/turno' : '/caja/turno',
+  );
 
   readonly products = signal<Product[]>([]);
   readonly clients = signal<Client[]>([]);
@@ -71,6 +89,11 @@ export class CajaSalesNewComponent {
   readonly orderNote = signal('');
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+
+  // Clave de idempotencia de la venta en curso. Se mantiene entre reintentos
+  // para que "Cobrar" tras un error de red no registre la venta dos veces, y
+  // se descarta al vaciar el carrito (que es una venta distinta).
+  private pendingSaleUuid: string | null = null;
 
   readonly availableProducts = computed(() =>
     this.products().filter((p) => !p.has_stock || p.stock > 0)
@@ -120,9 +143,14 @@ export class CajaSalesNewComponent {
     return this.clients().find((c) => c.id === id) ?? null;
   });
 
+  // Suscripción vencida: no se puede cobrar. Se evalúa acá y no con la
+  // directiva porque este botón ya tiene su propio [disabled].
+  readonly readonlyMode = computed(() => this.subscriptionState.status()?.isBlocked ?? false);
+
   readonly canCharge = computed(() => {
     if (this.cart().length === 0) return false;
     if (this.submitting()) return false;
+    if (this.readonlyMode()) return false;
     if (this.paymentMethod() === 'cash' && this.cashReceived() < this.cartSubtotal()) return false;
     return true;
   });
@@ -139,6 +167,16 @@ export class CajaSalesNewComponent {
   async load(): Promise<void> {
     this.loading.set(true);
     this.fromCache.set(false);
+
+    // Offline conserva el turno que se cargó la última vez que hubo red, que
+    // es el correcto: el turno se abre al inicio de la jornada.
+    if (this.network.isOnline()) {
+      try {
+        await this.cashSessions.loadCurrent();
+      } catch {
+        /* el aviso de turno es informativo; no debe romper la venta */
+      }
+    }
 
     if (!this.network.isOnline()) {
       const cached = await this.productCache.load();
@@ -246,6 +284,7 @@ export class CajaSalesNewComponent {
     this.cashReceived.set(0);
     this.orderNote.set('');
     this.formError.set(null);
+    this.pendingSaleUuid = null;
   }
 
   setSearch(value: string): void {
@@ -275,10 +314,11 @@ export class CajaSalesNewComponent {
     this.formError.set(null);
 
     const orderInput = {
-      client_id:      this.cartCustomerId() || null,
-      payment_method: this.paymentMethod(),
-      notes:          this.orderNote().trim() || null,
-      items:          this.cart().map((item) => ({
+      client_id:       this.cartCustomerId() || null,
+      payment_method:  this.paymentMethod(),
+      notes:           this.orderNote().trim() || null,
+      cash_session_id: this.cashSession()?.id ?? null,
+      items:           this.cart().map((item) => ({
         product_id: item.product_id,
         quantity:   item.quantity,
         unit_price: item.unit_price,
@@ -294,8 +334,11 @@ export class CajaSalesNewComponent {
       return;
     }
 
+    this.pendingSaleUuid ??= crypto.randomUUID();
+
     try {
-      await this.orderService.registerOrder(orderInput);
+      await this.orderService.registerOrder(orderInput, this.pendingSaleUuid);
+      this.pendingSaleUuid = null;
       this.goBack();
     } catch (err: unknown) {
       this.formError.set(errorMessage(err, 'Error al procesar la venta'));

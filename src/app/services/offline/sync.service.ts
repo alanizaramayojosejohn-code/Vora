@@ -54,7 +54,10 @@ export class SyncService {
     for (const order of toSync) {
       this.attemptedIds.add(order.id);
       try {
-        await this.orderService.registerOrder(order.input);
+        // El id de la cola viaja como clave de idempotencia: si esta venta ya
+        // llegó al servidor en un intento anterior cuya respuesta se perdió,
+        // el RPC devuelve la orden existente en vez de duplicarla.
+        await this.orderService.registerOrder(order.input, order.id);
         this.queue.remove(order.id);
       } catch (err: unknown) {
         const msg = errorMessage(err, 'Error al sincronizar venta');

@@ -24,10 +24,9 @@ import {
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 const PLAN_DESCRIPTIONS: Record<PlanType, string> = {
-  basico:     'Funciones esenciales para empezar',
-  pro:        'Más herramientas para crecer',
-  enterprise: 'Acceso completo y soporte prioritario',
-  custom:     'Tarifa negociada con el negocio',
+  caja:    'Punto de venta y ventas offline',
+  negocio: 'Inventario, compras, reportes y personal',
+  custom:  'Tarifa negociada con el negocio',
 };
 
 export interface BusinessFormValue {
@@ -65,9 +64,9 @@ export class BusinessesFormComponent {
   readonly PLAN_LABELS       = PLAN_LABELS;
   readonly PLAN_FEES         = PLAN_FEES;
   readonly PLAN_DESCRIPTIONS = PLAN_DESCRIPTIONS;
-  readonly planOptions: (PlanType | null)[] = ['basico', 'pro', 'enterprise', 'custom', null];
-  readonly selectedPlan = signal<PlanType | null>('basico');
-  readonly customFee    = signal(150);
+  readonly planOptions: (PlanType | null)[] = ['caja', 'negocio', 'custom', null];
+  readonly selectedPlan = signal<PlanType | null>('caja');
+  readonly customFee    = signal(PLAN_FEES.caja);
 
   selectPlan(plan: PlanType | null): void {
     this.selectedPlan.set(plan);

@@ -2,21 +2,17 @@
 
   <!-- Mobile topbar -->
   <header class="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-14 bg-surface border-b border-border-subtle flex-shrink-0">
-    <button (click)="sidebarOpen.set(!sidebarOpen())"
-            class="p-2 rounded-lg hover:bg-muted text-foreground-muted hover:text-foreground transition">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="4" x2="20" y1="6" y2="6"/>
-        <line x1="4" x2="20" y1="12" y2="12"/>
-        <line x1="4" x2="20" y1="18" y2="18"/>
-      </svg>
-    </button>
+    <app-menu-toggle [open]="sidebarOpen()" (toggled)="sidebarOpen.set(!sidebarOpen())" />
     <app-brand-logo [small]="true" [badge]="audienceLabel" class="flex items-center gap-2.5 min-w-0" />
   </header>
 
   <!-- Backdrop -->
-  @if (sidebarOpen()) {
-    <div class="fixed inset-0 z-40 bg-black/50 lg:hidden" (click)="sidebarOpen.set(false)"></div>
-  }
+  <div class="fixed inset-0 z-40 bg-black/50 lg:hidden transition-opacity duration-300 ease-out"
+       [class.opacity-0]="!sidebarOpen()"
+       [class.pointer-events-none]="!sidebarOpen()"
+       [class.opacity-100]="sidebarOpen()"
+       aria-hidden="true"
+       (click)="sidebarOpen.set(false)"></div>
 
   <!-- ============================== Sidebar ============================== -->
   <aside class="fixed inset-y-0 left-0 z-50 w-60 bg-surface backdrop-blur-xl border-r border-border-subtle flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out lg:sticky lg:inset-auto lg:top-0 lg:h-screen lg:z-auto lg:translate-x-0"
@@ -85,6 +81,7 @@
         Usuarios
       </a>
 
+      <ng-container *appIfPlan="'staff'">
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Personal</p>
 
       <a routerLink="/admin/staff" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -95,7 +92,9 @@
         </svg>
         Personal
       </a>
+      </ng-container>
 
+      <ng-container *appIfPlan="'purchases'">
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Provisiones</p>
 
       <a routerLink="/admin/purchases" routerLinkActive="bg-primary text-primary-fg shadow-sm"
@@ -106,6 +105,7 @@
         </svg>
         Provisiones
       </a>
+      </ng-container>
 
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Ventas</p>
 
@@ -116,6 +116,15 @@
           <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
         </svg>
         Ventas
+      </a>
+
+      <a routerLink="/admin/turno" routerLinkActive="bg-primary text-primary-fg shadow-sm"
+         (click)="sidebarOpen.set(false)"
+         class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
+        </svg>
+        Mi turno de caja
       </a>
 
       <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-foreground-faint">Análisis</p>
@@ -161,6 +170,7 @@
 
   <!-- ============================== Main ============================== -->
   <main class="flex-1 min-w-0">
-    <router-outlet />
+    <app-subscription-status />
+    <app-route-view />
   </main>
 </div>

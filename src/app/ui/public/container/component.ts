@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouteViewComponent } from '../../shared/route-view.component';
 
 @Component({
   selector: 'app-public-container',
-  imports: [RouterOutlet],
+  imports: [RouteViewComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -45,8 +45,9 @@
     </div>
   </div>
 
-  <!-- Apariencia del negocio (solo super_admin) -->
-  @if (isSuperAdmin()) {
+  <!-- Apariencia del negocio: super_admin siempre; el admin del negocio solo
+       si su plan incluye marca propia. -->
+  @if (canEditBranding()) {
     <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 space-y-5">
       <div>
         <h3 class="font-semibold text-foreground">Apariencia del negocio</h3>

@@ -6,6 +6,7 @@ import { BusinessTheme, DEFAULT_THEME } from '../theme/theme.presets';
 import { ThemeService } from '../theme/theme.service';
 import { StorageEncryptionService } from '../offline/storage-encryption.service';
 import { OfflineQueueService } from '../offline/offline-queue.service';
+import { SubscriptionStateService } from '../subscription/subscription-state.service';
 
 interface ProfileWithBusiness extends Profile {
   businesses: { theme: BusinessTheme | null; name: string; logo_url: string | null } | null;
@@ -17,6 +18,7 @@ export class AuthService {
   private readonly theme = inject(ThemeService);
   private readonly encryption = inject(StorageEncryptionService);
   private readonly offlineQueue = inject(OfflineQueueService);
+  private readonly subscriptionState = inject(SubscriptionStateService);
 
   readonly session = signal<Session | null>(null);
   readonly profile = signal<Profile | null>(null);
@@ -94,6 +96,9 @@ export class AuthService {
   async logout(): Promise<void> {
     this.offlineQueue.clearStorage();
     this.encryption.clear();
+    // Sin esto, el siguiente usuario en la misma tablet hereda el estado de
+    // suscripción cacheado del anterior.
+    this.subscriptionState.reset();
     await this.client.auth.signOut();
     this.session.set(null);
     this.profile.set(null);

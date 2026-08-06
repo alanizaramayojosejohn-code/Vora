@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth.service';
 import { BusinessService } from '../../../services/business/business.service';
+import { SubscriptionStateService } from '../../../services/subscription/subscription-state.service';
 import { ThemeService } from '../../../services/theme/theme.service';
 import { HsvPickerComponent } from '../hsv-picker/hsv-picker.component';
 import {
@@ -29,6 +30,7 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 export class ProfilePageComponent {
   private readonly fb = inject(FormBuilder);
   protected readonly auth = inject(AuthService);
+  private readonly subscriptionState = inject(SubscriptionStateService);
   private readonly businessService = inject(BusinessService);
   private readonly themeService = inject(ThemeService);
 
@@ -98,6 +100,14 @@ export class ProfilePageComponent {
 
   // ── Apariencia del negocio (solo super_admin) ────────────────────────────
   readonly isSuperAdmin = computed(() => this.auth.role() === 'super_admin');
+
+  // "Tema y logo propios" es una feature del plan Negocio. El super_admin
+  // configura la marca de cualquier negocio desde /saas, así que nunca se le
+  // restringe.
+  readonly canEditBranding = computed(
+    () => this.isSuperAdmin()
+      || (this.auth.role() === 'admin' && this.subscriptionState.allows('branding')),
+  );
   readonly presets: readonly ThemePreset[] = THEME_PRESET_LIST;
 
   // Paleta de colores: cada array interno = una columna (tono), de claro a oscuro

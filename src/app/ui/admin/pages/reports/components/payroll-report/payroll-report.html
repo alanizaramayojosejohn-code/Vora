@@ -1,0 +1,184 @@
+<div class="space-y-6">
+
+  <!-- Selector de periodo -->
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-2">
+      <select [value]="month()" (change)="onMonthChange($any($event.target).value)"
+              class="px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+        @for (label of monthLabels; track $index) {
+          <option [value]="$index + 1">{{ label }}</option>
+        }
+      </select>
+      <select [value]="year()" (change)="onYearChange($any($event.target).value)"
+              class="px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+        @for (y of years(); track y) {
+          <option [value]="y">{{ y }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button type="button" (click)="exportExcel()" [disabled]="status().length === 0"
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border-subtle text-foreground-muted hover:text-foreground hover:bg-muted transition disabled:opacity-50">
+        Excel
+      </button>
+      <button type="button" (click)="exportPdf()" [disabled]="status().length === 0"
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border-subtle text-foreground-muted hover:text-foreground hover:bg-muted transition disabled:opacity-50">
+        PDF
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="rounded-xl border border-danger/30 bg-danger/10 px-5 py-3 text-sm text-danger">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- KPIs -->
+  <div class="anim-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Pagado en {{ periodLabel() }}</p>
+      <p class="text-2xl font-bold text-foreground mt-1">
+        {{ totalPaid() | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+      <p class="text-[11px] text-foreground-subtle mt-0.5">
+        de {{ totalExpected() | currency: 'Bs. ' : 'symbol' : '1.2-2' }} esperados
+      </p>
+    </div>
+
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Pendiente de pago</p>
+      <p class="text-2xl font-bold mt-1"
+         [class.text-warning]="totalPending() > 0"
+         [class.text-success]="totalPending() === 0">
+        {{ totalPending() | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+      <p class="text-[11px] text-foreground-subtle mt-0.5">
+        {{ pendingRows().length }} de {{ headcount() }} empleados
+      </p>
+    </div>
+
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Costo laboral</p>
+      <!-- Se compara contra null y no con `as`: un costo laboral de 0% es un
+           dato válido, y `@if (valor; as x)` lo trataría como ausencia. -->
+      @if (laborCostShare() !== null) {
+        <p class="text-2xl font-bold text-foreground mt-1">{{ laborCostShare() | number: '1.0-1' }}%</p>
+        <p class="text-[11px] text-foreground-subtle mt-0.5">
+          de {{ incomeThisMonth() | currency: 'Bs. ' : 'symbol' : '1.0-0' }} de ingresos
+        </p>
+      } @else {
+        <p class="text-2xl font-bold text-foreground mt-1">—</p>
+        <p class="text-[11px] text-foreground-subtle mt-0.5">Sin ingresos registrados este mes</p>
+      }
+    </div>
+
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Plantilla</p>
+      <p class="text-2xl font-bold text-foreground mt-1">{{ headcount() }}</p>
+      <p class="text-[11px] text-foreground-subtle mt-0.5">
+        {{ avgTenureMonths() | number: '1.0-0' }} meses de antigüedad prom. ·
+        {{ avgSalary() | currency: 'Bs. ' : 'symbol' : '1.0-0' }} sueldo prom.
+      </p>
+    </div>
+  </div>
+
+  <!-- Estado por empleado -->
+  <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+    <header class="px-6 py-4 border-b border-border-subtle">
+      <h3 class="font-semibold text-foreground">Quién cobró y quién no — {{ periodLabel() }}</h3>
+      <p class="text-xs text-foreground-subtle">
+        Se compara el sueldo asignado a cada empleado contra lo efectivamente pagado en el mes.
+      </p>
+    </header>
+
+    @if (loading()) {
+      <app-skeleton-rows [rows]="5" />
+    } @else if (status().length === 0) {
+      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">
+        Todavía no hay empleados cargados.
+      </div>
+    } @else {
+      <div class="max-h-[32rem] overflow-auto table-scroll">
+        <table class="w-full text-sm min-w-[660px]">
+          <thead class="bg-muted border-b border-border-subtle sticky top-0 whitespace-nowrap">
+            <tr>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Empleado</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cargo</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Sueldo</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Pagado</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Pendiente</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            @for (row of status(); track row.employee.id) {
+              <tr class="hover:bg-muted/50 transition">
+                <td class="px-6 py-2 font-medium text-foreground">{{ row.employee.name }}</td>
+                <td class="px-6 py-2 text-foreground-muted">{{ row.employee.position }}</td>
+                <td class="px-6 py-2 text-right font-mono text-foreground-muted">
+                  {{ row.expected | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-6 py-2 text-right font-mono text-foreground">
+                  {{ row.paid | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-6 py-2 text-right font-mono"
+                    [class.text-warning]="row.pending > 0"
+                    [class.text-foreground-subtle]="row.pending === 0">
+                  {{ row.pending | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-6 py-2 text-right">
+                  @if (row.isPaid) {
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-success/15 text-success">Pagado</span>
+                  } @else if (row.paid > 0) {
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning">Parcial</span>
+                  } @else {
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-danger/15 text-danger">Sin pagar</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Detalle de pagos del mes -->
+  @if (payments().length > 0) {
+    <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+      <header class="px-6 py-4 border-b border-border-subtle">
+        <h3 class="font-semibold text-foreground">Pagos registrados</h3>
+        <p class="text-xs text-foreground-subtle">Detalle de cada pago imputado a {{ periodLabel() }}.</p>
+      </header>
+
+      <div class="max-h-80 overflow-auto table-scroll">
+        <table class="w-full text-sm min-w-[520px]">
+          <thead class="bg-muted border-b border-border-subtle sticky top-0 whitespace-nowrap">
+            <tr>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Fecha</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Empleado</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Nota</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Monto</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            @for (payment of payments(); track payment.id) {
+              <tr class="hover:bg-muted/50 transition">
+                <td class="px-6 py-2 text-foreground-muted whitespace-nowrap">
+                  {{ payment.paid_at | date: 'd MMM y' }}
+                </td>
+                <td class="px-6 py-2 font-medium text-foreground">{{ payment.employee_name }}</td>
+                <td class="px-6 py-2 text-foreground-muted truncate max-w-xs">{{ payment.notes ?? '—' }}</td>
+                <td class="px-6 py-2 text-right font-mono text-foreground">
+                  {{ payment.amount | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

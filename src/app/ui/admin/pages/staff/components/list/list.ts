@@ -8,10 +8,11 @@ import {
   signal,
 } from '@angular/core';
 import { Employee } from '../../../../../../models/employee.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-admin-staff-list',
-  imports: [DatePipe, CurrencyPipe],
+  imports: [SkeletonRowsComponent, DatePipe, CurrencyPipe],
   templateUrl: './list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

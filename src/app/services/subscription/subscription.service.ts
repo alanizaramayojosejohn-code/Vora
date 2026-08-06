@@ -1,6 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { Business } from '../../models/business.model';
-import { BusinessSubscription, PaymentMethod, PlanType, SubscriptionPayment } from '../../models/subscription.model';
+import {
+  BusinessSubscription,
+  evaluateSubscription,
+  PaymentMethod,
+  PlanType,
+  SubscriptionPayment,
+  SubscriptionStatus,
+} from '../../models/subscription.model';
 import { SupabaseService } from '../supabase/supabase.service';
 
 export interface BusinessWithSubscription {
@@ -46,26 +53,30 @@ export class SubscriptionService {
       (subs as BusinessSubscription[]).map((s) => [s.business_id, s]),
     );
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     return (businesses as Business[]).map((b) => {
       const sub = subsMap.get(b.id) ?? null;
       if (!sub) return { business: b, subscription: null, daysUntilExpiry: null, isExpiringSoon: false, isExpired: false };
 
-      const end = new Date(sub.end_date);
-      end.setHours(0, 0, 0, 0);
-      const diffMs = end.getTime() - today.getTime();
-      const daysUntilExpiry = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-      return {
-        business: b,
-        subscription: sub,
-        daysUntilExpiry,
-        isExpiringSoon: daysUntilExpiry >= 0 && daysUntilExpiry <= 5,
-        isExpired: daysUntilExpiry < 0,
-      };
+      const { daysUntilExpiry, isExpiringSoon, isExpired } = evaluateSubscription(sub);
+      return { business: b, subscription: sub, daysUntilExpiry, isExpiringSoon, isExpired };
     });
+  }
+
+  // Suscripción del negocio del usuario actual. RLS ya permite este select
+  // ("users read own business subscription"). Devuelve null si el negocio no
+  // tiene suscripción cargada, en cuyo caso no se bloquea nada.
+  async getOwnSubscription(): Promise<BusinessSubscription | null> {
+    const { data, error } = await this.client
+      .from('business_subscriptions')
+      .select('*')
+      .maybeSingle();
+    if (error) throw error;
+    return (data as BusinessSubscription | null) ?? null;
+  }
+
+  async getOwnStatus(): Promise<SubscriptionStatus | null> {
+    const sub = await this.getOwnSubscription();
+    return sub ? evaluateSubscription(sub) : null;
   }
 
   async upsertSubscription(input: UpsertSubscriptionInput): Promise<BusinessSubscription> {

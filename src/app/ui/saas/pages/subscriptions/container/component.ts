@@ -8,6 +8,7 @@ import {
 } from '../../../../../services/subscription/subscription.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { PaymentFormOutput, SubscriptionPaymentFormComponent } from '../components/payment-form/payment-form';
 import { SubscriptionPaymentsHistoryComponent } from '../components/payments-history/payments-history';
 import { SubscriptionFormComponent } from '../components/subscription-form/subscription-form';
@@ -15,7 +16,7 @@ import { SubscriptionsListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-saas-subscriptions',
-  imports: [
+  imports: [FormModalComponent, 
     DatePipe,
     SubscriptionsListComponent,
     SubscriptionFormComponent,

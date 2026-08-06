@@ -1,0 +1,167 @@
+<div class="space-y-6">
+
+  <!-- Selector de rango -->
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit">
+      @for (r of ranges; track r) {
+        <button type="button" (click)="setRange(r)"
+                [class.bg-surface]="range() === r"
+                [class.shadow-sm]="range() === r"
+                [class.text-foreground]="range() === r"
+                [class.text-foreground-muted]="range() !== r"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg transition">
+          {{ rangeLabels[r] }}
+        </button>
+      }
+    </div>
+
+    <button type="button" (click)="refresh()" [disabled]="loading()"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-border-subtle text-foreground-muted hover:text-foreground hover:bg-muted transition disabled:opacity-50">
+      Actualizar
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="rounded-xl border border-danger/30 bg-danger/10 px-5 py-3 text-sm text-danger">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- KPIs -->
+  <div class="anim-stagger grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Total vendido</p>
+      <p class="text-2xl font-bold text-foreground mt-1">
+        {{ summary().total | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Transacciones</p>
+      <p class="text-2xl font-bold text-foreground mt-1">{{ summary().transactions | number }}</p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Ticket promedio</p>
+      <p class="text-2xl font-bold text-foreground mt-1">
+        {{ summary().avgTicket | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Desglose por método de pago -->
+    <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+      <header class="px-6 py-4 border-b border-border-subtle">
+        <h3 class="font-semibold text-foreground">Cómo te pagaron</h3>
+        <p class="text-xs text-foreground-subtle">
+          El efectivo es el que tiene que cuadrar con el arqueo del turno.
+        </p>
+      </header>
+
+      @if (loading()) {
+        <app-skeleton-bars [bars]="3" />
+      } @else if (summary().transactions === 0) {
+        <div class="px-6 py-12 text-center text-sm text-foreground-subtle">
+          Todavía no hay ventas en este período.
+        </div>
+      } @else {
+        <div class="px-6 py-5 space-y-4">
+          @for (share of methodShares(); track share.method) {
+            <div>
+              <div class="flex items-center justify-between text-sm mb-1.5">
+                <span class="font-medium text-foreground">{{ methodLabels[share.method] }}</span>
+                <span class="font-mono text-foreground-muted">
+                  {{ share.amount | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                  <span class="text-foreground-subtle text-xs ml-1">
+                    ({{ share.percentage | number: '1.0-0' }}%)
+                  </span>
+                </span>
+              </div>
+              <div class="h-2 rounded-full bg-muted overflow-hidden">
+                <div class="anim-bar h-full rounded-full bg-primary transition-all"
+                     [style.width.%]="share.percentage"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Top productos -->
+    <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+      <header class="px-6 py-4 border-b border-border-subtle">
+        <h3 class="font-semibold text-foreground">Lo que más se vendió</h3>
+        <p class="text-xs text-foreground-subtle">Los 5 productos con más unidades en el período.</p>
+      </header>
+
+      @if (loading()) {
+        <app-skeleton-bars [bars]="3" />
+      } @else if (topProducts().length === 0) {
+        <div class="px-6 py-12 text-center text-sm text-foreground-subtle">
+          Sin productos vendidos en este período.
+        </div>
+      } @else {
+        <ul class="divide-y divide-border-subtle">
+          @for (product of topProducts(); track product.product_id ?? product.product_name) {
+            <li class="px-6 py-3">
+              <div class="flex items-center justify-between gap-4 text-sm">
+                <span class="font-medium text-foreground truncate">{{ product.product_name }}</span>
+                <span class="font-mono text-foreground-muted whitespace-nowrap">
+                  {{ product.quantity | number }} u ·
+                  {{ product.total | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </span>
+              </div>
+              <div class="h-1.5 rounded-full bg-muted overflow-hidden mt-2">
+                <div class="anim-bar h-full rounded-full bg-success transition-all"
+                     [style.width.%]="maxTopQuantity() === 0 ? 0 : (product.quantity / maxTopQuantity()) * 100"></div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
+  <!-- Turnos abiertos ahora -->
+  @if (openSessions().length > 0) {
+    <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
+      <header class="px-6 py-4 border-b border-border-subtle">
+        <h3 class="font-semibold text-foreground">Turnos abiertos ahora</h3>
+        <p class="text-xs text-foreground-subtle">
+          Cuánto lleva vendido cada caja y cuánto efectivo debería tener en el cajón.
+        </p>
+      </header>
+
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-sm min-w-[580px]">
+          <thead class="bg-muted border-b border-border-subtle whitespace-nowrap">
+            <tr>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cajero</th>
+              <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Abierto</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Ventas</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Total</th>
+              <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Efectivo esperado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-subtle">
+            @for (session of openSessions(); track session.session_id) {
+              <tr class="hover:bg-muted/50 transition">
+                <td class="px-6 py-2 font-medium text-foreground">{{ session.cashier_name ?? '—' }}</td>
+                <td class="px-6 py-2 text-foreground-muted">
+                  {{ session.opened_at | date: "d MMM, HH:mm" }}
+                </td>
+                <td class="px-6 py-2 text-right font-mono text-foreground-muted">{{ session.sales_count }}</td>
+                <td class="px-6 py-2 text-right font-mono text-foreground">
+                  {{ session.total_sales | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-6 py-2 text-right font-mono font-semibold text-foreground">
+                  {{ expectedCash(session) | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

@@ -4,6 +4,8 @@ import { Employee, SalaryPayment } from '../../../../../models/employee.model';
 import { CreateEmployeeInput, CreatePaymentInput, StaffService } from '../../../../../services/staff/staff.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
+import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { StaffFormComponent } from '../components/form/form';
 import { StaffListComponent } from '../components/list/list';
 import { StaffPaymentFormComponent } from '../components/payment-form/payment-form';
@@ -11,13 +13,14 @@ import { PaymentsHistoryComponent } from '../components/payments-history/payment
 
 @Component({
   selector: 'app-admin-staff',
-  imports: [
+  imports: [FormModalComponent, 
     DatePipe,
     StaffListComponent,
     StaffFormComponent,
     StaffPaymentFormComponent,
     PaymentsHistoryComponent,
     ConfirmDeleteModalComponent,
+    ReadonlyDisabledDirective,
   ],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

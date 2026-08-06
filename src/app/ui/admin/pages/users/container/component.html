@@ -4,27 +4,21 @@
       <h2 class="text-2xl font-bold text-foreground tracking-tight">Usuarios del negocio</h2>
       <p class="text-foreground-muted text-sm">Cajas y administradores con acceso al panel.</p>
     </div>
-    @if (showForm()) {
-      <button (click)="closeForm()"
-              class="px-4 py-2 text-sm font-semibold bg-muted hover:bg-input text-foreground border border-border-subtle rounded-lg transition">
-        Cerrar formulario
-      </button>
-    } @else {
-      <button (click)="openCreate()"
-              class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
-        Nuevo colaborador
-      </button>
-    }
+    <button appReadonlyDisabled (click)="openCreate()"
+            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
+      Nuevo colaborador
+    </button>
   </div>
 
-  @if (showForm()) {
+  <app-form-modal [open]="showForm()" [submitting]="submitting()"
+                  label="Formulario de colaborador" (closed)="closeForm()">
     <app-admin-users-form
       [value]="editing()"
       [submitting]="submitting()"
       [errorMessage]="formError()"
       (submitForm)="handleSubmit($event)"
       (cancel)="closeForm()" />
-  }
+  </app-form-modal>
 
   <app-admin-users-list
     [users]="users()"

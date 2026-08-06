@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()"
-      class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 space-y-6 shadow-sm">
+      class="p-6 pr-14 space-y-6">
   <div>
     <h3 class="font-semibold text-foreground">
       @if (isEdit()) { Editar negocio } @else { Nuevo negocio }
@@ -383,7 +383,7 @@
       </p>
     </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <!-- Planes preset -->
         @for (plan of planOptions; track plan) {
           @if (plan !== null) {

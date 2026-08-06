@@ -44,7 +44,7 @@
   <!-- Table -->
   <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden">
     @if (loading()) {
-      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+      <app-skeleton-rows [rows]="5" />
     } @else if (filteredSorted().length === 0) {
       <div class="px-6 py-16 text-center">
         @if (businesses().length === 0) {
@@ -55,67 +55,69 @@
         }
       </div>
     } @else {
-      <table class="w-full text-sm">
-        <thead class="bg-muted/40 border-b border-border-subtle">
-          <tr>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Negocio</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Paleta</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">ID</th>
-            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Creado</th>
-            <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (business of filteredSorted(); track business.id; let even = $even) {
-            <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
-              <td class="px-5 py-3">
-                <button type="button" (click)="view.emit(business)" class="flex items-center gap-3 group text-left">
-                  @if (business.logo_url) {
-                    <img [src]="business.logo_url" [alt]="business.name"
-                         class="w-9 h-9 rounded-lg object-contain border border-border-subtle flex-shrink-0 bg-elevated" />
-                  } @else {
-                    <span class="w-9 h-9 rounded-lg bg-foreground text-primary-fg flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                      {{ initials(business.name) }}
-                    </span>
-                  }
-                  <span class="font-semibold text-foreground group-hover:underline">{{ business.name }}</span>
-                </button>
-              </td>
-              <td class="px-5 py-3">
-                <div class="inline-flex items-center gap-2">
-                  <span class="w-3 h-3 rounded-full ring-1 ring-border-subtle"
-                        [style.background]="primaryColor(business)"></span>
-                  <span class="text-xs text-foreground-muted">{{ presetLabel(business) }}</span>
-                </div>
-              </td>
-              <td class="px-5 py-3 text-[11px] text-foreground-faint font-mono">{{ business.id.slice(0, 8) }}…</td>
-              <td class="px-5 py-3 text-foreground-subtle text-xs">{{ business.created_at | date: 'dd MMM yyyy' }}</td>
-              <td class="px-5 py-3 text-right">
-                <div class="inline-flex items-center gap-1">
-                  <button type="button" (click)="view.emit(business)" title="Ver detalle"
-                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  </button>
-                  <button type="button" (click)="edit.emit(business)" title="Editar"
-                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
-                    </svg>
-                  </button>
-                  <button type="button" (click)="remove.emit(business)" title="Eliminar"
-                          class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                  </button>
-                </div>
-              </td>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-sm min-w-[580px]">
+          <thead class="bg-muted/40 border-b border-border-subtle whitespace-nowrap">
+            <tr>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Negocio</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Paleta</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">ID</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Creado</th>
+              <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (business of filteredSorted(); track business.id; let even = $even) {
+              <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
+                <td class="px-5 py-3">
+                  <button type="button" (click)="view.emit(business)" class="flex items-center gap-3 group text-left">
+                    @if (business.logo_url) {
+                      <img [src]="business.logo_url" [alt]="business.name"
+                           class="w-9 h-9 rounded-lg object-contain border border-border-subtle flex-shrink-0 bg-elevated" />
+                    } @else {
+                      <span class="w-9 h-9 rounded-lg bg-foreground text-primary-fg flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                        {{ initials(business.name) }}
+                      </span>
+                    }
+                    <span class="font-semibold text-foreground group-hover:underline">{{ business.name }}</span>
+                  </button>
+                </td>
+                <td class="px-5 py-3">
+                  <div class="inline-flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full ring-1 ring-border-subtle"
+                          [style.background]="primaryColor(business)"></span>
+                    <span class="text-xs text-foreground-muted">{{ presetLabel(business) }}</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3 text-[11px] text-foreground-faint font-mono">{{ business.id.slice(0, 8) }}…</td>
+                <td class="px-5 py-3 text-foreground-subtle text-xs">{{ business.created_at | date: 'dd MMM yyyy' }}</td>
+                <td class="px-5 py-3 text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <button type="button" (click)="view.emit(business)" title="Ver detalle"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                    <button type="button" (click)="edit.emit(business)" title="Editar"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                      </svg>
+                    </button>
+                    <button type="button" (click)="remove.emit(business)" title="Eliminar"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
       <div class="px-5 py-3 flex items-center justify-between gap-3 border-t border-border-subtle bg-elevated/30">
         <span class="text-[11px] text-foreground-muted font-medium">

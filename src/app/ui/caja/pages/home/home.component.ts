@@ -6,10 +6,11 @@ import { ReportQueryService } from '../../../../services/report/query.service';
 import { OrderQueryService } from '../../../../services/order/query.service';
 import { DailyIncome } from '../../../../models/daily-income.model';
 import { OrderWithDetails, orderPrimaryLabel } from '../../../../models/order.model';
+import { SkeletonRowsComponent } from '../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-caja-home',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [SkeletonRowsComponent, CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

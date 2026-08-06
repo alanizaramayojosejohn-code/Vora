@@ -1,0 +1,184 @@
+<div class="p-4 md:p-6 max-w-2xl mx-auto space-y-5">
+
+  <div>
+    <h1 class="text-lg font-bold text-foreground">Caja</h1>
+    <p class="text-sm text-foreground-muted mt-0.5">
+      Abre tu turno con el fondo inicial y ciérralo contando el efectivo.
+    </p>
+  </div>
+
+  @if (error(); as msg) {
+    <div class="rounded-xl border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger">
+      {{ msg }}
+    </div>
+  }
+
+  <!-- Resultado del cierre recién hecho -->
+  @if (result(); as r) {
+    <div class="rounded-2xl border border-border-subtle bg-elevated overflow-hidden">
+      <div class="px-5 py-4 border-b border-border-subtle">
+        <p class="text-sm font-semibold text-foreground">Turno cerrado</p>
+      </div>
+
+      <div class="px-5 py-4 space-y-2.5 text-sm">
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">Fondo inicial</span>
+          <span class="text-foreground tabular-nums">{{ r.opening_float | currency:'BOB':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">Ventas en efectivo</span>
+          <span class="text-foreground tabular-nums">{{ r.cash_sales | currency:'BOB':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between pt-2.5 border-t border-border-subtle">
+          <span class="text-foreground-muted">Debería haber</span>
+          <span class="font-semibold text-foreground tabular-nums">{{ r.expected_cash | currency:'BOB':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">Contado</span>
+          <span class="font-semibold text-foreground tabular-nums">{{ r.counted_cash | currency:'BOB':'symbol-narrow':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="px-5 py-4 border-t"
+           [class]="r.difference === 0
+             ? 'bg-success/8 border-success/20'
+             : (r.difference > 0 ? 'bg-warning/8 border-warning/20' : 'bg-danger/8 border-danger/20')">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold"
+                [class]="r.difference === 0 ? 'text-success' : (r.difference > 0 ? 'text-warning' : 'text-danger')">
+            {{ differenceLabel(r.difference) }}
+          </span>
+          <span class="text-lg font-bold tabular-nums"
+                [class]="r.difference === 0 ? 'text-success' : (r.difference > 0 ? 'text-warning' : 'text-danger')">
+            {{ r.difference | currency:'BOB':'symbol-narrow':'1.2-2' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="px-5 py-4 border-t border-border-subtle">
+        <button type="button" (click)="dismissResult()"
+                class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-fg hover:opacity-90 transition">
+          Abrir un turno nuevo
+        </button>
+      </div>
+    </div>
+  }
+
+  @else if (loading()) {
+    <div class="rounded-2xl border border-border-subtle bg-elevated px-5 py-8 text-center text-sm text-foreground-muted">
+      Cargando…
+    </div>
+  }
+
+  <!-- Turno abierto: resumen + cierre -->
+  @else if (hasOpenSession()) {
+    <div class="rounded-2xl border border-border-subtle bg-elevated overflow-hidden">
+      <div class="px-5 py-4 border-b border-border-subtle flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-foreground">Turno abierto</p>
+          <p class="text-xs text-foreground-muted mt-0.5">
+            Desde {{ current()!.opened_at | date:'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-success/12 text-success flex-shrink-0">
+          Abierto
+        </span>
+      </div>
+
+      @if (summary(); as s) {
+        <div class="px-5 py-4 grid grid-cols-2 gap-4 text-sm border-b border-border-subtle">
+          <div>
+            <p class="text-xs text-foreground-muted mb-0.5">Fondo inicial</p>
+            <p class="font-semibold text-foreground tabular-nums">{{ s.opening_float | currency:'BOB':'symbol-narrow':'1.2-2' }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-foreground-muted mb-0.5">Ventas del turno</p>
+            <p class="font-semibold text-foreground tabular-nums">{{ s.sales_count }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-foreground-muted mb-0.5">Tarjeta</p>
+            <p class="font-semibold text-foreground tabular-nums">{{ s.card_sales | currency:'BOB':'symbol-narrow':'1.2-2' }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-foreground-muted mb-0.5">QR</p>
+            <p class="font-semibold text-foreground tabular-nums">{{ s.qr_sales | currency:'BOB':'symbol-narrow':'1.2-2' }}</p>
+          </div>
+        </div>
+      }
+
+      <form (ngSubmit)="closeShift()" class="px-5 py-4 space-y-4">
+        <div>
+          <label for="counted" class="block text-sm font-medium text-foreground mb-1.5">
+            Efectivo contado en el cajón
+          </label>
+          <input id="counted" type="number" inputmode="decimal" min="0" step="0.01" required
+                 [(ngModel)]="countedCash" name="counted" placeholder="0.00"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border-subtle text-foreground
+                        text-lg font-semibold tabular-nums
+                        focus:outline-none focus:border-primary transition">
+          <p class="text-xs text-foreground-subtle mt-1.5 leading-relaxed">
+            Cuenta el efectivo antes de escribir. Al cerrar verás cuánto debería haber
+            y la diferencia.
+          </p>
+        </div>
+
+        <div>
+          <label for="notes" class="block text-sm font-medium text-foreground mb-1.5">
+            Observaciones <span class="text-foreground-subtle font-normal">(opcional)</span>
+          </label>
+          <textarea id="notes" rows="2" [(ngModel)]="closingNotes" name="notes"
+                    placeholder="Ej: se pagó al proveedor de pan desde caja"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border-subtle text-foreground text-sm
+                           focus:outline-none focus:border-primary transition resize-none"></textarea>
+        </div>
+
+        <button type="submit" [disabled]="!canClose()"
+                class="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-fg
+                       hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ submitting() ? 'Cerrando…' : 'Cerrar caja' }}
+        </button>
+      </form>
+    </div>
+  }
+
+  <!-- Sin turno: apertura -->
+  @else {
+    <div class="rounded-2xl border border-border-subtle bg-elevated overflow-hidden">
+      <div class="px-5 py-4 border-b border-border-subtle">
+        <p class="text-sm font-semibold text-foreground">No tienes una caja abierta</p>
+        <p class="text-xs text-foreground-muted mt-0.5">
+          Las ventas que registres sin turno abierto no entrarán en ningún arqueo.
+        </p>
+      </div>
+
+      <form (ngSubmit)="openShift()" class="px-5 py-4 space-y-4">
+        <div>
+          <label for="float" class="block text-sm font-medium text-foreground mb-1.5">
+            Fondo inicial
+          </label>
+          <input id="float" type="number" inputmode="decimal" min="0" step="0.01"
+                 [(ngModel)]="openingFloat" name="float" placeholder="0.00"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border-subtle text-foreground
+                        text-lg font-semibold tabular-nums
+                        focus:outline-none focus:border-primary transition">
+          <p class="text-xs text-foreground-subtle mt-1.5">
+            El efectivo con el que arrancas el turno, para dar cambio.
+          </p>
+        </div>
+
+        <button type="submit" [disabled]="submitting() || readonlyMode()"
+                class="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-fg
+                       hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ submitting() ? 'Abriendo…' : 'Abrir caja' }}
+        </button>
+
+        @if (readonlyMode()) {
+          <p class="text-xs text-danger text-center">
+            Suscripción vencida — no se puede abrir turno hasta regularizar el pago.
+          </p>
+        }
+      </form>
+    </div>
+  }
+
+</div>

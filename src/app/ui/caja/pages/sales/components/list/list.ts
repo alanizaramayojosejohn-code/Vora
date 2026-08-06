@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../../../models/order.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-caja-sales-list',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [SkeletonRowsComponent, CurrencyPipe, DatePipe],
   templateUrl: './list.html',
   styleUrl: './list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -48,29 +48,27 @@ export class ReportQueryService {
     return (data ?? []) as LowStockProduct[];
   }
 
+  // Antes esto se bajaba orders → order_items → products → categories del mes
+  // entero para sumarlo en el navegador: un negocio con volumen transfería
+  // miles de filas para mostrar cinco. La vista revenue_by_category ya agrega
+  // en la base y devuelve una fila por categoría.
   async listRevenueByCategoryThisMonth(): Promise<{ category: string; total: number }[]> {
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+    // Primer día del mes en hora local. La vista agrupa en hora de Bolivia, así
+    // que armar el filtro con toISOString() erraría el mes durante la tarde del
+    // día 1 y del último día.
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
 
     const { data, error } = await this.client
-      .from('orders')
-      .select('order_items(unit_price, quantity, products(category:categories(name)))')
-      .is('cancelled_at', null)
-      .gte('created_at', firstDay)
-      .lt('created_at', nextMonth);
+      .from('revenue_by_category')
+      .select('category_name, total')
+      .eq('month', month)
+      .order('total', { ascending: false });
     if (error) throw error;
 
-    const totals = new Map<string, number>();
-    for (const order of (data ?? []) as any[]) {
-      for (const item of (order.order_items ?? []) as any[]) {
-        const cat: string = item.products?.category?.name ?? 'Otros';
-        const lineTotal = Number(item.unit_price) * Number(item.quantity);
-        totals.set(cat, (totals.get(cat) ?? 0) + lineTotal);
-      }
-    }
-    return Array.from(totals.entries())
-      .map(([category, total]) => ({ category, total }))
-      .sort((a, b) => b.total - a.total);
+    return (data ?? []).map((row: { category_name: string; total: number | string }) => ({
+      category: row.category_name,
+      total: Number(row.total),
+    }));
   }
 }

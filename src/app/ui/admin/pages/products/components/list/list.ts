@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { Product } from '../../../../../../models/product.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type ProductFilter = 'all' | 'in-stock' | 'low-stock' | 'out-of-stock' | 'no-category';
 type ProductSort = 'name' | 'stock-asc' | 'price-desc' | 'created';
 
 @Component({
   selector: 'app-admin-products-list',
-  imports: [CurrencyPipe],
+  imports: [SkeletonRowsComponent, CurrencyPipe],
   templateUrl: './list.html',
   styleUrl: './list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

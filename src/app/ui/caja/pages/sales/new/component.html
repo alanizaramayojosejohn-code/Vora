@@ -10,6 +10,20 @@
     </div>
   }
 
+  <!-- Sin turno abierto: la venta queda fuera del arqueo -->
+  @if (!cashSession()) {
+    <div class="flex items-center gap-2.5 px-4 py-3 bg-warning/10 border border-warning/25 text-warning rounded-xl text-sm font-medium">
+      <svg class="flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+      </svg>
+      <span class="flex-1 min-w-0">No tienes una caja abierta — esta venta no entrará en el arqueo</span>
+      <a [routerLink]="shiftLink()"
+         class="text-xs font-semibold underline underline-offset-2 hover:no-underline flex-shrink-0">
+        Abrir caja
+      </a>
+    </div>
+  }
+
   <!-- Cache offline notice -->
   @if (fromCache()) {
     <div class="flex items-center gap-2 px-3 py-2 bg-warning/10 border border-warning/20 text-warning rounded-lg text-xs font-medium">
@@ -364,16 +378,17 @@
 </div>
 
 @if (showNewProductModal()) {
-  <div class="fixed inset-0 z-50 flex items-start justify-center px-4 pt-16 pb-8 bg-black/60 backdrop-blur-sm overflow-y-auto"
-       (click)="closeNewProductModal()">
-    <div class="w-full max-w-2xl" (click)="$event.stopPropagation()">
-      <app-admin-products-form
-        [value]="null"
-        [categories]="modalCategories()"
-        [submitting]="newProductSubmitting()"
-        [errorMessage]="newProductError()"
-        (submitForm)="handleQuickProduct($event)"
-        (cancel)="closeNewProductModal()" />
-    </div>
-  </div>
+  <!-- El formulario de productos ya no trae tarjeta propia: se la pone
+       app-form-modal, el mismo contenedor que usan los demás formularios. -->
+  <app-form-modal [open]="true" [submitting]="newProductSubmitting()"
+                  label="Nuevo producto" widthClass="max-w-3xl"
+                  (closed)="closeNewProductModal()">
+    <app-admin-products-form
+      [value]="null"
+      [categories]="modalCategories()"
+      [submitting]="newProductSubmitting()"
+      [errorMessage]="newProductError()"
+      (submitForm)="handleQuickProduct($event)"
+      (cancel)="closeNewProductModal()" />
+  </app-form-modal>
 }

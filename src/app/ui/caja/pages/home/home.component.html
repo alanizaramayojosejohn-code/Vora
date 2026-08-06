@@ -14,7 +14,7 @@
   </div>
 
   <!-- KPIs -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="anim-stagger grid grid-cols-1 md:grid-cols-3 gap-4">
     <!-- Ventas hoy -->
     <div class="md:col-span-2 bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-6 shadow-sm">
       <div class="flex items-start justify-between gap-4 mb-4">
@@ -84,35 +84,37 @@
     </header>
 
     @if (loading()) {
-    <div class="px-6 py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+    <app-skeleton-rows [rows]="5" />
     } @else if (latestOrders().length === 0) {
     <div class="px-6 py-12 text-center">
       <p class="text-foreground-muted">Aún no hay ventas registradas.</p>
       <a routerLink="/caja/sales" class="text-sm text-primary hover:underline mt-2 inline-block">Registrar la primera</a>
     </div>
     } @else {
-    <table class="w-full text-sm">
-      <thead class="bg-muted border-b border-border-subtle">
-        <tr>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Detalle</th>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cliente</th>
-          <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Total</th>
-          <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Fecha</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-border-subtle">
-        @for (order of latestOrders(); track order.id) {
-        <tr class="hover:bg-muted/50 transition" [class.opacity-60]="order.cancelled_at">
-          <td class="px-6 py-2.5 font-medium text-foreground">{{ primaryLabel(order) }}</td>
-          <td class="px-6 py-2.5 text-foreground-muted">{{ order.client_label ?? '—' }}</td>
-          <td class="px-6 py-2.5 text-right font-mono font-semibold text-foreground">
-            {{ order.total_amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
-          </td>
-          <td class="px-6 py-2.5 text-foreground-subtle">{{ order.created_at | date: 'dd/MM HH:mm' }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
+    <div class="overflow-x-auto table-scroll">
+      <table class="w-full text-sm min-w-[520px]">
+        <thead class="bg-muted border-b border-border-subtle whitespace-nowrap">
+          <tr>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Detalle</th>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Cliente</th>
+            <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Total</th>
+            <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Fecha</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border-subtle">
+          @for (order of latestOrders(); track order.id) {
+          <tr class="hover:bg-muted/50 transition" [class.opacity-60]="order.cancelled_at">
+            <td class="px-6 py-2.5 font-medium text-foreground">{{ primaryLabel(order) }}</td>
+            <td class="px-6 py-2.5 text-foreground-muted">{{ order.client_label ?? '—' }}</td>
+            <td class="px-6 py-2.5 text-right font-mono font-semibold text-foreground">
+              {{ order.total_amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+            </td>
+            <td class="px-6 py-2.5 text-foreground-subtle">{{ order.created_at | date: 'dd/MM HH:mm' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
     }
   </div>
 </div>

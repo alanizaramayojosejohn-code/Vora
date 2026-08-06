@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Profile } from '../../../../../../models/profile.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type UserFilter = 'all' | 'admin' | 'caja';
 type UserSort = 'name' | 'ci' | 'created';
 
 @Component({
   selector: 'app-admin-users-list',
-  imports: [DatePipe],
+  imports: [SkeletonRowsComponent, DatePipe],
   templateUrl: './list.html',
   styleUrl: './list.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

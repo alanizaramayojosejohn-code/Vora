@@ -12,7 +12,7 @@
       <h1 class="text-xl font-bold text-foreground">Proveedores</h1>
     </div>
     @if (!showForm()) {
-      <button (click)="openCreate()"
+      <button appReadonlyDisabled (click)="openCreate()"
               class="px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg hover:bg-primary/90 transition shadow-md shadow-primary/20">
         + Proveedor
       </button>
@@ -78,7 +78,7 @@
   } @else if (suppliers().length === 0 && !showForm()) {
     <div class="rounded-xl border border-border-subtle bg-surface px-5 py-12 text-center">
       <p class="text-sm text-foreground-muted">No hay proveedores registrados.</p>
-      <button (click)="openCreate()"
+      <button appReadonlyDisabled (click)="openCreate()"
               class="mt-3 px-4 py-2 text-sm font-semibold bg-primary text-primary-fg rounded-lg hover:bg-primary/90 transition shadow-md shadow-primary/20">
         + Agregar proveedor
       </button>
