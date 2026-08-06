@@ -4,13 +4,14 @@ import { ProfileService } from '../../../../../services/profile/profile.service'
 import { ProfileQueryService } from '../../../../../services/profile/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { UserFormValue, UsersFormComponent } from '../components/form/form';
 import { UsersListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-admin-users',
-  imports: [UsersListComponent, UsersFormComponent, ConfirmDeleteModalComponent, ReadonlyDisabledDirective],
+  imports: [FormModalComponent, UsersListComponent, UsersFormComponent, ConfirmDeleteModalComponent, ReadonlyDisabledDirective],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -17,7 +17,7 @@
         <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
       </svg>
       <span class="flex-1 min-w-0">No tienes una caja abierta — esta venta no entrará en el arqueo</span>
-      <a routerLink="/caja/turno"
+      <a [routerLink]="shiftLink()"
          class="text-xs font-semibold underline underline-offset-2 hover:no-underline flex-shrink-0">
         Abrir caja
       </a>
@@ -378,16 +378,17 @@
 </div>
 
 @if (showNewProductModal()) {
-  <div class="fixed inset-0 z-50 flex items-start justify-center px-4 pt-16 pb-8 bg-black/60 backdrop-blur-sm overflow-y-auto"
-       (click)="closeNewProductModal()">
-    <div class="w-full max-w-2xl" (click)="$event.stopPropagation()">
-      <app-admin-products-form
-        [value]="null"
-        [categories]="modalCategories()"
-        [submitting]="newProductSubmitting()"
-        [errorMessage]="newProductError()"
-        (submitForm)="handleQuickProduct($event)"
-        (cancel)="closeNewProductModal()" />
-    </div>
-  </div>
+  <!-- El formulario de productos ya no trae tarjeta propia: se la pone
+       app-form-modal, el mismo contenedor que usan los demás formularios. -->
+  <app-form-modal [open]="true" [submitting]="newProductSubmitting()"
+                  label="Nuevo producto" widthClass="max-w-3xl"
+                  (closed)="closeNewProductModal()">
+    <app-admin-products-form
+      [value]="null"
+      [categories]="modalCategories()"
+      [submitting]="newProductSubmitting()"
+      [errorMessage]="newProductError()"
+      (submitForm)="handleQuickProduct($event)"
+      (cancel)="closeNewProductModal()" />
+  </app-form-modal>
 }

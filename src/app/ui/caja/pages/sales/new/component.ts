@@ -10,6 +10,7 @@ import { ClientQueryService } from '../../../../../services/client/query.service
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
 import { OrderService } from '../../../../../services/order/order.service';
+import { AuthService } from '../../../../../services/auth/auth.service';
 import { CashSessionService } from '../../../../../services/cash-session/cash-session.service';
 import { SubscriptionStateService } from '../../../../../services/subscription/subscription-state.service';
 import { NetworkService } from '../../../../../services/network/network.service';
@@ -17,6 +18,7 @@ import { OfflineQueueService } from '../../../../../services/offline/offline-que
 import { ProductCacheService } from '../../../../../services/offline/product-cache.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ProductsFormComponent } from '../../../../admin/pages/products/components/form/form';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
 
 const PRODUCT_PAGE_SIZE = 20;
 
@@ -34,7 +36,7 @@ type PaymentMethod = 'cash' | 'card' | 'qr';
 
 @Component({
   selector: 'app-caja-sales-new',
-  imports: [CurrencyPipe, DecimalPipe, FormsModule, RouterLink, ProductsFormComponent],
+  imports: [CurrencyPipe, DecimalPipe, FormsModule, RouterLink, ProductsFormComponent, FormModalComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -51,10 +53,18 @@ export class CajaSalesNewComponent {
   private readonly productCache   = inject(ProductCacheService);
   private readonly cashSessions   = inject(CashSessionService);
   private readonly subscriptionState = inject(SubscriptionStateService);
+  private readonly auth           = inject(AuthService);
 
   // Turno abierto. Si no hay, la venta se registra igual pero queda fuera del
   // arqueo — el aviso en pantalla hace visible el hueco en vez de callarlo.
   readonly cashSession = this.cashSessions.current;
+
+  // Esta pantalla la comparten caja y admin. El enlace para abrir turno tiene
+  // que quedarse en el panel de quien está vendiendo: mandar al admin a /caja
+  // lo sacaría de su propio menú.
+  readonly shiftLink = computed(() =>
+    this.auth.role() === 'admin' ? '/admin/turno' : '/caja/turno',
+  );
 
   readonly products = signal<Product[]>([]);
   readonly clients = signal<Client[]>([]);

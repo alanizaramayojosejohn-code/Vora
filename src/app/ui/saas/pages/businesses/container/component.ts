@@ -7,12 +7,13 @@ import { BusinessQueryService } from '../../../../../services/business/query.ser
 import { SubscriptionService } from '../../../../../services/subscription/subscription.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { BusinessesFormComponent, BusinessFormValue } from '../components/form/form';
 import { BusinessesListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-saas-businesses',
-  imports: [BusinessesListComponent, BusinessesFormComponent, ConfirmDeleteModalComponent],
+  imports: [FormModalComponent, BusinessesListComponent, BusinessesFormComponent, ConfirmDeleteModalComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

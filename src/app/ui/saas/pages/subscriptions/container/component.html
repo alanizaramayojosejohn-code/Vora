@@ -6,35 +6,41 @@
       <h2 class="text-2xl font-bold text-foreground tracking-tight">Facturación</h2>
       <p class="text-foreground-muted text-sm">Suscripciones, tarifas e historial de cobros por negocio.</p>
     </div>
-    @if (selectedItem() || configuringItem()) {
-      <button (click)="closePayments(); closeConfigure()"
+    @if (selectedItem()) {
+      <button (click)="closePayments()"
               class="px-4 py-2 text-sm font-semibold bg-muted hover:bg-input text-foreground border border-border-subtle rounded-lg transition">
         ← Volver a la lista
       </button>
     }
   </div>
 
-  <!-- Vista: configurar suscripción -->
+  <!-- Configurar suscripción: modal sobre lo que haya detrás. Antes reemplazaba
+       la lista entera, así que configurar una suscripción hacía perder de vista
+       el resto de los negocios. -->
   @if (configuringItem(); as item) {
-    <app-saas-subscription-form
-      [business]="item.business"
-      [subscription]="item.subscription"
-      [submitting]="configSubmitting()"
-      [errorMessage]="configError()"
-      (submitForm)="handleConfigure($event)"
-      (cancel)="closeConfigure()" />
+    <app-form-modal [open]="true" [submitting]="configSubmitting()"
+                    label="Configurar suscripción" (closed)="closeConfigure()">
+      <app-saas-subscription-form
+        [business]="item.business"
+        [subscription]="item.subscription"
+        [submitting]="configSubmitting()"
+        [errorMessage]="configError()"
+        (submitForm)="handleConfigure($event)"
+        (cancel)="closeConfigure()" />
+    </app-form-modal>
   }
 
   <!-- Vista: panel de pagos -->
-  @else if (selectedItem(); as item) {
-    @if (showPaymentForm()) {
+  @if (selectedItem(); as item) {
+    <app-form-modal [open]="showPaymentForm()" [submitting]="paymentSubmitting()"
+                    label="Registrar pago" (closed)="showPaymentForm.set(false)">
       <app-saas-subscription-payment-form
         [item]="item"
         [submitting]="paymentSubmitting()"
         [errorMessage]="paymentError()"
         (submitForm)="handlePayment($event)"
         (cancel)="showPaymentForm.set(false)" />
-    }
+    </app-form-modal>
 
     <app-saas-subscription-payments-history
       [item]="item"

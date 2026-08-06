@@ -4,13 +4,14 @@ import { CategoryService, CreateCategoryInput } from '../../../../../services/ca
 import { CategoryQueryService } from '../../../../../services/category/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { CategoriesFormComponent } from '../components/form/form';
 import { CategoriesListComponent } from '../components/list/list';
 
 @Component({
   selector: 'app-admin-categories',
-  imports: [CategoriesListComponent, CategoriesFormComponent, ConfirmDeleteModalComponent, ReadonlyDisabledDirective],
+  imports: [CategoriesListComponent, CategoriesFormComponent, ConfirmDeleteModalComponent, FormModalComponent, ReadonlyDisabledDirective],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

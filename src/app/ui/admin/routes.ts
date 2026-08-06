@@ -103,6 +103,17 @@ export const AdminRoutes: Routes = [
         (m) => m.CajaSalesContainerComponent,
       ),
   },
+  // El admin también vende, así que también necesita su turno: sin uno abierto
+  // sus ventas quedan sin imputar y no aparecen en el arqueo. Se reutiliza la
+  // pantalla de caja —igual que con las ventas de arriba— para que el turno se
+  // abra sin salir del panel de administración.
+  {
+    path: 'turno',
+    loadComponent: () =>
+      import('../caja/pages/shift/shift.component').then(
+        (m) => m.CajaShiftComponent,
+      ),
+  },
   {
     path: 'sales/new',
     loadComponent: () =>
