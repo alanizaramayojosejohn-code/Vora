@@ -16,12 +16,13 @@ import {
 import { ClientReportQueryService } from '../../../../../../services/report/client-report.query.service';
 import { ExportService } from '../../../../../../services/export/export.service';
 import { errorMessage } from '../../../../../../utilities/error-message';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type ClientView = 'top' | 'inactivos' | 'nuevos';
 
 @Component({
   selector: 'app-admin-reports-clients',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe],
+  imports: [SkeletonRowsComponent, CurrencyPipe, DatePipe, DecimalPipe],
   templateUrl: './clients-report.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

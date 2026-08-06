@@ -21,10 +21,11 @@ import { PayrollQueryService } from '../../../../../../services/report/payroll.q
 import { ReportQueryService } from '../../../../../../services/report/query.service';
 import { StaffService } from '../../../../../../services/staff/staff.service';
 import { errorMessage } from '../../../../../../utilities/error-message';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-admin-reports-payroll',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe],
+  imports: [SkeletonRowsComponent, CurrencyPipe, DatePipe, DecimalPipe],
   templateUrl: './payroll-report.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

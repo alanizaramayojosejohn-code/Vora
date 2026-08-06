@@ -15,10 +15,10 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
   template: `
     @if (open()) {
       <!-- Backdrop. Click cierra. -->
-      <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+      <div class="anim-backdrop fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
            (click)="onBackdropClick($event)">
         <!-- Card. Stop propagation para que click adentro NO cierre. -->
-        <div class="w-full max-w-md bg-elevated backdrop-blur-xl border border-border-subtle rounded-2xl shadow-2xl shadow-black/20 overflow-hidden"
+        <div class="anim-panel w-full max-w-md bg-elevated backdrop-blur-xl border border-border-subtle rounded-2xl shadow-2xl shadow-black/20 overflow-hidden"
              role="dialog"
              aria-modal="true"
              (click)="$event.stopPropagation()">

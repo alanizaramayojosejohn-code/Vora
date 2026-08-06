@@ -92,7 +92,7 @@
     </header>
 
     @if (loading()) {
-      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+      <app-skeleton-rows [rows]="6" />
     } @else if (visibleRows().length === 0) {
       <div class="px-6 py-12 text-center text-sm text-foreground-subtle">
         @if (view() === 'inactivos') {

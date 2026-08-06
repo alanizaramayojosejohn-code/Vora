@@ -29,12 +29,12 @@ import {
   template: `
     @if (open()) {
       <div
-        class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto"
+        class="anim-backdrop fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto"
         (click)="onBackdropClick()">
         <!-- max-h propio: un formulario largo (productos, negocios) scrollea
              dentro de la ventana en vez de estirarla fuera de la pantalla. -->
         <div
-          class="relative w-full my-auto bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl shadow-2xl shadow-black/30 max-h-[calc(100dvh-2rem)] overflow-y-auto"
+          class="anim-panel relative w-full my-auto bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl shadow-2xl shadow-black/30 max-h-[calc(100dvh-2rem)] overflow-y-auto"
           [class]="widthClass()"
           role="dialog"
           aria-modal="true"

@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { Category } from '../../../../../../models/category.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-admin-categories-list',
+  imports: [SkeletonRowsComponent],
   templateUrl: './list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -5,7 +5,7 @@
   </header>
 
   @if (loading()) {
-    <div class="px-6 py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+    <app-skeleton-rows [rows]="4" />
   } @else if (rows().length === 0) {
     <div class="px-6 py-12 text-center text-sm text-success bg-success/10">
       Todo el inventario está sobre el umbral.

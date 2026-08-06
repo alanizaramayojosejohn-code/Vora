@@ -1,10 +1,11 @@
 import { CurrencyPipe, DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { BusinessWithSubscription } from '../../../../../../services/subscription/subscription.service';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-saas-subscriptions-list',
-  imports: [DatePipe, CurrencyPipe, NgClass],
+  imports: [SkeletonRowsComponent, DatePipe, CurrencyPipe, NgClass],
   templateUrl: './list.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

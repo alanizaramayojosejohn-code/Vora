@@ -22,7 +22,7 @@
   </div>
 
   @if (loading()) {
-    <div class="px-5 py-10 text-center text-sm text-foreground-muted">Cargando…</div>
+    <app-skeleton-rows [rows]="5" />
   } @else if (sessions().length === 0) {
     <div class="px-5 py-10 text-center">
       <p class="text-sm text-foreground-muted">Todavía no hay turnos registrados.</p>

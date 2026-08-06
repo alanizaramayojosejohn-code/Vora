@@ -1,10 +1,11 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CashSessionWithCashier, differenceLabel } from '../../../../../../models/cash-session.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-cash-sessions-report',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [SkeletonRowsComponent, CurrencyPipe, DatePipe],
   templateUrl: './cash-sessions.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

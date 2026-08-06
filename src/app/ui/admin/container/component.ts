@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
 import { BrandLogoComponent } from '../../shared/brand-logo.component';
+import { RouteViewComponent } from '../../shared/route-view.component';
+import { MenuToggleComponent } from '../../shared/menu-toggle.component';
 import { IfPlanDirective } from '../../shared/if-plan.directive';
 import { SubscriptionStatusComponent } from '../../shared/subscription-status.component';
 import { ThemeModeToggleComponent } from '../../shared/theme-mode-toggle.component';
 
 @Component({
   selector: 'app-admin-container',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeModeToggleComponent, BrandLogoComponent, SubscriptionStatusComponent, IfPlanDirective],
+  imports: [MenuToggleComponent, RouteViewComponent, RouterLink, RouterLinkActive, ThemeModeToggleComponent, BrandLogoComponent, SubscriptionStatusComponent, IfPlanDirective],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

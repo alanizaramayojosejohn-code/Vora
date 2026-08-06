@@ -2,21 +2,17 @@
 
   <!-- Mobile topbar -->
   <header class="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-14 bg-surface border-b border-border-subtle flex-shrink-0">
-    <button (click)="sidebarOpen.set(!sidebarOpen())"
-            class="p-2 rounded-lg hover:bg-muted text-foreground-muted hover:text-foreground transition">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="4" x2="20" y1="6" y2="6"/>
-        <line x1="4" x2="20" y1="12" y2="12"/>
-        <line x1="4" x2="20" y1="18" y2="18"/>
-      </svg>
-    </button>
+    <app-menu-toggle [open]="sidebarOpen()" (toggled)="sidebarOpen.set(!sidebarOpen())" />
     <app-brand-logo [small]="true" [badge]="audienceLabel" class="flex items-center gap-2.5 min-w-0" />
   </header>
 
   <!-- Backdrop -->
-  @if (sidebarOpen()) {
-    <div class="fixed inset-0 z-40 bg-black/50 lg:hidden" (click)="sidebarOpen.set(false)"></div>
-  }
+  <div class="fixed inset-0 z-40 bg-black/50 lg:hidden transition-opacity duration-300 ease-out"
+       [class.opacity-0]="!sidebarOpen()"
+       [class.pointer-events-none]="!sidebarOpen()"
+       [class.opacity-100]="sidebarOpen()"
+       aria-hidden="true"
+       (click)="sidebarOpen.set(false)"></div>
 
   <!-- ============================== Sidebar ============================== -->
   <aside class="fixed inset-y-0 left-0 z-50 w-60 bg-surface backdrop-blur-xl border-r border-border-subtle flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out lg:sticky lg:inset-auto lg:top-0 lg:h-screen lg:z-auto lg:translate-x-0"
@@ -175,6 +171,6 @@
   <!-- ============================== Main ============================== -->
   <main class="flex-1 min-w-0">
     <app-subscription-status />
-    <router-outlet />
+    <app-route-view />
   </main>
 </div>

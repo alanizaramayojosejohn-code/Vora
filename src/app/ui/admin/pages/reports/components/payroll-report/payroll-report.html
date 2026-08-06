@@ -94,7 +94,7 @@
     </header>
 
     @if (loading()) {
-      <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Cargando…</div>
+      <app-skeleton-rows [rows]="5" />
     } @else if (status().length === 0) {
       <div class="px-6 py-12 text-center text-sm text-foreground-subtle">
         Todavía no hay empleados cargados.

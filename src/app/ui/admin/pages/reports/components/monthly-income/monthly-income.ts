@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { MonthlyIncome } from '../../../../../../models/monthly-income.model';
+import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-admin-reports-monthly-income',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [SkeletonRowsComponent, CurrencyPipe, DatePipe],
   templateUrl: './monthly-income.html',
   styleUrl: './monthly-income.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
