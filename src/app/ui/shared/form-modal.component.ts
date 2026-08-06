@@ -34,7 +34,7 @@ import {
         <!-- max-h propio: un formulario largo (productos, negocios) scrollea
              dentro de la ventana en vez de estirarla fuera de la pantalla. -->
         <div
-          class="anim-panel relative w-full my-auto bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl shadow-2xl shadow-black/30 max-h-[calc(100dvh-2rem)] overflow-y-auto"
+          class="anim-panel surface-solid relative w-full my-auto border border-border-subtle rounded-2xl shadow-2xl shadow-black/30 max-h-[calc(100dvh-2rem)] overflow-y-auto"
           [class]="widthClass()"
           role="dialog"
           aria-modal="true"

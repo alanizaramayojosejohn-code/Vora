@@ -127,6 +127,34 @@ html, body {
 }
 
 /* =====================================================================
+   Superficies opacas para ventanas.
+
+   Los tokens --c-surface y --c-elevated son translúcidos a propósito: son
+   tarjetas "glass" pensadas para apoyarse sobre --c-base, y ahí el fondo de
+   la página completa el color. Dentro de un modal eso deja de funcionar,
+   porque atrás no está la página sino el velo oscuro, y se filtra: el
+   comprobante de venta se veía transparente y el texto se mezclaba con lo
+   que había debajo. En los presets oscuros es peor todavía —algunos usan
+   rgba(255,255,255,0.04), o sea casi nada de superficie.
+
+   En vez de sumar un token opaco a los catorce presets, se compone acá lo
+   mismo que se ve en la página: el color base debajo y la superficie
+   encima. `background-image` pinta sobre `background-color`, así que el
+   resultado es exactamente el color de una tarjeta apoyada en la página,
+   pero sin nada que se filtre. Funciona con cualquier preset y no hay dos
+   listas de colores que mantener sincronizadas.
+   ===================================================================== */
+.surface-solid {
+  background-color: var(--c-base);
+  background-image: linear-gradient(var(--c-surface), var(--c-surface));
+}
+
+.elevated-solid {
+  background-color: var(--c-base);
+  background-image: linear-gradient(var(--c-elevated), var(--c-elevated));
+}
+
+/* =====================================================================
    Movimiento.
 
    El criterio es que la animación explique algo —de dónde salió un panel,
@@ -154,6 +182,16 @@ html, body {
   to   { opacity: 1; transform: none; }
 }
 
+@keyframes vora-grow-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes vora-grow-y {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
 @keyframes vora-sheen {
   from { background-position: 200% 0; }
   to   { background-position: -200% 0; }
@@ -178,6 +216,41 @@ html, body {
    `backwards` por el mismo motivo que arriba. */
 .anim-backdrop { animation: vora-fade-in 180ms ease-out backwards; }
 .anim-panel    { animation: vora-pop 220ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+
+/* Entrada escalonada de tarjetas. Los KPI y las tarjetas de un dashboard
+   aparecen uno detrás de otro en vez de todos juntos: el ojo recorre la
+   fila en el orden en que están, que es el orden en que hay que leerlos.
+   El escalón es de 45 ms —lo justo para que se note la secuencia sin que
+   el último tarde en llegar— y se corta en el sexto para que una grilla
+   larga no termine con media pantalla esperando. */
+.anim-stagger > * {
+  animation: vora-rise 300ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.anim-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.anim-stagger > *:nth-child(2) { animation-delay: 45ms; }
+.anim-stagger > *:nth-child(3) { animation-delay: 90ms; }
+.anim-stagger > *:nth-child(4) { animation-delay: 135ms; }
+.anim-stagger > *:nth-child(5) { animation-delay: 180ms; }
+.anim-stagger > *:nth-child(n + 6) { animation-delay: 225ms; }
+
+/* Barras de gráfico. Crecen desde el borde izquierdo en vez de aparecer
+   ya dibujadas, así se lee la comparación entre una y otra.
+
+   Se anima `transform: scaleX` y no `width`: el ancho lo fija un binding
+   inline con el porcentaje real, y animar esa misma propiedad pelearía
+   contra el valor que escribe Angular. El transform va por encima sin
+   tocarlo, y además lo resuelve el compositor sin recalcular layout en
+   cada cuadro. */
+.anim-bar {
+  transform-origin: left center;
+  animation: vora-grow-x 620ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Las columnas de un sparkline crecen desde abajo, que es su línea base. */
+.anim-column {
+  transform-origin: bottom center;
+  animation: vora-grow-y 520ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
 
 /* Esqueleto de carga: una barra con un brillo que la recorre. Reemplaza al
    "Cargando…" suelto, que no dejaba ver cuánto contenido viene ni ocupaba

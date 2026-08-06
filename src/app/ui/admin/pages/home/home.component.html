@@ -39,7 +39,7 @@
   </div>
 
   <!-- KPIs: 2 cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="anim-stagger grid grid-cols-1 md:grid-cols-2 gap-4">
 
     <!-- Ventas de la semana -->
     <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-5">
@@ -68,7 +68,7 @@
         <span class="text-xs text-foreground-muted">vs semana pasada</span>
         <div class="flex items-end gap-0.5 h-6">
           @for (bar of weekSparkline(); track $index) {
-            <div class="w-1 rounded-sm bg-primary/70 transition" [style.height.px]="bar"></div>
+            <div class="anim-column w-1 rounded-sm bg-primary/70 transition" [style.height.px]="bar"></div>
           }
         </div>
       </div>
@@ -108,7 +108,7 @@
   </div>
 
   <!-- Charts 3 columns -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="anim-stagger grid grid-cols-1 lg:grid-cols-3 gap-4">
 
     <!-- Ingresos por categoría — plan Negocio -->
     @if (hasAdvancedReports()) {
@@ -118,7 +118,7 @@
         <p class="text-xs text-foreground-muted">Mes en curso</p>
       </div>
       @if (loading()) {
-        <div class="flex-1 py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+        <app-skeleton-bars [bars]="4" />
       } @else if (categoryRevenueWithPct().length === 0) {
         <div class="flex-1 py-8 text-center text-sm text-foreground-subtle">Sin datos este mes</div>
       } @else {
@@ -135,7 +135,7 @@
                 </div>
               </div>
               <div class="h-1.5 bg-muted rounded-full overflow-hidden">
-                <div class="h-full bg-primary rounded-full" [style.width.%]="cat.barPct"></div>
+                <div class="anim-bar h-full bg-primary rounded-full" [style.width.%]="cat.barPct"></div>
               </div>
             </div>
           }
@@ -151,7 +151,7 @@
         <p class="text-xs text-foreground-muted">Más vendidos del mes</p>
       </div>
       @if (loading()) {
-        <div class="flex-1 py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+        <app-skeleton-bars [bars]="4" />
       } @else if (topProducts().length === 0) {
         <div class="flex-1 py-8 text-center text-sm text-foreground-subtle">Sin ventas este mes</div>
       } @else {
@@ -179,7 +179,7 @@
         <p class="text-xs text-foreground-muted">Distribución del mes</p>
       </div>
       @if (loading()) {
-        <div class="py-8 text-center text-sm text-foreground-subtle">Cargando…</div>
+        <app-skeleton-bars [bars]="3" />
       } @else {
         <div class="flex justify-center">
           <svg viewBox="0 0 100 100" width="136" height="136" class="-rotate-90">
@@ -242,7 +242,7 @@
     </div>
 
     @if (loading()) {
-      <div class="py-10 text-center text-sm text-foreground-subtle">Cargando…</div>
+      <app-skeleton-rows [rows]="5" />
     } @else if (recentSales().length === 0) {
       <div class="py-10 text-center text-sm text-foreground-subtle">Sin ventas registradas.</div>
     } @else {

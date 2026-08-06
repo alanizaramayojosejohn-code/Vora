@@ -20,13 +20,14 @@ import {
   OpenSessionSales,
 } from '../../../../../../services/report/daily-sales.query.service';
 import { errorMessage } from '../../../../../../utilities/error-message';
+import { SkeletonBarsComponent } from '../../../../../shared/skeleton-bars.component';
 
 const RANGES: DayRange[] = ['today', 'week', 'month'];
 const METHODS: PaymentMethod[] = ['cash', 'card', 'qr'];
 
 @Component({
   selector: 'app-admin-reports-daily-sales',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe],
+  imports: [SkeletonBarsComponent, CurrencyPipe, DatePipe, DecimalPipe],
   templateUrl: './daily-sales.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

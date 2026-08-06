@@ -9,10 +9,12 @@ import { ExportService, SalesReportRow, SalesSummary } from '../../../../service
 import { DailyIncome } from '../../../../models/daily-income.model';
 import { MonthlyIncome } from '../../../../models/monthly-income.model';
 import { OrderWithDetails, PaymentMethod, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../models/order.model';
+import { SkeletonBarsComponent } from '../../../shared/skeleton-bars.component';
+import { SkeletonRowsComponent } from '../../../shared/skeleton-rows.component';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [SkeletonRowsComponent, SkeletonBarsComponent, CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

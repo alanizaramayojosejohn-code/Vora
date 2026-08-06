@@ -56,6 +56,14 @@ export class OrderInvoiceComponent {
       width: 100% !important;
       max-width: 480px;
       margin: 0 auto;
+      /* En pantalla el comprobante se pinta con el color del tema; en papel
+         va sobre blanco. Se anulan las dos capas de surface-solid, no solo
+         el color, o la de background-image seguiría tiñendo la hoja. */
+      background: white !important;
+      background-image: none !important;
+      /* La animación de entrada no tiene sentido en la ventana de impresión
+         y podría capturarse a mitad de camino. */
+      animation: none !important;
     }
     .print\\:hidden { display: none !important; }
   </style>
