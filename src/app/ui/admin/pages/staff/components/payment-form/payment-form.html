@@ -9,7 +9,7 @@
     <div>
       <label for="period_month" class="block text-sm font-medium text-foreground-muted mb-1">Mes</label>
       <select id="period_month" formControlName="period_month"
-              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
         @for (m of months; track m.v) {
           <option [value]="m.v">{{ m.l }}</option>
         }

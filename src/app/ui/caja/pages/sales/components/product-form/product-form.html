@@ -15,7 +15,7 @@
     <div class="md:col-span-2">
       <label for="product_id" class="block text-sm font-medium text-foreground-muted mb-1">Producto</label>
       <select id="product_id" formControlName="product_id"
-              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
         <option value="" disabled>Selecciona un producto…</option>
         @for (product of availableProducts(); track product.id) {
           <option [value]="product.id">
@@ -44,7 +44,7 @@
         Cliente <span class="text-foreground-faint">(opcional)</span>
       </label>
       <select id="client_id" formControlName="client_id"
-              class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
         <option value="">— Venta sin cliente —</option>
         @for (client of clients(); track client.id) {
           <option [value]="client.id">{{ client.ci }} · {{ client.name }}</option>
