@@ -127,6 +127,76 @@ html, body {
 }
 
 /* =====================================================================
+   Controles nativos y <select>.
+
+   En modo oscuro el desplegable salía blanco sobre blanco. La causa no es
+   el CSS de la página: la lista de <option> la dibuja el navegador con su
+   propio tema, y sin `color-scheme` ese tema siempre es claro. El <select>
+   cerrado se veía bien porque ahí sí manda nuestro CSS, pero al abrirlo
+   aparecía un panel blanco con el texto blanco heredado.
+
+   `color-scheme` es la pieza que faltaba: le dice al navegador con qué
+   tema pintar TODO lo nativo — el desplegable, las barras de scroll, los
+   selectores de fecha, el autocompletado. Se declara junto al data-mode
+   que ya escribe ThemeService, más una variante por prefers-color-scheme
+   para la pantalla de login, que se muestra antes de que el servicio
+   aplique nada.
+   ===================================================================== */
+:root[data-mode="dark"] { color-scheme: dark; }
+:root[data-mode="light"] { color-scheme: light; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode="light"]) { color-scheme: dark; }
+}
+
+/* Además se pintan las opciones a mano. Firefox y algunos Chrome viejos
+   no derivan el fondo del desplegable de color-scheme, y ahí esto es lo
+   único que evita que vuelva el blanco sobre blanco. */
+.select-field option {
+  background-color: var(--c-base);
+  color: var(--c-foreground);
+}
+
+/* -------------------------------------------------------------------
+   Aspecto del select.
+
+   La flecha nativa se dibuja con el color del sistema y desentona con el
+   tema del negocio, así que se reemplaza por una propia. Va como
+   background-image y no como pseudo-elemento porque <select> es un
+   elemento reemplazado: no admite ::after.
+
+   El SVG no puede usar currentColor —está fuera del documento—, así que
+   el trazo se fija por modo. Son dos reglas y evitan el gris plano que
+   se ve mal en uno de los dos temas.
+   ------------------------------------------------------------------- */
+.select-field {
+  appearance: none;
+  -webkit-appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1.05rem;
+  /* Espacio para que el texto largo no pase por debajo de la flecha. */
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  cursor: pointer;
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+:root[data-mode="dark"] .select-field,
+:root:not([data-mode="light"]) .select-field {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-mode="dark"]) .select-field {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23525252' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+.select-field:hover:not(:disabled) { border-color: var(--c-border); }
+.select-field:disabled { cursor: not-allowed; opacity: 0.55; }
+
+/* =====================================================================
    Superficies opacas para ventanas.
 
    Los tokens --c-surface y --c-elevated son translúcidos a propósito: son

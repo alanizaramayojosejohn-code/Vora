@@ -32,7 +32,7 @@
       <div class="space-y-1">
         <label class="block text-xs font-medium text-foreground-muted">Usuario</label>
         <select [ngModel]="selectedUserId()" (ngModelChange)="selectedUserId.set($event)"
-                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
+                class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
                        text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
           <option value="">Todos los usuarios</option>
           @for (u of users(); track u.id) {
@@ -45,7 +45,7 @@
       <div class="space-y-1">
         <label class="block text-xs font-medium text-foreground-muted">Producto</label>
         <select [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)"
-                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
+                class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg
                        text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
           <option value="">Todos los productos</option>
           @for (p of products(); track p.id) {

@@ -4,13 +4,13 @@
   <div class="flex items-center justify-between gap-4 flex-wrap">
     <div class="flex items-center gap-2">
       <select [value]="month()" (change)="onMonthChange($any($event.target).value)"
-              class="px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              class="select-field px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
         @for (label of monthLabels; track $index) {
           <option [value]="$index + 1">{{ label }}</option>
         }
       </select>
       <select [value]="year()" (change)="onYearChange($any($event.target).value)"
-              class="px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              class="select-field px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
         @for (y of years(); track y) {
           <option [value]="y">{{ y }}</option>
         }
