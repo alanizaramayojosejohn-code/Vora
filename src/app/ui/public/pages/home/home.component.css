@@ -1,0 +1,130 @@
+/* =====================================================================
+   Landing.
+
+   La página es la única del producto que no usa el tema del negocio: es
+   la vitrina, no la herramienta, y se pinta siempre oscura para que el
+   fondo animado tenga dónde brillar. Por eso los colores viven acá como
+   variables propias y no salen de los tokens --c-*.
+
+   La paleta es casi monocroma a propósito. El único color es un celeste
+   muy contenido —el lado azul del logo— reservado para tres cosas: el
+   punto vivo del chip, el sello del plan recomendado y las ventajas
+   exclusivas de ese plan. Todo lo demás es blanco a distintas opacidades.
+   ===================================================================== */
+
+:host {
+  --ink: #08090b;
+  --ink-soft: #0d0f12;
+
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  --card: rgba(255, 255, 255, 0.022);
+  --card-featured: rgba(255, 255, 255, 0.055);
+
+  --accent: #7dd3fc;
+
+  display: block;
+  background: var(--ink);
+  color: #fafafa;
+  /* La landing se ve igual venga de donde venga: si el usuario dejó el
+     modo claro en la app, los controles nativos de esta página siguen
+     siendo los oscuros. */
+  color-scheme: dark;
+}
+
+/* Viñeta fija sobre el canvas. Apaga la retícula en los bordes y deja el
+   centro —donde va el texto— con el contraste alto. Va aparte del canvas
+   para no tener que repintar un degradado grande en cada cuadro. */
+.landing-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 75% at 50% 0%,
+      rgba(125, 211, 252, 0.05) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      100% 65% at 50% 42%,
+      rgba(8, 9, 11, 0.3) 0%,
+      rgba(8, 9, 11, 0.82) 78%
+    );
+}
+
+/* Superficie de tarjeta. Un solo lugar en vez de repetir el par
+   fondo + borde en cada bloque del template. */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.card-featured {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(125, 211, 252, 0.05) 0%,
+      transparent 240px
+    ),
+    var(--card-featured);
+  border: 1px solid var(--line-strong);
+  /* El brillo interior superior levanta la tarjeta del fondo sin sumar
+     un color: es la misma luz del canvas apoyada en el borde. */
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+    0 24px 70px -30px rgba(0, 0, 0, 0.85);
+}
+
+/* Filo de luz que separa la barra de navegación del contenido. Se
+   desvanece hacia los costados para que no se lea como una línea dura. */
+.hairline::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent
+  );
+}
+
+/* Selector mensual/anual: la pastilla activa. */
+.billing-option {
+  transition:
+    color 160ms ease-out,
+    background-color 160ms ease-out;
+}
+
+/* =====================================================================
+   Aparición por scroll.
+
+   Se resuelve con `animation-timeline: view()`, sin JavaScript ni
+   observers: el navegador liga el avance de la animación a la posición
+   del elemento en la ventana. Donde no está soportado —Firefox, Safari
+   viejos— el @supports no aplica y el contenido se ve directamente, que
+   es el comportamiento correcto para una landing: nunca queda nada
+   invisible esperando un efecto que no va a correr.
+
+   El rango se mide en píxeles y no en porcentaje, y esto no es un
+   detalle: el porcentaje de la fase `entry` se calcula sobre el alto del
+   elemento más el de la ventana, así que un bloque más alto que la
+   pantalla —las tarjetas de planes en un teléfono— nunca llega a
+   "entrar del todo" y la animación se queda congelada a mitad, con el
+   contenido a media opacidad para siempre. Con un desplazamiento fijo de
+   240 px el final del rango siempre se alcanza, mida lo que mida el
+   bloque, y además todos aparecen a la misma velocidad.
+   ===================================================================== */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: vora-rise 1ms linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 240px;
+    }
+  }
+}

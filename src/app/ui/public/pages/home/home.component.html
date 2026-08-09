@@ -1,239 +1,442 @@
-<div class="min-h-screen flex flex-col" style="background:#0d0d0d; color:#fff">
+<div class="relative min-h-screen">
 
-  <!-- Navbar -->
-  <nav class="flex items-center justify-between px-6 md:px-12 py-5 shrink-0">
-    <img src="img/logo_dark.png" alt="VORA" class="h-9 w-auto">
+  <!-- Fondo animado + viñeta. Ambos fijos, detrás de todo. -->
+  <app-landing-backdrop />
+  <div class="landing-vignette"></div>
 
-    <div class="flex items-center gap-2 sm:gap-5">
-      <a href="#precios"
-         class="text-sm font-medium text-white/55 hover:text-white/90
-                transition-colors duration-150">
-        Precios
-      </a>
-      <a routerLink="/login"
-         class="px-5 py-2 rounded-xl text-sm font-semibold
-                bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.09]
-                text-white/80 hover:text-white transition-colors duration-150">
-        Entrar
-      </a>
-    </div>
-  </nav>
+  <!-- Iconos que se repiten en la tabla de planes. Se declaran una vez y
+       se instancian con <use>, en vez de pegar el mismo path treinta veces. -->
+  <svg width="0" height="0" class="absolute" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 12.5 9 17.5 20 6.5" />
+    </symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round">
+      <path d="M6 12h12" />
+    </symbol>
+  </svg>
 
-  <!-- Hero -->
-  <section class="flex-1 flex flex-col items-center justify-center text-center px-6 py-16 md:py-24 relative overflow-hidden">
+  <div class="relative z-10 flex min-h-screen flex-col">
 
-    <!-- Glows -->
-    <div class="absolute pointer-events-none" style="
-      width:600px; height:600px; border-radius:50%;
-      background:radial-gradient(circle, rgba(109,40,217,0.13) 0%, transparent 65%);
-      top:50%; left:50%; transform:translate(-50%,-55%);
-    "></div>
-    <div class="absolute pointer-events-none" style="
-      width:360px; height:360px; border-radius:50%;
-      background:radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 65%);
-      top:44%; left:56%; transform:translate(-50%,-50%);
-    "></div>
-
-    <!-- Tag -->
-    <span class="relative z-10 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-semibold tracking-widest uppercase mb-8"
-          style="background:rgba(109,40,217,0.12); border:1px solid rgba(109,40,217,0.28); color:rgba(167,139,250,0.9)">
-      <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
-      Sistema POS para cafés y restaurantes
-    </span>
-
-    <!-- Headline -->
-    <h1 class="relative z-10 text-4xl md:text-6xl font-bold leading-[1.1] tracking-tight mb-6 max-w-2xl"
-        style="color:rgba(255,255,255,0.93)">
-      Todo tu negocio,<br>
-      <span style="background:linear-gradient(135deg,#7c3aed,#06b6d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
-        en una sola pantalla
-      </span>
-    </h1>
-
-    <!-- Subheadline -->
-    <p class="relative z-10 text-base md:text-lg max-w-md leading-relaxed mb-10"
-       style="color:rgba(255,255,255,0.42)">
-      Caja, inventario, clientes y reportes — diseñado para cafés
-      que quieren operar rápido y sin complicaciones.
-    </p>
-
-    <!-- CTAs -->
-    <div class="relative z-10 flex flex-col sm:flex-row items-center gap-3">
-      <a routerLink="/login"
-         class="px-7 py-3.5 rounded-xl text-sm font-semibold text-white
-                bg-violet-700 hover:bg-violet-600 active:bg-violet-800
-                shadow-lg shadow-violet-900/50
-                transition-colors duration-150">
-        Comenzar ahora
-      </a>
-      <a href="#features"
-         class="px-7 py-3.5 rounded-xl text-sm font-medium
-                bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08]
-                text-white/60 hover:text-white/85
-                transition-colors duration-150">
-        Ver funciones
-      </a>
-    </div>
-
-  </section>
-
-  <!-- Features -->
-  <section id="features" class="px-6 md:px-12 pb-20 pt-4">
-    <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-      <!-- POS -->
-      <div class="rounded-2xl p-6" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-             style="background:rgba(109,40,217,0.14); border:1px solid rgba(109,40,217,0.22)">
-          <svg class="w-5 h-5" style="color:rgba(167,139,250,0.85)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
+    <!-- ================================================================
+         Navegación
+         ================================================================ -->
+    <header class="hairline sticky top-0 z-30 backdrop-blur-xl"
+            style="background: rgba(8, 9, 11, 0.72)">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-8">
+        <!-- `logo_mark.png` es el isotipo recortado con fondo transparente.
+             `logo_dark.png` trae su propio fondo negro opaco —rgb(14,15,13),
+             no exactamente el de esta página— y dejaba un recuadro visible
+             flotando en la barra. Además es cuadrado, con la palabra VORA
+             debajo del símbolo: a la altura de una barra de navegación esa
+             palabra queda ilegible. Acá el símbolo va solo y la palabra se
+             compone con la tipografía de la página. -->
+        <div class="flex items-center gap-2.5">
+          <img src="img/logo_mark.png" alt="Vora" class="h-6 w-auto" />
+          <span class="text-[17px] font-semibold tracking-[-0.02em]">Vora</span>
         </div>
-        <h3 class="font-semibold text-sm mb-1.5" style="color:rgba(255,255,255,0.85)">Punto de venta</h3>
-        <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.38)">
-          Cobra en segundos. Efectivo, tarjeta o QR. Imprime facturas al instante.
-        </p>
-      </div>
 
-      <!-- Inventario -->
-      <div class="rounded-2xl p-6" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-             style="background:rgba(6,182,212,0.10); border:1px solid rgba(6,182,212,0.18)">
-          <svg class="w-5 h-5" style="color:rgba(103,232,249,0.85)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-          </svg>
-        </div>
-        <h3 class="font-semibold text-sm mb-1.5" style="color:rgba(255,255,255,0.85)">Control de inventario</h3>
-        <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.38)">
-          Stock en tiempo real. Alertas de bajo inventario. Compras y proveedores.
-        </p>
-      </div>
-
-      <!-- Offline -->
-      <div class="rounded-2xl p-6" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-             style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.18)">
-          <svg class="w-5 h-5" style="color:rgba(134,239,172,0.85)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-              d="M12 18h.01M8.93 10.11A4 4 0 0115.07 10M5.07 7.07A8 8 0 0118.93 7M1.5 4.5l21 15"/>
-          </svg>
-        </div>
-        <h3 class="font-semibold text-sm mb-1.5" style="color:rgba(255,255,255,0.85)">Funciona sin internet</h3>
-        <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.38)">
-          Sigue vendiendo aunque se corte la señal. Se sincroniza automáticamente al reconectar.
-        </p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Precios -->
-  <section id="precios" class="px-6 md:px-12 pb-20 pt-4">
-    <div class="max-w-4xl mx-auto">
-
-      <div class="text-center mb-10">
-        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-3" style="color:rgba(255,255,255,0.9)">
-          Precios claros, sin sorpresas
-        </h2>
-        <p class="text-sm max-w-md mx-auto leading-relaxed" style="color:rgba(255,255,255,0.4)">
-          Cajas y usuarios ilimitados en los dos planes. Sin contrato de permanencia.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-
-        <!-- Plan Caja -->
-        <div class="rounded-2xl p-7" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07)">
-          <h3 class="font-semibold text-sm mb-1" style="color:rgba(255,255,255,0.85)">Caja</h3>
-          <p class="text-xs mb-5" style="color:rgba(255,255,255,0.38)">Para vender y cobrar rápido.</p>
-
-          <div class="flex items-baseline gap-1.5 mb-6">
-            <span class="text-4xl font-bold tracking-tight" style="color:rgba(255,255,255,0.93)">149</span>
-            <span class="text-sm font-medium" style="color:rgba(255,255,255,0.35)">Bs/mes</span>
-          </div>
-
-          <ul class="space-y-2.5 mb-7">
-            @for (item of planCaja; track item) {
-              <li class="flex items-start gap-2.5 text-xs leading-relaxed" style="color:rgba(255,255,255,0.55)">
-                <svg class="w-3.5 h-3.5 mt-0.5 shrink-0" style="color:rgba(167,139,250,0.75)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                </svg>
-                {{ item }}
-              </li>
-            }
-          </ul>
-
+        <div class="flex items-center gap-1 sm:gap-2">
+          <a href="#funciones"
+             class="hidden rounded-lg px-3 py-2 text-sm font-medium text-white/50
+                    transition-colors duration-150 hover:text-white sm:block">
+            Funciones
+          </a>
+          <a href="#precios"
+             class="rounded-lg px-3 py-2 text-sm font-medium text-white/50
+                    transition-colors duration-150 hover:text-white">
+            Precios
+          </a>
           <a routerLink="/login"
-             class="block text-center px-6 py-3 rounded-xl text-sm font-medium
-                    bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.08]
-                    text-white/60 hover:text-white/85
-                    transition-colors duration-150">
-            Empezar con Caja
+             class="ml-1 rounded-full bg-white px-5 py-2 text-sm font-semibold text-neutral-950
+                    transition-colors duration-150 hover:bg-white/85">
+            Entrar
           </a>
         </div>
+      </nav>
+    </header>
 
-        <!-- Plan Negocio (destacado) -->
-        <div class="rounded-2xl p-7 relative"
-             style="background:rgba(109,40,217,0.07); border:1px solid rgba(109,40,217,0.3)">
+    <main class="flex-1">
 
-          <span class="absolute -top-2.5 right-6 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase"
-                style="background:#6d28d9; color:#fff">
-            Recomendado
+      <!-- ==============================================================
+           Hero
+           ============================================================== -->
+      <!-- `anim-stagger` escalona los cinco hijos directos de la sección:
+           chip, título, bajada, botones y la línea de garantías entran en
+           ese orden, que es el orden en que se leen. -->
+      <section class="anim-stagger mx-auto max-w-6xl px-6 pt-20 pb-24 text-center
+                      md:pt-32 md:pb-32 lg:px-8">
+
+        <span class="inline-flex items-center gap-2.5 rounded-full border border-white/10
+                     bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/60">
+          <span class="relative flex h-1.5 w-1.5">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                  style="background: var(--accent)"></span>
+            <span class="relative inline-flex h-1.5 w-1.5 rounded-full"
+                  style="background: var(--accent)"></span>
           </span>
+          Punto de venta e inventario para cafés y restaurantes
+        </span>
 
-          <h3 class="font-semibold text-sm mb-1" style="color:rgba(255,255,255,0.85)">Negocio</h3>
-          <p class="text-xs mb-5" style="color:rgba(255,255,255,0.38)">Para administrar todo el local.</p>
+        <h1 class="mx-auto mt-8 max-w-4xl text-[2.15rem] leading-[1.06] font-semibold
+                   tracking-[-0.035em] sm:text-5xl md:text-6xl lg:text-7xl">
+          Todo tu negocio<br />
+          <span class="text-white/40">en una sola pantalla</span>
+        </h1>
 
-          <div class="flex items-baseline gap-1.5 mb-6">
-            <span class="text-4xl font-bold tracking-tight" style="color:rgba(255,255,255,0.93)">349</span>
-            <span class="text-sm font-medium" style="color:rgba(255,255,255,0.35)">Bs/mes</span>
-          </div>
+        <p class="mx-auto mt-7 max-w-xl text-base leading-relaxed text-white/50 sm:text-lg">
+          Caja, inventario, clientes y reportes en un mismo lugar.
+          Pensado para locales que necesitan cobrar rápido y saber
+          exactamente qué pasó al cerrar el día.
+        </p>
 
-          <p class="text-xs font-medium mb-3" style="color:rgba(167,139,250,0.8)">Todo lo de Caja, más:</p>
-
-          <ul class="space-y-2.5 mb-7">
-            @for (item of planNegocio; track item) {
-              <li class="flex items-start gap-2.5 text-xs leading-relaxed" style="color:rgba(255,255,255,0.6)">
-                <svg class="w-3.5 h-3.5 mt-0.5 shrink-0" style="color:rgba(167,139,250,0.9)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                </svg>
-                {{ item }}
-              </li>
-            }
-          </ul>
-
+        <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a routerLink="/login"
-             class="block text-center px-6 py-3 rounded-xl text-sm font-semibold text-white
-                    bg-violet-700 hover:bg-violet-600 active:bg-violet-800
-                    shadow-lg shadow-violet-900/50
-                    transition-colors duration-150">
-            Empezar con Negocio
+             class="w-full rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-neutral-950
+                    transition-colors duration-150 hover:bg-white/85 sm:w-auto">
+            Comenzar ahora
+          </a>
+          <a href="#precios"
+             class="w-full rounded-full border border-white/12 px-7 py-3.5 text-sm font-medium
+                    text-white/70 transition-colors duration-150 hover:border-white/25
+                    hover:text-white sm:w-auto">
+            Ver planes
           </a>
         </div>
 
+        <ul class="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3
+                   text-xs text-white/35">
+          <li>Sin contrato de permanencia</li>
+          <li class="hidden h-3 w-px bg-white/12 sm:block" aria-hidden="true"></li>
+          <li>Cajas y usuarios ilimitados</li>
+          <li class="hidden h-3 w-px bg-white/12 sm:block" aria-hidden="true"></li>
+          <li>Funciona sin internet</li>
+        </ul>
+      </section>
+
+      <!-- ==============================================================
+           Funciones
+           ============================================================== -->
+      <section id="funciones" class="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+
+        <div class="reveal mb-12 max-w-2xl">
+          <p class="mb-3 text-xs font-semibold tracking-[0.18em] text-white/30 uppercase">
+            Funciones
+          </p>
+          <h2 class="text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">
+            Lo que hace falta para operar.<br />
+            <span class="text-white/40">Nada más.</span>
+          </h2>
+        </div>
+
+        <div class="reveal grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/8
+                    bg-white/8 sm:grid-cols-2 lg:grid-cols-3">
+
+          <!-- Punto de venta -->
+          <div class="p-7" style="background: var(--ink-soft)">
+            <svg class="mb-5 h-5 w-5 text-white/45" fill="none" stroke="currentColor"
+                 stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 4h2l2.4 11.2A2 2 0 0 0 9.36 17H18a2 2 0 0 0 1.96-1.6L21.5 8H6M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+            </svg>
+            <h3 class="mb-2 text-[0.95rem] font-semibold">Punto de venta</h3>
+            <p class="text-sm leading-relaxed text-white/45">
+              Cobra en segundos con efectivo, tarjeta o QR, y entrega la
+              factura impresa en el momento.
+            </p>
+          </div>
+
+          <!-- Inventario -->
+          <div class="p-7" style="background: var(--ink-soft)">
+            <svg class="mb-5 h-5 w-5 text-white/45" fill="none" stroke="currentColor"
+                 stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M20 7.5 12 3.5 4 7.5m16 0-8 4m8-4V16l-8 4m0-8.5L4 7.5m8 4V20M4 7.5V16l8 4" />
+            </svg>
+            <h3 class="mb-2 text-[0.95rem] font-semibold">Inventario en vivo</h3>
+            <p class="text-sm leading-relaxed text-white/45">
+              El stock baja con cada venta y te avisa antes de que se
+              termine, no cuando ya no queda.
+            </p>
+          </div>
+
+          <!-- Offline -->
+          <div class="p-7" style="background: var(--ink-soft)">
+            <svg class="mb-5 h-5 w-5 text-white/45" fill="none" stroke="currentColor"
+                 stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 18h.01M8.9 14.1a4.4 4.4 0 0 1 6.2 0M5.6 10.8a9 9 0 0 1 12.8 0M2.5 7.5a13.4 13.4 0 0 1 19 0M2 3l19 18" />
+            </svg>
+            <h3 class="mb-2 text-[0.95rem] font-semibold">Funciona sin internet</h3>
+            <p class="text-sm leading-relaxed text-white/45">
+              Si se corta la señal la caja sigue vendiendo, y todo se
+              sincroniza solo al volver la conexión.
+            </p>
+          </div>
+
+          <!-- Caja / arqueo -->
+          <div class="p-7" style="background: var(--ink-soft)">
+            <svg class="mb-5 h-5 w-5 text-white/45" fill="none" stroke="currentColor"
+                 stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 8.5h18M3 8.5 5 4.5h14l2 4M3 8.5V19a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8.5M10 13h4" />
+            </svg>
+            <h3 class="mb-2 text-[0.95rem] font-semibold">Cierre de turno</h3>
+            <p class="text-sm leading-relaxed text-white/45">
+              Arqueo por turno con la diferencia a la vista: quién abrió,
+              cuánto entró y cuánto quedó.
+            </p>
+          </div>
+
+          <!-- Reportes -->
+          <div class="p-7" style="background: var(--ink-soft)">
+            <svg class="mb-5 h-5 w-5 text-white/45" fill="none" stroke="currentColor"
+                 stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 20V10m5 10V4m5 16v-7m5 7V8" />
+            </svg>
+            <h3 class="mb-2 text-[0.95rem] font-semibold">Reportes que se leen</h3>
+            <p class="text-sm leading-relaxed text-white/45">
+              Ventas, ingresos y clientes en informes claros, exportables
+              a Excel y PDF cuando los necesites.
+            </p>
+          </div>
+
+          <!-- Marca -->
+          <div class="p-7" style="background: var(--ink-soft)">
+            <svg class="mb-5 h-5 w-5 text-white/45" fill="none" stroke="currentColor"
+                 stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 3.5a8.5 8.5 0 0 0 0 17c1.4 0 2.2-.9 2.2-2 0-1.4-1.2-1.7-1.2-2.7 0-.8.7-1.3 1.6-1.3h1.3a4.6 4.6 0 0 0 4.6-4.6c0-3.6-3.7-6.4-8.5-6.4Z" />
+              <circle cx="8" cy="11" r="1.1" />
+              <circle cx="12" cy="8" r="1.1" />
+              <circle cx="16" cy="10" r="1.1" />
+            </svg>
+            <h3 class="mb-2 text-[0.95rem] font-semibold">Con tu marca</h3>
+            <p class="text-sm leading-relaxed text-white/45">
+              El color y el logo de tu local en toda la aplicación, en
+              modo claro u oscuro.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==============================================================
+           Planes
+           ============================================================== -->
+      <section id="precios" class="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+
+        <div class="reveal mx-auto mb-12 max-w-2xl text-center">
+          <p class="mb-3 text-xs font-semibold tracking-[0.18em] text-white/30 uppercase">
+            Planes
+          </p>
+          <h2 class="text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">
+            Dos planes. Todo incluido.
+          </h2>
+          <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/45">
+            Cajas y usuarios ilimitados en ambos. Sin comisión por venta y
+            sin contrato de permanencia.
+          </p>
+
+          <!-- Ciclo de facturación -->
+          <div class="mt-8 inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1"
+               role="group" aria-label="Ciclo de facturación">
+            <button type="button" (click)="setBilling('mensual')"
+                    [attr.aria-pressed]="billing() === 'mensual'"
+                    class="billing-option rounded-full px-5 py-2 text-sm font-medium"
+                    [class]="billing() === 'mensual'
+                      ? 'bg-white text-neutral-950'
+                      : 'text-white/50 hover:text-white'">
+              Mensual
+            </button>
+            <button type="button" (click)="setBilling('anual')"
+                    [attr.aria-pressed]="billing() === 'anual'"
+                    class="billing-option rounded-full px-5 py-2 text-sm font-medium"
+                    [class]="billing() === 'anual'
+                      ? 'bg-white text-neutral-950'
+                      : 'text-white/50 hover:text-white'">
+              Anual
+              <span class="ml-1.5 text-xs"
+                    [class]="billing() === 'anual' ? 'text-neutral-950/55' : 'text-white/35'">
+                −2 meses
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="reveal mx-auto grid max-w-5xl grid-cols-1 items-start gap-5 md:grid-cols-2 lg:gap-6">
+
+          <!-- ---------- Plan Caja ---------- -->
+          <div class="card rounded-3xl p-8 sm:p-10">
+
+            <h3 class="text-lg font-semibold">Caja</h3>
+            <p class="mt-1.5 text-sm text-white/45">
+              Para vender, cobrar y cerrar el día.
+            </p>
+
+            <div class="mt-8 flex items-baseline gap-2">
+              <span class="text-6xl font-semibold tracking-[-0.04em]">
+                {{ pricing().caja.amount }}
+              </span>
+              <span class="text-sm font-medium text-white/40">Bs/mes</span>
+            </div>
+            <p class="mt-2 text-xs text-white/35">{{ pricing().caja.note }}</p>
+
+            <a routerLink="/login"
+               class="mt-8 block rounded-full border border-white/12 py-3.5 text-center text-sm
+                      font-semibold text-white/80 transition-colors duration-150
+                      hover:border-white/30 hover:text-white">
+              Empezar con Caja
+            </a>
+
+            <div class="mt-9 border-t border-white/8 pt-7">
+              <p class="mb-5 text-xs font-semibold tracking-[0.14em] text-white/35 uppercase">
+                Incluye
+              </p>
+              <ul class="space-y-3.5">
+                @for (feature of featuresBase; track feature) {
+                  <li class="flex gap-3 text-sm leading-relaxed text-white/70">
+                    <svg class="mt-1 h-3.5 w-3.5 shrink-0 text-white/45" aria-hidden="true">
+                      <use href="#i-check" />
+                    </svg>
+                    {{ feature }}
+                  </li>
+                }
+              </ul>
+
+              <p class="mt-8 mb-5 text-xs font-semibold tracking-[0.14em] text-white/25 uppercase">
+                No incluye
+              </p>
+              <ul class="space-y-3.5">
+                @for (feature of featuresNegocio; track feature) {
+                  <li class="flex gap-3 text-sm leading-relaxed text-white/28">
+                    <svg class="mt-1 h-3.5 w-3.5 shrink-0" aria-hidden="true">
+                      <use href="#i-minus" />
+                    </svg>
+                    {{ feature }}
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <!-- ---------- Plan Negocio ---------- -->
+          <div class="card-featured relative rounded-3xl p-8 sm:p-10">
+
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-semibold">Negocio</h3>
+              <span class="rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide"
+                    style="background: rgba(125, 211, 252, 0.1);
+                           border-color: rgba(125, 211, 252, 0.28);
+                           color: var(--accent)">
+                Recomendado
+              </span>
+            </div>
+
+            <p class="mt-1.5 text-sm text-white/45">
+              Para administrar el local completo.
+            </p>
+
+            <div class="mt-8 flex items-baseline gap-2">
+              <span class="text-6xl font-semibold tracking-[-0.04em]">
+                {{ pricing().negocio.amount }}
+              </span>
+              <span class="text-sm font-medium text-white/40">Bs/mes</span>
+            </div>
+            <p class="mt-2 text-xs text-white/35">{{ pricing().negocio.note }}</p>
+
+            <a routerLink="/login"
+               class="mt-8 block rounded-full bg-white py-3.5 text-center text-sm font-semibold
+                      text-neutral-950 transition-colors duration-150 hover:bg-white/85">
+              Empezar con Negocio
+            </a>
+
+            <div class="mt-9 border-t border-white/10 pt-7">
+              <p class="mb-5 text-xs font-semibold tracking-[0.14em] text-white/35 uppercase">
+                Todo lo del plan Caja
+              </p>
+              <ul class="space-y-3.5">
+                @for (feature of featuresBase; track feature) {
+                  <li class="flex gap-3 text-sm leading-relaxed text-white/70">
+                    <svg class="mt-1 h-3.5 w-3.5 shrink-0 text-white/45" aria-hidden="true">
+                      <use href="#i-check" />
+                    </svg>
+                    {{ feature }}
+                  </li>
+                }
+              </ul>
+
+              <p class="mt-8 mb-5 text-xs font-semibold tracking-[0.14em] uppercase"
+                 style="color: var(--accent)">
+                Y además
+              </p>
+              <ul class="space-y-3.5">
+                @for (feature of featuresNegocio; track feature) {
+                  <li class="flex gap-3 text-sm leading-relaxed text-white/85">
+                    <svg class="mt-1 h-3.5 w-3.5 shrink-0" aria-hidden="true"
+                         style="color: var(--accent)">
+                      <use href="#i-check" />
+                    </svg>
+                    {{ feature }}
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="reveal mx-auto mt-10 max-w-xl text-center text-xs leading-relaxed text-white/30">
+          Instalación, capacitación del equipo y carga del catálogo:
+          500&nbsp;Bs de pago único.
+        </p>
+      </section>
+
+      <!-- ==============================================================
+           Cierre
+           ============================================================== -->
+      <section class="mx-auto max-w-6xl px-6 pt-10 pb-28 lg:px-8">
+        <div class="reveal card rounded-3xl px-8 py-14 text-center sm:px-12">
+          <h2 class="mx-auto max-w-lg text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">
+            Tu café, bajo control desde hoy
+          </h2>
+          <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/45">
+            Te instalamos el sistema, cargamos tu catálogo y capacitamos a
+            tu equipo. Empiezas a cobrar el mismo día.
+          </p>
+          <a routerLink="/login"
+             class="mt-9 inline-block rounded-full bg-white px-8 py-3.5 text-sm font-semibold
+                    text-neutral-950 transition-colors duration-150 hover:bg-white/85">
+            Comenzar ahora
+          </a>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ================================================================
+         Pie
+         ================================================================ -->
+    <footer class="border-t border-white/8">
+      <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8
+                  sm:flex-row lg:px-8">
+        <span class="text-xs text-white/25">© {{ year }} Vora</span>
+
+        <div class="flex items-center gap-6">
+          <a href="#precios"
+             class="text-xs text-white/35 transition-colors duration-150 hover:text-white/70">
+            Precios
+          </a>
+          <a routerLink="/login"
+             class="text-xs font-medium text-white/55 transition-colors duration-150
+                    hover:text-white">
+            Iniciar sesión →
+          </a>
+        </div>
       </div>
+    </footer>
 
-      <p class="text-center text-xs mt-8 leading-relaxed" style="color:rgba(255,255,255,0.3)">
-        Instalación, capacitación y carga de catálogo: 500&nbsp;Bs pago único.<br class="hidden sm:block">
-        Plan anual: pagas 10 meses, llevas 12.
-      </p>
-
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="px-6 md:px-12 py-6 border-t flex items-center justify-between"
-          style="border-color:rgba(255,255,255,0.06)">
-    <span class="text-xs" style="color:rgba(255,255,255,0.22)">© 2025 Vora</span>
-    <a routerLink="/login"
-       class="text-xs font-medium transition-colors duration-150"
-       style="color:rgba(167,139,250,0.7)"
-       onmouseover="this.style.color='rgba(167,139,250,1)'"
-       onmouseout="this.style.color='rgba(167,139,250,0.7)'">
-      Iniciar sesión →
-    </a>
-  </footer>
-
+  </div>
 </div>
