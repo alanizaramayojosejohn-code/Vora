@@ -49,7 +49,8 @@
               <td class="px-5 py-3 whitespace-nowrap">
                 <p class="text-foreground">{{ s.opened_at | date:'dd/MM/yy HH:mm' }}</p>
                 @if (s.status === 'open') {
-                  <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-success/12 text-success">
+                  <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-success/12 text-success">
+                    <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
                     Abierto
                   </span>
                 } @else if (s.closed_at) {
@@ -72,7 +73,16 @@
               </td>
               <td class="px-5 py-3 text-right whitespace-nowrap">
                 @if (s.difference !== null) {
-                  <span class="font-semibold tabular-nums" [class]="differenceClass(s.difference)">
+                  <span class="inline-flex items-center justify-end gap-1 font-semibold tabular-nums" [class]="differenceClass(s.difference)">
+                    @if (s.difference !== 0) {
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                        @if (s.difference > 0) {
+                          <path d="M12 19V5" /><path d="m5 12 7-7 7 7" />
+                        } @else {
+                          <path d="M12 5v14" /><path d="m19 12-7 7-7-7" />
+                        }
+                      </svg>
+                    }
                     {{ s.difference | currency:'BOB':'symbol-narrow':'1.2-2' }}
                   </span>
                   <p class="text-[11px]" [class]="differenceClass(s.difference)">

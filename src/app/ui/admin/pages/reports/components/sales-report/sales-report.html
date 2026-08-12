@@ -222,13 +222,11 @@
                     {{ row.products_summary }}
                   </td>
                   <td class="px-4 py-2.5">
-                    <!-- Relleno sólido con su color de texto pareado: el acento
-                         puede ser blanco o negro según el preset, así que solo
-                         el par bg-accent/text-accent-fg garantiza contraste. -->
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border border-border-subtle"
-                          [class]="row.payment_method === 'cash' ? 'bg-success text-white'
-                                 : row.payment_method === 'card' ? 'bg-primary text-primary-fg'
-                                 : 'bg-accent text-accent-fg'">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                          [class]="methodStyle[row.payment_method].classes">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                        @for (d of methodStyle[row.payment_method].paths; track d) { <path [attr.d]="d" /> }
+                      </svg>
                       {{ methodLabels[row.payment_method] }}
                     </span>
                   </td>

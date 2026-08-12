@@ -5,6 +5,7 @@ import { RouteViewComponent } from '../../shared/route-view.component';
   selector: 'app-public-container',
   imports: [RouteViewComponent],
   templateUrl: './component.html',
+  styleUrl: './component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicContainerComponent {}

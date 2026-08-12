@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Business } from '../../../../../../models/business.model';
-import { getPreset } from '../../../../../../services/theme/theme.presets';
+import { contrastColor, getPreset } from '../../../../../../services/theme/theme.presets';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type BusinessSort = 'name' | 'created' | 'preset';
@@ -33,6 +33,10 @@ export class BusinessesListComponent {
 
   primaryColor(business: Business): string {
     return getPreset(business.theme).light.primary;
+  }
+
+  avatarTextColor(business: Business): string {
+    return contrastColor(this.primaryColor(business));
   }
 
   presetLabel(business: Business): string {

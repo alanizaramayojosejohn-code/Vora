@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { OrderWithDetails, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../../../models/order.model';
+import {
+  OrderWithDetails,
+  PAYMENT_METHOD_LABEL,
+  PAYMENT_METHOD_STYLE,
+  orderPrimaryLabel,
+} from '../../../../../../models/order.model';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
@@ -17,5 +22,6 @@ export class SalesListComponent {
   readonly invoice = output<OrderWithDetails>();
 
   readonly paymentLabel = PAYMENT_METHOD_LABEL;
+  readonly paymentStyle = PAYMENT_METHOD_STYLE;
   readonly primaryLabel = orderPrimaryLabel;
 }

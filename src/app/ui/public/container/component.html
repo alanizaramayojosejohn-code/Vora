@@ -14,22 +14,40 @@
   <!-- Desktop: brand panel -->
   <aside class="hidden md:flex flex-col items-center justify-center w-[52%] relative overflow-hidden">
 
-    <!-- Ambient glow — purple core -->
-    <div class="absolute pointer-events-none" style="
-      width: 520px; height: 520px; border-radius: 50%;
+    <!-- Tres luces a la deriva, con duraciones y desfases distintos para
+         que el conjunto no respire en sincro. -->
+    <div class="login-orb login-orb-1 pointer-events-none" style="
+      width: 520px; height: 520px;
       background: radial-gradient(circle, rgba(109,40,217,0.16) 0%, transparent 68%);
       top: 50%; left: 50%; transform: translate(-50%, -50%);
     "></div>
 
-    <!-- Ambient glow — cyan offset -->
-    <div class="absolute pointer-events-none" style="
-      width: 340px; height: 340px; border-radius: 50%;
+    <div class="login-orb login-orb-2 pointer-events-none" style="
+      width: 340px; height: 340px;
       background: radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%);
       top: 43%; left: 43%; transform: translate(-50%, -50%);
     "></div>
 
+    <div class="login-orb login-orb-3 pointer-events-none" style="
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(167,139,250,0.09) 0%, transparent 65%);
+      top: 58%; left: 60%; transform: translate(-50%, -50%);
+    "></div>
+
+    <!-- Halo cónico girando muy despacio detrás del logo. Un giro entero
+         dura 48s: se nota si uno lo busca, no reclama la vista. -->
+    <div class="login-halo absolute pointer-events-none" style="
+      width: 460px; height: 460px; top: 50%; left: 50%;
+      background: conic-gradient(from 0deg,
+        rgba(109,40,217,0.14), rgba(6,182,212,0.10), transparent 40%,
+        transparent 60%, rgba(167,139,250,0.12), rgba(109,40,217,0.14));
+      filter: blur(40px);
+      mask-image: radial-gradient(circle, black 0%, transparent 72%);
+      -webkit-mask-image: radial-gradient(circle, black 0%, transparent 72%);
+    "></div>
+
     <!-- Logo + tagline -->
-    <div class="relative z-10 flex flex-col items-center gap-5">
+    <div class="login-sheen relative z-10 flex flex-col items-center gap-5">
       <img src="img/logo_dark.png" alt="VORA" class="w-[22rem] h-auto">
       <p class="text-[10px] font-semibold tracking-[0.26em] uppercase"
          style="color: rgba(255,255,255,0.22);">

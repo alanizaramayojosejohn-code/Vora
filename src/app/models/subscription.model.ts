@@ -45,6 +45,42 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   transferencia: 'Transferencia',
 };
 
+export interface PaymentMethodStyle {
+  classes: string;
+  // Cada string es el `d` de un <path>. Con esto alcanza para dibujar los
+  // cuatro íconos (billete, tarjeta, QR, flechas) sin <rect>/<line>/innerHTML:
+  // un solo @for en la plantilla los recorre a todos igual.
+  paths: string[];
+}
+
+// Mismo criterio que PAYMENT_METHOD_STYLE en order.model.ts: efectivo usa
+// success, tarjeta usa primary (contraste garantizado en cualquier preset),
+// qr usa accent en relleno sólido — nunca traslúcido, porque accent puede
+// ser blanco puro en algunos presets y el par accent/10 + accent perdería
+// contraste. transferencia usa warning para diferenciarse de los otros tres.
+export const PAYMENT_METHOD_STYLE: Record<PaymentMethod, PaymentMethodStyle> = {
+  efectivo: {
+    classes: 'bg-success/10 text-success border-success/20',
+    paths: ['M12 2v20', 'M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'],
+  },
+  tarjeta: {
+    classes: 'bg-primary/10 text-primary border-primary/20',
+    paths: ['M2 5h20v14H2z', 'M2 10h20'],
+  },
+  qr: {
+    classes: 'bg-accent text-accent-fg border-transparent',
+    paths: [
+      'M3 3h5v5H3z', 'M16 3h5v5h-5z', 'M3 16h5v5H3z',
+      'M21 16h-3a2 2 0 0 0-2 2v3', 'M21 21v.01', 'M12 7v3a2 2 0 0 1-2 2H7',
+      'M3 12h.01', 'M12 3h.01', 'M12 16v.01', 'M16 12h1', 'M21 12v.01', 'M12 21v-1',
+    ],
+  },
+  transferencia: {
+    classes: 'bg-warning/10 text-warning border-warning/20',
+    paths: ['m16 3 4 4-4 4', 'M20 7H4', 'm8 21-4-4 4-4', 'M4 17h16'],
+  },
+};
+
 export interface BusinessSubscription {
   id: string;
   business_id: string;

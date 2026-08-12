@@ -24,7 +24,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
              (click)="$event.stopPropagation()">
           <!-- Header: icon + title + description -->
           <div class="px-7 pt-7 pb-5 flex flex-col items-center text-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-foreground text-base flex items-center justify-center shadow-lg shadow-black/20">
+            <div class="w-16 h-16 rounded-2xl bg-danger/10 text-danger flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
               </svg>
@@ -39,7 +39,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
           <div class="px-7 pb-5 space-y-4">
             @if (entityLabel(); as label) {
               <div class="flex items-center gap-3 p-3 rounded-xl bg-input border border-border-subtle">
-                <div class="w-10 h-10 rounded-full bg-foreground text-base flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-primary text-primary-fg flex items-center justify-center text-xs font-bold flex-shrink-0">
                   {{ entityInitials() || '··' }}
                 </div>
                 <div class="flex-1 min-w-0">

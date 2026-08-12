@@ -75,7 +75,8 @@
                       <img [src]="business.logo_url" [alt]="business.name"
                            class="w-9 h-9 rounded-lg object-contain border border-border-subtle flex-shrink-0 bg-elevated" />
                     } @else {
-                      <span class="w-9 h-9 rounded-lg bg-foreground text-primary-fg flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                      <span class="w-9 h-9 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                            [style.background]="primaryColor(business)" [style.color]="avatarTextColor(business)">
                         {{ initials(business.name) }}
                       </span>
                     }

@@ -1,0 +1,71 @@
+/* =====================================================================
+   Panel de marca del login.
+
+   Antes eran dos manchas de gradiente fijas. Acá se mueven muy despacio
+   —14 a 22 segundos por ciclo, con desfases distintos para que no
+   respiren en sincro y se sienta orgánico— y se suma un aro cónico
+   girando detrás del logo y un brillo que lo recorre cada tanto. Nada de
+   esto es información: es la vitrina antes de entrar a la herramienta,
+   así que puede tomarse el lujo de moverse donde el resto del producto
+   no lo hace.
+   ===================================================================== */
+
+.login-orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .login-orb-1 { animation: login-drift-1 18s ease-in-out infinite; }
+  .login-orb-2 { animation: login-drift-2 22s ease-in-out infinite; }
+  .login-orb-3 { animation: login-drift-3 14s ease-in-out infinite; }
+
+  .login-halo { animation: login-spin 48s linear infinite; }
+
+  .login-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 60%
+    );
+    background-size: 260% 100%;
+    background-position: 140% 0;
+    mix-blend-mode: overlay;
+    animation: login-sheen 7s ease-in-out infinite;
+  }
+}
+
+@keyframes login-drift-1 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(calc(-50% + 24px), calc(-50% - 18px)) scale(1.08); }
+}
+
+@keyframes login-drift-2 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(calc(-50% - 20px), calc(-50% + 22px)) scale(0.94); }
+}
+
+@keyframes login-drift-3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.96); }
+  50%      { transform: translate(calc(-50% + 14px), calc(-50% + 16px)) scale(1.05); }
+}
+
+@keyframes login-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Pausa larga entre pasadas: el brillo cruza en ~1.2s y descansa el resto
+   del ciclo. Un sheen constante se sentiría como una barra de carga, no
+   como un detalle. */
+@keyframes login-sheen {
+  0%   { background-position: 140% 0; }
+  16%  { background-position: -40% 0; }
+  100% { background-position: -40% 0; }
+}

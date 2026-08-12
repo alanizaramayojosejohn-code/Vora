@@ -35,11 +35,12 @@
     </div>
   } @else {
     <div class="overflow-x-auto table-scroll">
-      <table class="w-full text-sm min-w-[580px]">
+      <table class="w-full text-sm min-w-[760px]">
         <thead class="bg-muted/40 border-b border-border-subtle whitespace-nowrap">
           <tr>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Período</th>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Monto</th>
+            <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Método</th>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Fecha de cobro</th>
             <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Notas</th>
             <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
@@ -49,7 +50,26 @@
           @for (p of payments(); track p.id; let even = $even) {
             <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
               <td class="px-5 py-3 font-medium text-foreground text-xs">{{ p.period_label }}</td>
-              <td class="px-5 py-3 font-semibold text-foreground text-xs">{{ p.amount | currency: 'ARS' : 'symbol' : '1.0-0' }}</td>
+              <td class="px-5 py-3 text-xs">
+                <span class="font-semibold text-foreground">{{ p.amount | currency: 'ARS' : 'symbol' : '1.0-0' }}</span>
+                @if (p.is_late) {
+                  <span class="inline-flex items-center gap-1 ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-warning/10 text-warning border border-warning/20">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                      <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" />
+                    </svg>
+                    Atraso
+                  </span>
+                }
+              </td>
+              <td class="px-5 py-3">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                      [class]="methodStyle[p.payment_method].classes">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                    @for (d of methodStyle[p.payment_method].paths; track d) { <path [attr.d]="d" /> }
+                  </svg>
+                  {{ methodLabels[p.payment_method] }}
+                </span>
+              </td>
               <td class="px-5 py-3 text-foreground-subtle text-xs">{{ p.paid_at | date: 'dd MMM yyyy' }}</td>
               <td class="px-5 py-3 text-foreground-muted text-xs">{{ p.notes ?? '—' }}</td>
               <td class="px-5 py-3 text-right">

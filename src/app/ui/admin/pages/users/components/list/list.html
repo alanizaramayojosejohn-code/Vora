@@ -105,7 +105,7 @@
               <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
                 <td class="px-5 py-3">
                   <button type="button" (click)="view.emit(user)" class="flex items-center gap-3 group text-left">
-                    <span class="w-9 h-9 rounded-full bg-foreground text-base flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                    <span class="w-9 h-9 rounded-full bg-primary text-primary-fg flex items-center justify-center text-[11px] font-bold flex-shrink-0">
                       {{ initials(user.name) }}
                     </span>
                     <span>
@@ -117,15 +117,24 @@
                 <td class="px-5 py-3 font-mono text-foreground-muted text-xs">{{ user.ci }}</td>
                 <td class="px-5 py-3">
                   @if (user.role === 'super_admin') {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-foreground text-base">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-fg">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="shrink-0">
+                        <path d="m2.5 18.5 2-9.5 5 4 2.5-7 2.5 7 5-4 2 9.5z" />
+                      </svg>
                       Super admin
                     </span>
                   } @else if (user.role === 'admin') {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-input text-foreground border border-border-subtle">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                        <path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5z" />
+                      </svg>
                       Admin
                     </span>
                   } @else {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-muted text-foreground-muted border border-border-subtle">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-muted text-foreground-muted border border-border-subtle">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                        <rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" />
+                      </svg>
                       Caja
                     </span>
                   }

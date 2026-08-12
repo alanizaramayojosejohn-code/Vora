@@ -32,7 +32,8 @@
       @for (item of alerts(); track item.business.id) {
         <div class="flex items-center justify-between gap-3 bg-surface border border-border-subtle rounded-lg px-3 py-2.5">
           <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 rounded-full bg-foreground text-base flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                  [style.background]="avatarColor(item.business)" [style.color]="avatarTextColor(item.business)">
               {{ initials(item.business.name) }}
             </span>
             <div>
@@ -91,7 +92,8 @@
               <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
                 <td class="px-5 py-3">
                   <div class="flex items-center gap-3">
-                    <span class="w-8 h-8 rounded-full bg-foreground text-base flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                          [style.background]="avatarColor(item.business)" [style.color]="avatarTextColor(item.business)">
                       {{ initials(item.business.name) }}
                     </span>
                     <span class="font-semibold text-foreground">{{ item.business.name }}</span>
@@ -121,8 +123,11 @@
                   }
                 </td>
                 <td class="px-5 py-3">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
                         [ngClass]="statusClasses(item)">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                      @for (d of statusIconPaths(item); track d) { <path [attr.d]="d" /> }
+                    </svg>
                     {{ statusLabel(item) }}
                   </span>
                 </td>

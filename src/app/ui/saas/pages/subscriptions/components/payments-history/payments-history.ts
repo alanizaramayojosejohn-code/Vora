@@ -1,7 +1,11 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { BusinessWithSubscription } from '../../../../../../services/subscription/subscription.service';
-import { SubscriptionPayment } from '../../../../../../models/subscription.model';
+import {
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_METHOD_STYLE,
+  SubscriptionPayment,
+} from '../../../../../../models/subscription.model';
 
 @Component({
   selector: 'app-saas-subscription-payments-history',
@@ -16,6 +20,9 @@ export class SubscriptionPaymentsHistoryComponent {
   readonly close = output<void>();
   readonly addPayment = output<void>();
   readonly deletePayment = output<SubscriptionPayment>();
+
+  readonly methodLabels = PAYMENT_METHOD_LABELS;
+  readonly methodStyle = PAYMENT_METHOD_STYLE;
 
   readonly total = computed(() => this.payments().reduce((acc, p) => acc + p.amount, 0));
 }

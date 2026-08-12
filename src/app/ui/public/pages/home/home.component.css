@@ -23,6 +23,11 @@
   --card-featured: rgba(255, 255, 255, 0.055);
 
   --accent: #7dd3fc;
+  /* Segundo tono, tomado del lado violeta del isotipo. Se usa en apenas dos
+     lugares (el punto del chip del hero y el sello "Recomendado") como
+     degradado con --accent: un guiño al logo, no una vuelta al morado de
+     antes. El resto de la página sigue siendo casi monocroma. */
+  --accent-2: #a78bfa;
 
   display: block;
   background: var(--ink);

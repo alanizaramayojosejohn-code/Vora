@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PAYMENT_METHOD_LABEL, PaymentMethod } from '../../../../../../models/order.model';
+import { PAYMENT_METHOD_LABEL, PAYMENT_METHOD_STYLE, PaymentMethod } from '../../../../../../models/order.model';
 import { ExportService, SalesReportRow, SalesSummary } from '../../../../../../services/export/export.service';
 import {
   ProductOption,
@@ -67,6 +67,7 @@ export class SalesReportComponent implements OnInit {
   });
 
   readonly methodLabels = PAYMENT_METHOD_LABEL;
+  readonly methodStyle = PAYMENT_METHOD_STYLE;
   readonly allMethods = ALL_METHODS;
 
   async ngOnInit(): Promise<void> {
