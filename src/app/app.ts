@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PwaInstallBannerComponent } from './ui/shared/pwa-install-banner.component';
 import { SwUpdateBannerComponent } from './ui/shared/sw-update-banner.component';
@@ -7,7 +7,8 @@ import { SwUpdateBannerComponent } from './ui/shared/sw-update-banner.component'
   selector: 'app-root',
   imports: [RouterOutlet, PwaInstallBannerComponent, SwUpdateBannerComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('Vora');

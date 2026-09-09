@@ -123,9 +123,14 @@
               <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
                 <td class="px-5 py-3">
                   <button type="button" (click)="view.emit(product)" class="flex items-center gap-3 group text-left">
-                    <span class="w-9 h-9 rounded-lg bg-primary text-primary-fg flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                      {{ initials(product.name) }}
-                    </span>
+                    @if (product.image_url; as img) {
+                      <img [src]="img" [alt]="product.name" loading="lazy" decoding="async"
+                           class="w-9 h-9 rounded-lg object-cover bg-muted flex-shrink-0" />
+                    } @else {
+                      <span class="w-9 h-9 rounded-lg bg-primary text-primary-fg flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                        {{ initials(product.name) }}
+                      </span>
+                    }
                     <span>
                       <span class="block font-semibold text-foreground group-hover:underline">{{ product.name }}</span>
                       @if (product.description) {

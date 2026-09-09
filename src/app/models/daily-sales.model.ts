@@ -22,7 +22,14 @@ export interface TopProduct {
   product_name: string;
   quantity: number;
   total: number;
+  // Costo y ganancia bruta del producto en el rango, y su margen — null
+  // cuando el producto no tuvo ingreso (spec 002, RF-17).
+  cost: number;
+  profit: number;
+  margin: number | null;
 }
+
+export type TopProductOrderBy = 'quantity' | 'profit';
 
 export const EMPTY_DAILY_SUMMARY: DailySalesSummary = {
   total: 0,

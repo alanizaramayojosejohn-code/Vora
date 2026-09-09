@@ -1,0 +1,45 @@
+<div class="max-w-7xl mx-auto px-6 py-10 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-foreground tracking-tight">Mesas</h2>
+      <p class="text-foreground-muted text-sm">Las cuentas abiertas en caja se asocian a estas mesas.</p>
+    </div>
+    <button appReadonlyDisabled (click)="openCreate()"
+            class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
+      Nueva mesa
+    </button>
+  </div>
+
+  <app-form-modal [open]="showForm()" [submitting]="submitting()"
+                  label="Formulario de mesa" (closed)="closeForm()">
+    <app-admin-tables-form
+      [value]="editing()"
+      [submitting]="submitting()"
+      [errorMessage]="formError()"
+      (submitForm)="handleSubmit($event)"
+      (cancel)="closeForm()" />
+  </app-form-modal>
+
+  <app-admin-tables-list
+    [tables]="tables()"
+    [occupiedIds]="occupiedIds()"
+    [loading]="loading()"
+    (edit)="openEdit($event)"
+    (remove)="handleDelete($event)" />
+
+  @if (deleting(); as t) {
+    <app-confirm-delete
+      [open]="true"
+      title="¿Eliminar esta mesa?"
+      [description]="deletingError()
+        ?? (deletingOccupied()
+              ? 'Esta mesa tiene un pedido pendiente. Cóbralo o cancélalo antes de eliminarla.'
+              : 'Los pedidos ya cobrados en esta mesa conservan su historial, pero dejarán de mostrarla.')"
+      confirmLabel="Eliminar mesa"
+      [entityLabel]="t.name"
+      [entitySublabel]="t.is_active ? 'Mesa activa' : 'Mesa inactiva'"
+      [submitting]="deletingSubmitting()"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()" />
+  }
+</div>

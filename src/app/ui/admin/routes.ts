@@ -35,6 +35,13 @@ export const AdminRoutes: Routes = [
       ),
   },
   {
+    path: 'tables',
+    loadComponent: () =>
+      import('./pages/tables/container/component').then(
+        (m) => m.AdminTablesContainerComponent,
+      ),
+  },
+  {
     path: 'users',
     loadComponent: () =>
       import('./pages/users/container/component').then(

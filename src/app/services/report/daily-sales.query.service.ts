@@ -4,7 +4,9 @@ import {
   SalesByPaymentDay,
   summarizeDailySales,
   TopProduct,
+  TopProductOrderBy,
 } from '../../models/daily-sales.model';
+import { EMPTY_PROFIT_TOTALS, ProfitTotals } from '../../models/profit.model';
 import { SupabaseService } from '../supabase/supabase.service';
 
 // Rangos ofrecidos al plan Caja. Son presets y no un selector libre de fechas
@@ -72,13 +74,49 @@ export class DailySalesQueryService {
     return summarizeDailySales(await this.listByPayment(range));
   }
 
-  async topProducts(range: DayRange, limit = 5): Promise<TopProduct[]> {
+  // Costo y ganancia bruta del rango (spec 002, RF-11), sumados desde
+  // income_daily — la misma vista que ya trae el ingreso día por día, así que
+  // "Total vendido" de esta pantalla y la suma de esto SIEMPRE coinciden: no
+  // hay una segunda fuente de verdad para el ingreso.
+  async profitSummary(range: DayRange): Promise<ProfitTotals> {
+    const { from, to } = DailySalesQueryService.rangeBounds(range);
+
+    const { data, error } = await this.client
+      .from('income_daily')
+      .select('total, cost, profit')
+      .gte('day', from)
+      .lte('day', to);
+    if (error) throw error;
+
+    return (data ?? []).reduce(
+      (acc, row: { total: number; cost: number; profit: number }) => ({
+        revenue: acc.revenue + Number(row.total),
+        cost: acc.cost + Number(row.cost),
+        profit: acc.profit + Number(row.profit),
+      }),
+      { ...EMPTY_PROFIT_TOTALS },
+    );
+  }
+
+  // Cuántos productos vendidos en el rango no tienen costo cargado (RF-23).
+  async zeroCostProductCount(range: DayRange): Promise<number> {
+    const { from, to } = DailySalesQueryService.rangeBounds(range);
+    const { data, error } = await this.client.rpc('zero_cost_product_count', {
+      p_from: from,
+      p_to: to,
+    });
+    if (error) throw error;
+    return Number(data ?? 0);
+  }
+
+  async topProducts(range: DayRange, limit = 5, orderBy: TopProductOrderBy = 'quantity'): Promise<TopProduct[]> {
     const { from, to } = DailySalesQueryService.rangeBounds(range);
 
     const { data, error } = await this.client.rpc('top_products', {
       p_from: from,
       p_to: to,
       p_limit: limit,
+      p_order_by: orderBy,
     });
     if (error) throw error;
     return (data ?? []) as TopProduct[];

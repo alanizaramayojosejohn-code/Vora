@@ -27,5 +27,16 @@
         ]
       }
     }
+  ],
+  "dataGroups": [
+    {
+      "name": "product-images",
+      "urls": ["https://**.supabase.co/storage/v1/object/public/product-images/**"],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 400,
+        "maxAge": "30d"
+      }
+    }
   ]
 }

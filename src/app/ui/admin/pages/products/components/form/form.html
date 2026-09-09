@@ -10,6 +10,61 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Imagen -->
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium text-foreground-muted mb-1">
+        Imagen <span class="text-foreground-faint">(opcional)</span>
+      </label>
+      <div class="flex items-start gap-4">
+        <div class="w-24 h-24 rounded-xl border border-border-subtle bg-elevated overflow-hidden flex items-center justify-center flex-shrink-0">
+          @if (compressing()) {
+            <span class="text-[10px] text-foreground-muted">Procesando…</span>
+          } @else if (imagePreview(); as preview) {
+            <img [src]="preview" alt="Vista previa del producto" class="w-full h-full object-cover" />
+          } @else if (showExistingImage()) {
+            <img [src]="existingImageUrl()" alt="Imagen actual del producto" class="w-full h-full object-cover" />
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-faint">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
+          }
+        </div>
+
+        <div class="flex-1 min-w-0 space-y-2">
+          <div class="flex flex-wrap gap-2">
+            <label class="px-3 py-1.5 text-xs font-semibold bg-muted hover:bg-input text-foreground-muted hover:text-foreground rounded-lg transition cursor-pointer">
+              @if (hasAnyImage()) { Cambiar imagen } @else { Elegir imagen }
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+                     (change)="onImageFileChange($event)" [disabled]="compressing()" class="sr-only" />
+            </label>
+            @if (imagePreview()) {
+              <button type="button" (click)="clearPickedImage()"
+                      class="px-3 py-1.5 text-xs font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
+                Descartar
+              </button>
+            } @else if (showExistingImage()) {
+              <button type="button" (click)="removeExistingImage()"
+                      class="px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 rounded-lg transition">
+                Quitar imagen
+              </button>
+            }
+          </div>
+
+          @if (imageError(); as err) {
+            <p class="text-xs text-danger">{{ err }}</p>
+          } @else if (compressionInfo(); as info) {
+            <p class="text-xs text-success font-mono">{{ info }}</p>
+          } @else if (imageRemoved()) {
+            <p class="text-xs text-foreground-muted">Se quitará al guardar.</p>
+          } @else {
+            <p class="text-xs text-foreground-faint">
+              JPG, PNG, WebP o GIF. Se comprime automáticamente a 600 px para que la caja cargue rápido.
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+
     <div class="md:col-span-2">
       <label for="name" class="block text-sm font-medium text-foreground-muted mb-1">Nombre</label>
       <input id="name" type="text" formControlName="name"
@@ -129,7 +184,7 @@
             class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
       Cancelar
     </button>
-    <button type="submit" [disabled]="form.invalid || submitting()"
+    <button type="submit" [disabled]="form.invalid || submitting() || compressing()"
             class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
       @if (submitting()) {
         @if (isEdit()) { Guardando… } @else { Creando… }

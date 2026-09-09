@@ -4,8 +4,11 @@ import { CashSessionWithCashier } from '../../../../../models/cash-session.model
 import { DailyIncome } from '../../../../../models/daily-income.model';
 import { LowStockProduct } from '../../../../../models/low-stock-product.model';
 import { MonthlyIncome } from '../../../../../models/monthly-income.model';
+import { PayrollMonth } from '../../../../../models/payroll.model';
 import { CashSessionService } from '../../../../../services/cash-session/cash-session.service';
 import { ReportQueryService } from '../../../../../services/report/query.service';
+import { DailySalesQueryService } from '../../../../../services/report/daily-sales.query.service';
+import { PayrollQueryService } from '../../../../../services/report/payroll.query.service';
 import { CashSessionsReportComponent } from '../components/cash-sessions/cash-sessions';
 import { ClientsReportComponent } from '../components/clients-report/clients-report';
 import { DailyIncomeCardComponent } from '../components/daily-income/daily-income';
@@ -35,6 +38,7 @@ type ReportTab = 'dia' | 'resumen' | 'ventas' | 'clientes' | 'planilla' | 'arque
 export class AdminReportsContainerComponent {
   private readonly reports = inject(ReportQueryService);
   private readonly sessions = inject(CashSessionService);
+  private readonly payrollQuery = inject(PayrollQueryService);
   private readonly subscriptionState = inject(SubscriptionStateService);
 
   // Plan Caja incluye "reportes básicos": ventas del día, bajo stock y arqueos.
@@ -55,6 +59,17 @@ export class AdminReportsContainerComponent {
   readonly daily = signal<DailyIncome[]>([]);
   readonly lowStock = signal<LowStockProduct[]>([]);
   readonly loading = signal(false);
+
+  // Sueldos por mes, para cruzar contra la ganancia mensual (RF-14). Solo se
+  // pide con el módulo de personal habilitado: sin él nunca hay sueldos que
+  // restar (RF-16), y pedirlo igual sería una consulta que siempre vuelve vacía.
+  readonly payrollMonthly = signal<PayrollMonth[]>([]);
+
+  // Cuántos productos vendidos en el rango visible no tienen costo cargado
+  // (RF-22/23), uno por tarjeta porque cada una muestra un rango distinto
+  // (30 días vs. 12 meses).
+  readonly dailyZeroCost = signal<number | null>(null);
+  readonly monthlyZeroCost = signal<number | null>(null);
 
   readonly cashSessions = signal<CashSessionWithCashier[]>([]);
   readonly loadingSessions = signal(false);
@@ -103,10 +118,19 @@ export class AdminReportsContainerComponent {
   async refreshResumen(): Promise<void> {
     this.loading.set(true);
     try {
+      const today = DailySalesQueryService.localDate(new Date());
+      const dailyFrom = DailySalesQueryService.localDate(daysAgo(30));
+      const monthlyFrom = DailySalesQueryService.localDate(monthsAgoStart(12));
+
       await Promise.all([
         this.reports.listMonthlyIncome().then((v) => this.monthly.set(v)),
         this.reports.listDailyIncome().then((v) => this.daily.set(v)),
         this.reports.listLowStockProducts().then((v) => this.lowStock.set(v)),
+        this.reports.zeroCostProductCount(dailyFrom, today).then((v) => this.dailyZeroCost.set(v)),
+        this.reports.zeroCostProductCount(monthlyFrom, today).then((v) => this.monthlyZeroCost.set(v)),
+        this.hasStaff()
+          ? this.payrollQuery.listMonthly(12).then((v) => this.payrollMonthly.set(v))
+          : Promise.resolve(),
       ]);
     } catch (err: unknown) {
       console.error('Error cargando reports', err);
@@ -114,4 +138,17 @@ export class AdminReportsContainerComponent {
       this.loading.set(false);
     }
   }
+}
+
+function daysAgo(days: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+}
+
+function monthsAgoStart(months: number): Date {
+  const d = new Date();
+  d.setMonth(d.getMonth() - months);
+  d.setDate(1);
+  return d;
 }

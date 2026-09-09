@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
-import { ReportQueryService } from '../../../../services/report/query.service';
+import { CategoryRevenue, ReportQueryService } from '../../../../services/report/query.service';
 import { OrderQueryService } from '../../../../services/order/query.service';
 import { SubscriptionStateService } from '../../../../services/subscription/subscription-state.service';
 import { ExportService, SalesReportRow, SalesSummary } from '../../../../services/export/export.service';
 import { MonthlyIncome } from '../../../../models/monthly-income.model';
+import { computeMargin } from '../../../../models/profit.model';
 import { LowStockProduct } from '../../../../models/low-stock-product.model';
 import {
   DailySalesSummary,
@@ -16,7 +17,16 @@ import {
   DailySalesQueryService,
   OpenSessionSales,
 } from '../../../../services/report/daily-sales.query.service';
-import { OrderWithDetails, PaymentMethod, PAYMENT_METHOD_LABEL, orderPrimaryLabel } from '../../../../models/order.model';
+import {
+  orderCost,
+  OrderWithDetails,
+  orderProfit,
+  PaymentMethod,
+  PAYMENT_METHOD_LABEL,
+  orderPaymentLabel,
+  orderPaymentMethods,
+  orderPrimaryLabel,
+} from '../../../../models/order.model';
 import { SkeletonBarsComponent } from '../../../shared/skeleton-bars.component';
 import { SkeletonRowsComponent } from '../../../shared/skeleton-rows.component';
 
@@ -41,7 +51,7 @@ export class AdminHomeComponent {
   readonly loading         = signal(true);
   readonly monthly         = signal<MonthlyIncome[]>([]);
   readonly orders          = signal<OrderWithDetails[]>([]);
-  readonly categoryRevenue = signal<{ category: string; total: number }[]>([]);
+  readonly categoryRevenue = signal<CategoryRevenue[]>([]);
   readonly now             = signal(new Date());
 
   // Datos que los DOS planes pueden ver. Sin esto el panel del plan Caja
@@ -63,6 +73,7 @@ export class AdminHomeComponent {
 
   readonly orderPrimaryLabel    = orderPrimaryLabel;
   readonly PAYMENT_METHOD_LABEL = PAYMENT_METHOD_LABEL;
+  readonly paymentLabel = orderPaymentLabel;
 
   // ── helpers ────────────────────────────────────────────────────────────
   private readonly monthStart = computed(() => {
@@ -75,6 +86,16 @@ export class AdminHomeComponent {
     const ym = new Date().toISOString().slice(0, 7);
     return this.monthly().filter(m => m.month.startsWith(ym)).reduce((s, m) => s + Number(m.total), 0);
   });
+
+  // Ganancia bruta del mes en curso (spec 002, RF-21), junto al ingreso.
+  readonly currentMonthProfit = computed(() => {
+    const ym = new Date().toISOString().slice(0, 7);
+    return this.monthly().filter(m => m.month.startsWith(ym)).reduce((s, m) => s + Number(m.profit), 0);
+  });
+
+  readonly currentMonthMargin = computed(() =>
+    computeMargin(this.currentMonthProfit(), this.currentMonthIncome()),
+  );
 
   readonly monthOverMonth = computed<number | null>(() => {
     const now  = new Date();
@@ -148,8 +169,12 @@ export class AdminHomeComponent {
     let total    = 0;
     for (const o of this.orders()) {
       if (o.cancelled_at || new Date(o.created_at) < ms) continue;
-      counts.set(o.payment_method, (counts.get(o.payment_method) ?? 0) + 1);
-      total++;
+      // Una venta dividida cuenta una vez por cada método con el que se cobró;
+      // una cuenta pendiente no cuenta en ninguno, porque todavía no se cobró.
+      for (const method of orderPaymentMethods(o)) {
+        counts.set(method, (counts.get(method) ?? 0) + 1);
+        total++;
+      }
     }
     return (['cash', 'card', 'qr'] as const)
       .map(m => ({
@@ -214,18 +239,26 @@ export class AdminHomeComponent {
         created_at: o.created_at,
         user_name: null,
         products_summary: o.items.map(i => `${i.product_name ?? '—'} ×${i.quantity}`).join(', '),
-        payment_method: o.payment_method,
+        payments: o.payments.map(p => ({ method: p.method, amount: p.amount })),
+        payment_methods: orderPaymentMethods(o),
         total_amount: o.total_amount,
+        cost: orderCost(o),
+        profit: orderProfit(o),
         item_count: o.items.length,
+        status: o.status,
       }));
   });
 
   private readonly exportSummary = computed<SalesSummary>(() => {
     const rows = this.exportRows();
     const total = rows.reduce((s, r) => s + r.total_amount, 0);
+    const cost = rows.reduce((s, r) => s + r.cost, 0);
     const byMethod: Record<PaymentMethod, number> = { cash: 0, card: 0, qr: 0 };
-    rows.forEach(r => { byMethod[r.payment_method] += r.total_amount; });
-    return { total, transactions: rows.length, avgTicket: rows.length ? total / rows.length : 0, byMethod };
+    rows.forEach(r => r.payments.forEach(p => { byMethod[p.method] += p.amount; }));
+    return {
+      total, cost, profit: total - cost,
+      transactions: rows.length, avgTicket: rows.length ? total / rows.length : 0, byMethod,
+    };
   });
 
   private get dateRangeLabel(): string {
@@ -256,7 +289,12 @@ export class AdminHomeComponent {
       const advanced = this.hasAdvancedReports();
 
       await Promise.all([
-        this.orderQuery.listOrders(100).then(v => this.orders.set(v)),
+        // Solo las cobradas: todos los KPI de abajo (ventas de la semana, top
+        // de productos, métodos de pago, export) cuentan ventas realizadas, y
+        // una cuenta que sigue abierta todavía no lo es (RF-20).
+        this.orderQuery
+          .listOrders(100)
+          .then(v => this.orders.set(v.filter(o => o.status === 'settled'))),
         this.dailySales.summary('today').then(v => this.todaySummary.set(v)),
         // Los turnos en curso los sirve una RPC que exige rol admin. Un fallo
         // acá no debe tumbar el resto del panel.

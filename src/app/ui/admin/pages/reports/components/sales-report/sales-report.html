@@ -103,6 +103,8 @@
 
   @if (hasQueried()) {
 
+    <app-zero-cost-notice [count]="zeroCostCount()" />
+
     <!-- =================== TARJETAS DE RESUMEN =================== -->
     <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
 
@@ -110,6 +112,23 @@
         <p class="text-xs text-foreground-muted">Total ingresos</p>
         <p class="text-lg font-bold text-foreground mt-1">
           {{ summary().total | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Costo</p>
+        <p class="text-lg font-bold text-foreground-muted mt-1">
+          {{ summary().cost | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+      </div>
+
+      <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl p-4">
+        <p class="text-xs text-foreground-muted">Ganancia bruta</p>
+        <p class="text-lg font-bold mt-1" [class.text-success]="summary().profit >= 0" [class.text-danger]="summary().profit < 0">
+          {{ summary().profit | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+        </p>
+        <p class="text-[11px] text-foreground-faint mt-0.5">
+          @if (margin() === null) { — } @else { {{ margin() | number: '1.0-1' }}% margen }
         </p>
       </div>
 
@@ -153,8 +172,13 @@
       <!-- Toolbar de la tabla -->
       <div class="px-5 py-3.5 border-b border-border-subtle flex items-center gap-3 flex-wrap">
         <span class="text-sm font-semibold text-foreground">
-          {{ rows().length }} ventas encontradas
+          {{ rows().length }} registros encontrados
         </span>
+        @if (pendingCount() > 0) {
+          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/20">
+            {{ pendingCount() }} pendiente{{ pendingCount() === 1 ? '' : 's' }} · no {{ pendingCount() === 1 ? 'suma' : 'suman' }} al resumen
+          </span>
+        }
         <span class="text-xs text-foreground-subtle">· {{ dateRangeLabel() }}</span>
         <div class="flex-1"></div>
 
@@ -198,7 +222,7 @@
         </div>
       } @else {
         <div class="overflow-x-auto table-scroll">
-          <table class="w-full text-sm min-w-[640px]">
+          <table class="w-full text-sm min-w-[820px]">
             <thead class="bg-muted/40 border-b border-border-subtle whitespace-nowrap">
               <tr>
                 <th class="text-left px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Fecha</th>
@@ -207,6 +231,8 @@
                 <th class="text-left px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Método</th>
                 <th class="text-center px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Ítems</th>
                 <th class="text-right px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Total</th>
+                <th class="text-right px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Costo</th>
+                <th class="text-right px-4 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Ganancia</th>
               </tr>
             </thead>
             <tbody>
@@ -221,20 +247,46 @@
                   <td class="px-4 py-2.5 text-foreground-subtle text-xs max-w-[240px] truncate">
                     {{ row.products_summary }}
                   </td>
+                  <!-- Un chip por método realmente usado: una venta dividida
+                       muestra los dos (RF-14). Una cuenta pendiente todavía
+                       no tiene ninguno: se marca en vez de mostrar "—", que
+                       se confundiría con una venta vieja sin datos. -->
                   <td class="px-4 py-2.5">
-                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border"
-                          [class]="methodStyle[row.payment_method].classes">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
-                        @for (d of methodStyle[row.payment_method].paths; track d) { <path [attr.d]="d" /> }
-                      </svg>
-                      {{ methodLabels[row.payment_method] }}
-                    </span>
+                    <div class="flex items-center gap-1 flex-wrap">
+                      @for (m of row.payment_methods; track m) {
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                              [class]="methodStyle[m].classes">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                            @for (d of methodStyle[m].paths; track d) { <path [attr.d]="d" /> }
+                          </svg>
+                          {{ methodLabels[m] }}
+                        </span>
+                      } @empty {
+                        @if (row.status === 'pending') {
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-warning/10 text-warning border border-warning/20">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+                              <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>
+                            </svg>
+                            Pendiente
+                          </span>
+                        } @else {
+                          <span class="text-xs text-foreground-faint">—</span>
+                        }
+                      }
+                    </div>
                   </td>
                   <td class="px-4 py-2.5 text-center font-mono text-xs text-foreground-muted">
                     {{ row.item_count }}
                   </td>
                   <td class="px-4 py-2.5 text-right font-mono font-semibold text-foreground text-sm">
                     {{ row.total_amount | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+                  </td>
+                  <td class="px-4 py-2.5 text-right font-mono text-xs text-foreground-faint">
+                    {{ row.cost | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+                  </td>
+                  <td class="px-4 py-2.5 text-right font-mono text-xs font-semibold"
+                      [class.text-success]="row.profit >= 0" [class.text-danger]="row.profit < 0">
+                    {{ row.profit | currency: 'BOB':'symbol-narrow':'1.2-2' }}
                   </td>
                 </tr>
               }

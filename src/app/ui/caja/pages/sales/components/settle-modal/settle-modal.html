@@ -1,0 +1,75 @@
+<app-form-modal [open]="open()" [submitting]="submitting()"
+                label="Cobrar cuenta pendiente" widthClass="max-w-md"
+                (closed)="cancelled.emit()">
+  <div class="p-6 pr-14 space-y-5">
+    <div>
+      <h3 class="font-semibold text-foreground">{{ title() }}</h3>
+      <p class="text-sm text-foreground-subtle">Elige cómo paga el cliente.</p>
+    </div>
+
+    <div class="flex items-baseline justify-between gap-2 px-3 py-2.5 bg-elevated border border-border-subtle rounded-xl">
+      <span class="text-sm text-foreground-muted">Total de la cuenta</span>
+      <span class="text-xl font-bold font-mono text-foreground tracking-tight">
+        {{ total() | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+      </span>
+    </div>
+
+    <!-- Simple vs dividido -->
+    <div class="flex gap-1 bg-input rounded-lg p-0.5 border border-border-subtle">
+      <button type="button" (click)="setSplitMode(false)"
+              [class.bg-primary]="!splitMode()"
+              [class.text-primary-fg]="!splitMode()"
+              [class.shadow-sm]="!splitMode()"
+              [class.text-foreground-muted]="splitMode()"
+              class="flex-1 py-1.5 text-xs font-semibold rounded-md transition">
+        Pago simple
+      </button>
+      <button type="button" (click)="setSplitMode(true)"
+              [class.bg-primary]="splitMode()"
+              [class.text-primary-fg]="splitMode()"
+              [class.shadow-sm]="splitMode()"
+              [class.text-foreground-muted]="!splitMode()"
+              class="flex-1 py-1.5 text-xs font-semibold rounded-md transition">
+        Dividir pago
+      </button>
+    </div>
+
+    @if (splitMode()) {
+      <app-payment-lines
+        [lines]="lines()"
+        [total]="total()"
+        [disabled]="submitting()"
+        (linesChange)="lines.set($event)" />
+    } @else {
+      <div class="flex gap-1 bg-input rounded-lg p-0.5 border border-border-subtle">
+        @for (m of methods; track m) {
+          <button type="button" (click)="setSimpleMethod(m)"
+                  [class.bg-primary]="simpleMethod() === m"
+                  [class.text-primary-fg]="simpleMethod() === m"
+                  [class.shadow-sm]="simpleMethod() === m"
+                  [class.text-foreground-muted]="simpleMethod() !== m"
+                  class="flex-1 py-1.5 text-xs font-semibold rounded-md transition">
+            {{ methodLabel[m] }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (errorMessage(); as msg) {
+      <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+        {{ msg }}
+      </div>
+    }
+
+    <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
+      <button type="button" (click)="cancelled.emit()" [disabled]="submitting()"
+              class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition disabled:opacity-40">
+        Cancelar
+      </button>
+      <button type="button" (click)="onConfirm()" [disabled]="!canConfirm()"
+              class="px-4 py-2 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-fg disabled:bg-muted disabled:text-foreground-faint disabled:cursor-not-allowed rounded-lg transition shadow-md shadow-primary/20 disabled:shadow-none">
+        @if (submitting()) { Cobrando… } @else { Cobrar {{ total() | currency: 'BOB':'symbol-narrow':'1.2-2' }} }
+      </button>
+    </div>
+  </div>
+</app-form-modal>
