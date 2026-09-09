@@ -111,7 +111,10 @@
       "Bash(xargs grep -l \"TestBed\")",
       "Bash(bun --version)",
       "Bash(bun install *)",
-      "Bash(bun run *)"
+      "Bash(bun run *)",
+      "Bash(gh auth *)",
+      "Bash(gh secret *)",
+      "Bash(gh repo *)"
     ]
   },
   "enableAllProjectMcpServers": true,
