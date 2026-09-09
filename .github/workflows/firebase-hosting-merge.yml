@@ -13,17 +13,16 @@ jobs:
       # desde el 16/06/2026 el runner las fuerza a Node 24.
       - uses: actions/checkout@v5
 
-      # Sin este paso la versión de Node era la que trajera el runner, sin
-      # fijar. Angular 21 pide 20.19+, 22.12+ o 24; se fija 22 LTS para que el
-      # build no cambie de piso cuando GitHub actualice la imagen.
-      # La caché de npm ahorra la mayor parte del tiempo de instalación.
-      - uses: actions/setup-node@v4
+      # El proyecto pasó de npm a bun (bun.lock, sin package-lock.json): con
+      # setup-node + `npm ci` el runner fallaba porque no encuentra ningún
+      # lock file soportado. setup-bun trae su propio runtime, así que ya no
+      # hace falta fijar la versión de Node aparte.
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: npm
+          bun-version: 1.3.12
 
-      - run: npm ci
-      - run: npm run build
+      - run: bun install --frozen-lockfile
+      - run: bun run build
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
