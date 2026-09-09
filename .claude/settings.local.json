@@ -108,7 +108,10 @@
       "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe test 2>&1 | Select-Object -Last 20)",
       "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe test 2>&1 | Select-Object -Last 18)",
       "Bash(python -c \"import json;d=json.load\\(open\\('angular.json'\\)\\);print\\(json.dumps\\(d['projects'][list\\(d['projects']\\)[0]]['architect'].get\\('test'\\),indent=2\\)\\)\")",
-      "Bash(xargs grep -l \"TestBed\")"
+      "Bash(xargs grep -l \"TestBed\")",
+      "Bash(bun --version)",
+      "Bash(bun install *)",
+      "Bash(bun run *)"
     ]
   },
   "enableAllProjectMcpServers": true,
