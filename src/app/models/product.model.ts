@@ -10,6 +10,7 @@ export interface Product {
   stock: number;
   has_stock: boolean;
   provider: string | null;
+  image_url: string | null;
   created_at: string;
   deleted_at: string | null;
 }

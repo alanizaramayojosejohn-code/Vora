@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { AuthService } from '../../../../../../services/auth/auth.service';
-import { OrderWithDetails, PAYMENT_METHOD_LABEL } from '../../../../../../models/order.model';
+import {
+  OrderWithDetails,
+  orderDestinationLabel,
+  orderPaymentLabel,
+  PAYMENT_METHOD_LABEL,
+} from '../../../../../../models/order.model';
 
 @Component({
   selector: 'app-order-invoice',
@@ -21,7 +26,11 @@ export class OrderInvoiceComponent {
 
   readonly orderNumber = computed(() => this.order().id.replace(/-/g, '').slice(-8).toUpperCase());
 
-  readonly paymentLabel = computed(() => PAYMENT_METHOD_LABEL[this.order().payment_method]);
+  // "Efectivo/QR" cuando el cobro se repartió, "Pendiente" si la cuenta sigue
+  // abierta (RF-14).
+  readonly paymentLabel = computed(() => orderPaymentLabel(this.order()));
+  readonly destinationLabel = computed(() => orderDestinationLabel(this.order()));
+  readonly paymentMethodLabels = PAYMENT_METHOD_LABEL;
 
   readonly subtotal = computed(() =>
     this.order().items.reduce((s, i) => s + i.unit_price * i.quantity, 0),

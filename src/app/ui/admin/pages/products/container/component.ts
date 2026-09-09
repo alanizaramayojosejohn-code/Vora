@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Category } from '../../../../../models/category.model';
 import { Product } from '../../../../../models/product.model';
 import { CategoryQueryService } from '../../../../../services/category/query.service';
-import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
+import { ProductService } from '../../../../../services/product/product.service';
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
 import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
-import { ProductsFormComponent } from '../components/form/form';
+import { ProductFormValue, ProductsFormComponent } from '../components/form/form';
 import { ProductsListComponent } from '../components/list/list';
 
 @Component({
@@ -35,6 +35,8 @@ export class AdminProductsContainerComponent {
 
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+  // Aviso de nivel página: el producto se guardó pero su imagen no.
+  readonly imageNotice = signal<string | null>(null);
 
   // Soft delete via modal — los productos no requieren type-to-confirm porque
   // queda en deleted_at, las ventas históricas siguen viendolo.
@@ -104,25 +106,56 @@ export class AdminProductsContainerComponent {
     this.formError.set(null);
   }
 
-  async handleSubmit(input: CreateProductInput): Promise<void> {
+  async handleSubmit(value: ProductFormValue): Promise<void> {
     this.submitting.set(true);
     this.formError.set(null);
+    this.imageNotice.set(null);
     const editing = this.editing();
+
+    let saved: Product;
     try {
-      if (editing) {
-        await this.productService.updateProduct(editing.id, input);
-      } else {
-        await this.productService.createProduct(input);
-      }
-      this.formState.set(null);
-      await this.refresh();
+      saved = editing
+        ? await this.productService.updateProduct(editing.id, value.product)
+        : await this.productService.createProduct(value.product);
     } catch (err: unknown) {
       this.formError.set(
         errorMessage(err, editing ? 'Error al guardar producto' : 'Error al crear producto'),
       );
-    } finally {
       this.submitting.set(false);
+      return;
     }
+
+    // La imagen va después, porque la ruta del archivo necesita el id del
+    // producto. Si falla, el producto YA está guardado: reabrir el formulario
+    // con el error haría que un alta se reenvíe y se duplique. Se cierra, se
+    // refresca y el aviso queda arriba de la lista.
+    try {
+      await this.applyImage(saved.id, value);
+    } catch (err: unknown) {
+      this.imageNotice.set(
+        `El producto "${saved.name}" se guardó, pero la imagen no: ${errorMessage(err, 'error desconocido')}. Editalo para reintentar.`,
+      );
+    }
+
+    this.formState.set(null);
+    this.submitting.set(false);
+    await this.refresh();
+  }
+
+  private async applyImage(productId: string, value: ProductFormValue): Promise<void> {
+    if (value.imageFile) {
+      const url = await this.productService.uploadImage(value.imageFile, productId);
+      await this.productService.setImageUrl(productId, url);
+      return;
+    }
+    if (value.removeImage) {
+      await this.productService.removeImage(productId);
+      await this.productService.setImageUrl(productId, null);
+    }
+  }
+
+  dismissImageNotice(): void {
+    this.imageNotice.set(null);
   }
 
   handleDelete(product: Product): void {

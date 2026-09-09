@@ -72,6 +72,15 @@
         Categorías
       </a>
 
+      <a routerLink="/admin/tables" routerLinkActive="bg-primary text-primary-fg shadow-sm"
+         (click)="sidebarOpen.set(false)"
+         class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9h18"/><path d="M5 9V6a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M8 9v10"/><path d="M16 9v10"/>
+        </svg>
+        Mesas
+      </a>
+
       <a routerLink="/admin/users" routerLinkActive="bg-primary text-primary-fg shadow-sm"
          (click)="sidebarOpen.set(false)"
          class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition mb-0.5">

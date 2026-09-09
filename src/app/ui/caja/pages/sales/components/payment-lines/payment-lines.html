@@ -1,0 +1,47 @@
+<div class="space-y-2">
+  @for (line of lines(); track $index) {
+    <div class="flex items-center gap-2">
+      <select [value]="line.method"
+              [disabled]="disabled()"
+              (change)="setMethod($index, $any($event.target).value)"
+              class="select-field flex-1 min-w-0 px-2 py-1.5 bg-input text-foreground text-xs font-semibold border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+        @for (m of methods; track m) {
+          <option [value]="m">{{ methodLabel[m] }}</option>
+        }
+      </select>
+      <input type="number" min="0" step="0.01"
+             [value]="line.amount || ''"
+             [disabled]="disabled()"
+             (input)="setAmount($index, +$any($event.target).value)"
+             placeholder="0.00"
+             class="w-24 px-2 py-1.5 bg-input text-foreground text-sm font-mono border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+      <button type="button" (click)="removeLine($index)" [disabled]="disabled()"
+              title="Quitar línea"
+              class="w-7 h-7 flex-shrink-0 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition disabled:opacity-40">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/>
+        </svg>
+      </button>
+    </div>
+  }
+
+  <div class="flex items-center justify-between gap-2">
+    <button type="button" (click)="addLine()" [disabled]="disabled()"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-primary hover:bg-primary/10 rounded-md transition disabled:opacity-40">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"/><path d="M12 5v14"/>
+      </svg>
+      Agregar línea
+    </button>
+
+    <span class="text-[11px] font-mono"
+          [class.text-danger]="!check().valid"
+          [class.text-success]="check().valid">
+      {{ check().sum | currency: 'BOB':'symbol-narrow':'1.2-2' }} / {{ total() | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+    </span>
+  </div>
+
+  @if (check().error; as msg) {
+    <p class="text-[11px] text-danger font-medium">{{ msg }}</p>
+  }
+</div>

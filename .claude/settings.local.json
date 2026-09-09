@@ -95,7 +95,20 @@
       "PowerShell(npx ng test --watch=false 2>&1 | Select-Object -Last 30ç)",
       "Bash(perl -0pi -e \"s/\\(\\\\{\\\\n    path: 'staff',\\)/{\\\\n    path: 'staff',\\\\n    canActivate: [planGuard\\('staff'\\)],/\" routes.ts)",
       "Bash(perl -0pi -e \"s/\\(\\\\n    path: \\('purchases\\(?:\\\\/[a-z\\\\/]+\\)?'\\),\\)/\\\\n    path: \\\\$2,\\\\n    canActivate: [planGuard\\('purchases'\\)],/g\" routes.ts)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "PowerShell(npx tsc -p tsconfig.app.json --noEmit)",
+      "PowerShell(.\\\\node_modules\\\\.bin\\\\tsc.cmd -p tsconfig.app.json --noEmit)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\tsc.exe -p tsconfig.app.json --noEmit)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe build --configuration development 2>&1 | Select-Object -Last 40)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\vitest.exe run src/app/utilities/image-guard.spec.ts 2>&1 | Select-Object -Last 45)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\vitest.exe run 2>&1 | Select-Object -Last 30)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\vitest.exe run src/app/utilities/image-guard.spec.ts 2>&1 | Select-Object -Last 30)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe build --configuration development 2>&1 | Select-Object -Last 8; & .\\\\node_modules\\\\.bin\\\\vitest.exe run 2>&1 | Select-Object -Last 8)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe test 2>&1 | Select-Object -Last 45)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe test 2>&1 | Select-Object -Last 20)",
+      "PowerShell(& .\\\\node_modules\\\\.bin\\\\ng.exe test 2>&1 | Select-Object -Last 18)",
+      "Bash(python -c \"import json;d=json.load\\(open\\('angular.json'\\)\\);print\\(json.dumps\\(d['projects'][list\\(d['projects']\\)[0]]['architect'].get\\('test'\\),indent=2\\)\\)\")",
+      "Bash(xargs grep -l \"TestBed\")"
     ]
   },
   "enableAllProjectMcpServers": true,

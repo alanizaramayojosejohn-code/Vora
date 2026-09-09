@@ -27,6 +27,8 @@
     </div>
   }
 
+  <app-zero-cost-notice [count]="zeroCostCount()" />
+
   <!-- KPIs -->
   <div class="anim-stagger grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
@@ -43,6 +45,28 @@
       <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Ticket promedio</p>
       <p class="text-2xl font-bold text-foreground mt-1">
         {{ summary().avgTicket | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Costo y ganancia -->
+  <div class="anim-stagger grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Costo</p>
+      <p class="text-2xl font-bold text-foreground-muted mt-1">
+        {{ profit().cost | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Ganancia bruta</p>
+      <p class="text-2xl font-bold mt-1" [class.text-success]="profit().profit >= 0" [class.text-danger]="profit().profit < 0">
+        {{ profit().profit | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+      </p>
+    </div>
+    <div class="bg-surface border border-border-subtle rounded-2xl px-5 py-4 shadow-sm">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle">Margen</p>
+      <p class="text-2xl font-bold text-foreground mt-1">
+        @if (margin() === null) { — } @else { {{ margin() | number: '1.0-1' }}% }
       </p>
     </div>
   </div>
@@ -89,9 +113,29 @@
 
     <!-- Top productos -->
     <div class="bg-surface border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
-      <header class="px-6 py-4 border-b border-border-subtle">
-        <h3 class="font-semibold text-foreground">Lo que más se vendió</h3>
-        <p class="text-xs text-foreground-subtle">Los 5 productos con más unidades en el período.</p>
+      <header class="px-6 py-4 border-b border-border-subtle flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h3 class="font-semibold text-foreground">Lo que más se vendió</h3>
+          <p class="text-xs text-foreground-subtle">Los 5 productos del período.</p>
+        </div>
+        <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-lg p-0.5">
+          <button type="button" (click)="setTopOrderBy('quantity')"
+                  [class.bg-surface]="topOrderBy() === 'quantity'"
+                  [class.shadow-sm]="topOrderBy() === 'quantity'"
+                  [class.text-foreground]="topOrderBy() === 'quantity'"
+                  [class.text-foreground-muted]="topOrderBy() !== 'quantity'"
+                  class="px-2.5 py-1 text-[11px] font-semibold rounded-md transition">
+            Por cantidad
+          </button>
+          <button type="button" (click)="setTopOrderBy('profit')"
+                  [class.bg-surface]="topOrderBy() === 'profit'"
+                  [class.shadow-sm]="topOrderBy() === 'profit'"
+                  [class.text-foreground]="topOrderBy() === 'profit'"
+                  [class.text-foreground-muted]="topOrderBy() !== 'profit'"
+                  class="px-2.5 py-1 text-[11px] font-semibold rounded-md transition">
+            Por ganancia
+          </button>
+        </div>
       </header>
 
       @if (loading()) {
@@ -111,9 +155,22 @@
                   {{ product.total | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
                 </span>
               </div>
+              <div class="flex items-center justify-between gap-4 text-xs mt-0.5">
+                <span class="text-foreground-faint">
+                  Costo {{ product.cost | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                </span>
+                <span class="font-mono font-semibold whitespace-nowrap"
+                      [class.text-success]="product.profit >= 0"
+                      [class.text-danger]="product.profit < 0">
+                  {{ product.profit | currency: 'Bs. ' : 'symbol' : '1.2-2' }}
+                  @if (product.margin !== null) {
+                    <span class="font-normal text-foreground-faint">({{ product.margin | number: '1.0-0' }}%)</span>
+                  }
+                </span>
+              </div>
               <div class="h-1.5 rounded-full bg-muted overflow-hidden mt-2">
                 <div class="anim-bar h-full rounded-full bg-success transition-all"
-                     [style.width.%]="maxTopQuantity() === 0 ? 0 : (product.quantity / maxTopQuantity()) * 100"></div>
+                     [style.width.%]="maxTopValue() === 0 ? 0 : (($any(product)[topOrderBy()] / maxTopValue()) * 100)"></div>
               </div>
             </li>
           }

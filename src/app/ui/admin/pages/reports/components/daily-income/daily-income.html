@@ -1,7 +1,10 @@
 <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden shadow-sm">
-  <header class="px-6 py-4 border-b border-border-subtle">
-    <h3 class="font-semibold text-foreground">Ingresos diarios</h3>
-    <p class="text-xs text-foreground-subtle">Últimos 30 días.</p>
+  <header class="px-6 py-4 border-b border-border-subtle space-y-2">
+    <div>
+      <h3 class="font-semibold text-foreground">Ingresos diarios</h3>
+      <p class="text-xs text-foreground-subtle">Últimos 30 días.</p>
+    </div>
+    <app-zero-cost-notice [count]="zeroCostCount()" />
   </header>
 
   @if (loading()) {
@@ -10,11 +13,14 @@
     <div class="px-6 py-12 text-center text-sm text-foreground-subtle">Sin ingresos en el período.</div>
   } @else {
     <div class="max-h-80 overflow-auto table-scroll">
-      <table class="w-full text-sm min-w-[440px]">
+      <table class="w-full text-sm min-w-[600px]">
         <thead class="bg-muted border-b border-border-subtle sticky top-0 whitespace-nowrap">
           <tr>
             <th class="text-left px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Día</th>
             <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Total</th>
+            <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Costo</th>
+            <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Ganancia</th>
+            <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Margen</th>
             <th class="text-right px-6 py-2 font-semibold text-[11px] tracking-wider uppercase text-foreground-subtle">Trans.</th>
           </tr>
         </thead>
@@ -23,6 +29,14 @@
             <tr class="hover:bg-muted/50 transition">
               <td class="px-6 py-2 text-foreground-muted">{{ row.day | date: 'dd/MM/yyyy' }}</td>
               <td class="px-6 py-2 text-right font-mono font-semibold text-foreground">{{ row.total | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+              <td class="px-6 py-2 text-right font-mono text-foreground-faint">{{ row.cost | currency: 'BOB':'symbol-narrow':'1.2-2' }}</td>
+              <td class="px-6 py-2 text-right font-mono font-semibold"
+                  [class.text-success]="row.profit >= 0" [class.text-danger]="row.profit < 0">
+                {{ row.profit | currency: 'BOB':'symbol-narrow':'1.2-2' }}
+              </td>
+              <td class="px-6 py-2 text-right font-mono text-foreground-subtle">
+                @if (row.margin === null) { — } @else { {{ row.margin | number: '1.0-0' }}% }
+              </td>
               <td class="px-6 py-2 text-right font-mono text-foreground-subtle">{{ row.transactions }}</td>
             </tr>
           }

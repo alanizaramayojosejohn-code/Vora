@@ -128,7 +128,15 @@
       <p class="text-3xl font-bold text-foreground tracking-tight mb-1">
         {{ currentMonthIncome() | currency:'BOB':'symbol-narrow':'1.2-2' }}
       </p>
-      <p class="text-xs text-foreground-muted">acumulado del mes en curso</p>
+      <p class="text-xs text-foreground-muted">
+        acumulado del mes en curso ·
+        <span [class.text-success]="currentMonthProfit() >= 0" [class.text-danger]="currentMonthProfit() < 0" class="font-semibold">
+          {{ currentMonthProfit() | currency:'BOB':'symbol-narrow':'1.0-0' }} ganancia
+        </span>
+        @if (currentMonthMargin() !== null) {
+          ({{ currentMonthMargin() | number: '1.0-0' }}%)
+        }
+      </p>
     </div>
     }
 
@@ -249,6 +257,12 @@
               <div class="h-1.5 bg-muted rounded-full overflow-hidden">
                 <div class="anim-bar h-full bg-primary rounded-full" [style.width.%]="cat.barPct"></div>
               </div>
+              <p class="text-[10px] text-foreground-faint mt-1">
+                Ganancia
+                <span class="font-semibold" [class.text-success]="cat.profit >= 0" [class.text-danger]="cat.profit < 0">
+                  {{ cat.profit | currency:'BOB':'symbol-narrow':'1.0-0' }}
+                </span>
+              </p>
             </div>
           }
         </div>
@@ -374,7 +388,7 @@
             <!-- Método -->
             <div class="w-28 flex-shrink-0 hidden md:block">
               <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-muted border border-border-subtle text-foreground-muted">
-                {{ PAYMENT_METHOD_LABEL[order.payment_method] }}
+                {{ paymentLabel(order) }}
               </span>
             </div>
             <!-- Estado -->

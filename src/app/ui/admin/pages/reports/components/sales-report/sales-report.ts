@@ -6,9 +6,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHOD_STYLE, PaymentMethod } from '../../../../../../models/order.model';
+import { computeMargin } from '../../../../../../models/profit.model';
 import { ExportService, SalesReportRow, SalesSummary } from '../../../../../../services/export/export.service';
 import {
   ProductOption,
@@ -17,12 +18,13 @@ import {
 } from '../../../../../../services/report/sales-report.query.service';
 import { Profile } from '../../../../../../models/profile.model';
 import { errorMessage } from '../../../../../../utilities/error-message';
+import { ZeroCostNoticeComponent } from '../zero-cost-notice/zero-cost-notice';
 
 const ALL_METHODS: PaymentMethod[] = ['cash', 'card', 'qr'];
 
 @Component({
   selector: 'app-admin-sales-report',
-  imports: [CurrencyPipe, DatePipe, FormsModule],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, FormsModule, ZeroCostNoticeComponent],
   templateUrl: './sales-report.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -43,10 +45,21 @@ export class SalesReportComponent implements OnInit {
 
   // ---- Resultado ----
   readonly rows = signal<SalesReportRow[]>([]);
-  readonly summary = signal<SalesSummary>({ total: 0, transactions: 0, avgTicket: 0, byMethod: { cash: 0, card: 0, qr: 0 } });
+  readonly summary = signal<SalesSummary>({
+    total: 0, cost: 0, profit: 0, transactions: 0, avgTicket: 0,
+    byMethod: { cash: 0, card: 0, qr: 0 },
+  });
+  readonly zeroCostCount = signal<number | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly hasQueried = signal(false);
+
+  readonly margin = computed(() => computeMargin(this.summary().profit, this.summary().total));
+
+  // El conteo del resumen de arriba solo incluye lo cobrado (summary().
+  // transactions); esto es aparte, para que la barra de la tabla diga cuántas
+  // de las filas visibles son cuentas todavía abiertas.
+  readonly pendingCount = computed(() => this.rows().filter((r) => r.status === 'pending').length);
 
   // ---- Paginación ----
   readonly page = signal(0);
@@ -117,9 +130,13 @@ export class SalesReportComponent implements OnInit {
       paymentMethods: this.allMethodsActive() ? [] : Array.from(this.selectedMethods()),
     };
     try {
-      const data = await this.query.listOrders(filters);
+      const [data, zeroCost] = await Promise.all([
+        this.query.listOrders(filters),
+        this.query.zeroCostProductCount(filters),
+      ]);
       this.rows.set(data);
       this.summary.set(this.query.buildSummary(data));
+      this.zeroCostCount.set(zeroCost);
       this.hasQueried.set(true);
     } catch (err: unknown) {
       this.error.set(errorMessage(err, 'Error al cargar el reporte'));

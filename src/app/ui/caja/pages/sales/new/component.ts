@@ -5,11 +5,22 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Category } from '../../../../../models/category.model';
 import { Client } from '../../../../../models/client.model';
 import { Product } from '../../../../../models/product.model';
+import { Table } from '../../../../../models/table.model';
+import {
+  canSettleOrder,
+  orderDestinationLabel,
+  orderPrimaryLabel,
+  OrderWithDetails,
+} from '../../../../../models/order.model';
+import { PaymentLine, validatePaymentSplit } from '../../../../../models/payment-split.model';
 import { CategoryQueryService } from '../../../../../services/category/query.service';
 import { ClientQueryService } from '../../../../../services/client/query.service';
+import { ClientService, CreateClientInput } from '../../../../../services/client/client.service';
 import { ProductQueryService } from '../../../../../services/product/query.service';
-import { CreateProductInput, ProductService } from '../../../../../services/product/product.service';
-import { OrderService } from '../../../../../services/order/order.service';
+import { ProductService } from '../../../../../services/product/product.service';
+import { OrderService, RegisterOrderInput, RegisterProductItem } from '../../../../../services/order/order.service';
+import { OrderQueryService } from '../../../../../services/order/query.service';
+import { TableQueryService } from '../../../../../services/table/query.service';
 import { AuthService } from '../../../../../services/auth/auth.service';
 import { CashSessionService } from '../../../../../services/cash-session/cash-session.service';
 import { SubscriptionStateService } from '../../../../../services/subscription/subscription-state.service';
@@ -17,10 +28,18 @@ import { NetworkService } from '../../../../../services/network/network.service'
 import { OfflineQueueService } from '../../../../../services/offline/offline-queue.service';
 import { ProductCacheService } from '../../../../../services/offline/product-cache.service';
 import { errorMessage } from '../../../../../utilities/error-message';
-import { ProductsFormComponent } from '../../../../admin/pages/products/components/form/form';
+import { ClientsFormComponent } from '../../../../admin/pages/clients/components/form/form';
+import { ProductFormValue, ProductsFormComponent } from '../../../../admin/pages/products/components/form/form';
 import { FormModalComponent } from '../../../../shared/form-modal.component';
+import { PaymentLinesComponent } from '../components/payment-lines/payment-lines';
+import { SettleModalComponent } from '../components/settle-modal/settle-modal';
 
 const PRODUCT_PAGE_SIZE = 20;
+
+// Valor del selector de destino cuando el pedido no va a una mesa física.
+// Mesa y "para llevar" son excluyentes (RF-4), y un solo select lo garantiza
+// sin ninguna validación cruzada.
+const TAKEAWAY_VALUE = '__takeaway__';
 
 interface CartItem {
   product_id: string;
@@ -34,18 +53,40 @@ interface CartItem {
 
 type PaymentMethod = 'cash' | 'card' | 'qr';
 
+// Una cuenta abierta, tal como se ve en la franja de tarjetas (RF-7). Puede
+// venir del servidor o de la cola offline de este dispositivo: la pantalla no
+// distingue, salvo por la marca de "sin sincronizar".
+interface PendingCard {
+  key: string;
+  order_uuid: string | null;
+  order_id: string | null;
+  destination: string;
+  total: number;
+  summary: string;
+  can_settle: boolean;
+  synced: boolean;
+  table_id: string | null;
+}
+
 @Component({
   selector: 'app-caja-sales-new',
-  imports: [CurrencyPipe, DecimalPipe, FormsModule, RouterLink, ProductsFormComponent, FormModalComponent],
+  imports: [
+    CurrencyPipe, DecimalPipe, FormsModule, RouterLink,
+    ProductsFormComponent, ClientsFormComponent, FormModalComponent,
+    PaymentLinesComponent, SettleModalComponent,
+  ],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CajaSalesNewComponent {
   private readonly orderService   = inject(OrderService);
+  private readonly orderQuery     = inject(OrderQueryService);
   private readonly productQuery   = inject(ProductQueryService);
   private readonly productService = inject(ProductService);
   private readonly categoryQuery  = inject(CategoryQueryService);
   private readonly clientQuery    = inject(ClientQueryService);
+  private readonly clientService  = inject(ClientService);
+  private readonly tableQuery     = inject(TableQueryService);
   private readonly router         = inject(Router);
   private readonly route          = inject(ActivatedRoute);
   private readonly network        = inject(NetworkService);
@@ -68,6 +109,7 @@ export class CajaSalesNewComponent {
 
   readonly products = signal<Product[]>([]);
   readonly clients = signal<Client[]>([]);
+  readonly tables = signal<Table[]>([]);
   readonly modalCategories = signal<Category[]>([]);
   readonly loading = signal(false);
   readonly fromCache = signal(false);
@@ -77,10 +119,20 @@ export class CajaSalesNewComponent {
   readonly newProductSubmitting = signal(false);
   readonly newProductError = signal<string | null>(null);
 
+  readonly showNewClientModal = signal(false);
+  readonly newClientSubmitting = signal(false);
+  readonly newClientError = signal<string | null>(null);
+
+  // La observación arranca plegada: es opcional y ocupa el alto de tres ítems.
+  readonly showNote = signal(false);
+
   readonly cart = signal<CartItem[]>([]);
   readonly cartCustomerId = signal<string>('');
+  readonly destination = signal<string>('');
   readonly paymentMethod = signal<PaymentMethod>('cash');
   readonly cashReceived = signal<number>(0);
+  readonly splitMode = signal(false);
+  readonly paymentLines = signal<PaymentLine[]>([]);
 
   readonly searchQuery = signal<string>('');
   readonly activeCategory = signal<string | null>(null);
@@ -89,6 +141,20 @@ export class CajaSalesNewComponent {
   readonly orderNote = signal('');
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+
+  // Cuentas abiertas del servidor. Las de este dispositivo que todavía no
+  // sincronizaron se superponen desde la cola (ver pendingCards).
+  readonly remotePending = signal<OrderWithDetails[]>([]);
+  readonly pendingError = signal<string | null>(null);
+
+  // Cuenta a la que se le están agregando productos. Con una seleccionada, el
+  // carrito deja de ser una venta nueva y pasa a ser "lo que la mesa pidió
+  // además".
+  readonly activePendingKey = signal<string | null>(null);
+
+  readonly settleTarget = signal<PendingCard | null>(null);
+  readonly settleSubmitting = signal(false);
+  readonly settleError = signal<string | null>(null);
 
   // Clave de idempotencia de la venta en curso. Se mantiene entre reintentos
   // para que "Cobrar" tras un error de red no registre la venta dos veces, y
@@ -147,12 +213,114 @@ export class CajaSalesNewComponent {
   // directiva porque este botón ya tiene su propio [disabled].
   readonly readonlyMode = computed(() => this.subscriptionState.status()?.isBlocked ?? false);
 
+  // La franja de cuentas abiertas: lo del servidor más lo que este dispositivo
+  // encoló y todavía no sincronizó. Sin esta superposición, un pendiente
+  // creado sin conexión desaparecería de la pantalla hasta volver la señal.
+  readonly pendingCards = computed<PendingCard[]>(() => {
+    const userId = this.auth.session()?.user.id ?? null;
+    const role = this.auth.role();
+    const cards = new Map<string, PendingCard>();
+
+    for (const order of this.remotePending()) {
+      const key = order.client_uuid ?? order.id;
+      cards.set(key, {
+        key,
+        order_uuid: order.client_uuid,
+        order_id: order.id,
+        destination: orderDestinationLabel(order) ?? 'Sin mesa',
+        total: Number(order.total_amount),
+        summary: orderPrimaryLabel(order),
+        can_settle: canSettleOrder(order, userId, role),
+        synced: true,
+        table_id: order.table_id,
+      });
+    }
+
+    for (const op of this.offlineQueue.pending()) {
+      if (op.kind === 'create') {
+        if (op.input.status !== 'pending') continue;
+        cards.set(op.order_uuid, {
+          key: op.order_uuid,
+          order_uuid: op.order_uuid,
+          order_id: null,
+          destination: this.destinationLabelFor(op.input),
+          total: this.itemsTotal(op.input.items),
+          summary: this.summarizeItems(op.input.items),
+          can_settle: true,
+          synced: false,
+          table_id: op.input.table_id ?? null,
+        });
+        continue;
+      }
+
+      const card = cards.get(op.order_uuid);
+      if (!card) continue;
+
+      if (op.kind === 'add_items') {
+        cards.set(op.order_uuid, {
+          ...card,
+          total: card.total + this.itemsTotal(op.items),
+          synced: false,
+        });
+      } else {
+        // Ya está cobrada en este dispositivo: sacarla de la franja evita que
+        // se cobre dos veces mientras la operación espera para sincronizar.
+        cards.delete(op.order_uuid);
+      }
+    }
+
+    return [...cards.values()];
+  });
+
+  readonly activePending = computed<PendingCard | null>(() => {
+    const key = this.activePendingKey();
+    if (!key) return null;
+    return this.pendingCards().find((c) => c.key === key) ?? null;
+  });
+
+  readonly activeTables = computed(() => this.tables());
+
+  // RF-6: la mesa elegida ya tiene una cuenta abierta. En vez de dejar que el
+  // servidor rechace la creación, se avisa antes y se ofrece lo que el cajero
+  // realmente quiere hacer: sumar los productos a esa cuenta.
+  readonly tableConflict = computed<PendingCard | null>(() => {
+    if (this.activePending()) return null;
+    const tableId = this.selectedTableId();
+    if (!tableId) return null;
+    return this.pendingCards().find((c) => c.table_id === tableId) ?? null;
+  });
+
+  readonly splitCheck = computed(() => validatePaymentSplit(this.paymentLines(), this.cartSubtotal()));
+
   readonly canCharge = computed(() => {
     if (this.cart().length === 0) return false;
     if (this.submitting()) return false;
     if (this.readonlyMode()) return false;
+    if (this.activePending()) return false;
+    if (this.splitMode()) return this.splitCheck().valid;
     if (this.paymentMethod() === 'cash' && this.cashReceived() < this.cartSubtotal()) return false;
     return true;
+  });
+
+  // Dejar pendiente no exige método de pago (RF-5): todavía no se cobra nada.
+  readonly canLeavePending = computed(() => {
+    if (this.cart().length === 0) return false;
+    if (this.submitting()) return false;
+    if (this.readonlyMode()) return false;
+    if (this.activePending()) return false;
+    if (this.tableConflict()) return false;
+    return true;
+  });
+
+  readonly canAddToPending = computed(() => {
+    if (this.cart().length === 0) return false;
+    if (this.submitting()) return false;
+    if (this.readonlyMode()) return false;
+    const pending = this.activePending();
+    if (!pending) return false;
+    // RF-28: sin conexión, sobre un pedido que este dispositivo no puede
+    // identificar por uuid no se encola nada a ciegas.
+    return pending.order_uuid !== null || this.network.isOnline();
   });
 
   constructor() {
@@ -178,6 +346,16 @@ export class CajaSalesNewComponent {
       }
     }
 
+    // El catálogo de mesas se cachea, así que el selector sigue sirviendo sin
+    // conexión con lo último sincronizado (RF-29).
+    try {
+      const { tables, fromCache } = await this.tableQuery.listActiveTablesWithCache();
+      this.tables.set(tables);
+      if (fromCache) this.fromCache.set(true);
+    } catch {
+      this.tables.set([]);
+    }
+
     if (!this.network.isOnline()) {
       const cached = await this.productCache.load();
       if (cached) {
@@ -196,6 +374,7 @@ export class CajaSalesNewComponent {
         }),
         this.clientQuery.listClients().then((v) => this.clients.set(v)),
         this.categoryQuery.listCategories().then((v) => this.modalCategories.set(v)),
+        this.refreshPending(),
       ]);
     } catch (err) {
       console.error('Error cargando datos', err);
@@ -209,6 +388,22 @@ export class CajaSalesNewComponent {
     }
   }
 
+  async refreshPending(): Promise<void> {
+    if (!this.network.isOnline()) return;
+    this.pendingError.set(null);
+    try {
+      // Un admin ve las cuentas de todo el negocio; un cajero, solo las suyas
+      // (RF-15, RF-16).
+      const role = this.auth.role();
+      const scope = role === 'admin' || role === 'super_admin'
+        ? null
+        : this.auth.session()?.user.id ?? null;
+      this.remotePending.set(await this.orderQuery.listPendingOrders(scope));
+    } catch (err: unknown) {
+      this.pendingError.set(errorMessage(err, 'No se pudieron cargar las cuentas abiertas'));
+    }
+  }
+
   openNewProductModal(): void {
     this.showNewProductModal.set(true);
     this.newProductError.set(null);
@@ -219,16 +414,60 @@ export class CajaSalesNewComponent {
     this.newProductError.set(null);
   }
 
-  async handleQuickProduct(input: CreateProductInput): Promise<void> {
+  async handleQuickProduct(value: ProductFormValue): Promise<void> {
     this.newProductSubmitting.set(true);
     this.newProductError.set(null);
+
+    let newProduct: Product;
     try {
-      const newProduct = await this.productService.createProduct(input);
-      this.products.update((list) => [...list, newProduct]);
-      this.closeNewProductModal();
+      newProduct = await this.productService.createProduct(value.product);
     } catch (err: unknown) {
       this.newProductError.set(errorMessage(err, 'Error al crear producto'));
       this.newProductSubmitting.set(false);
+      return;
+    }
+
+    // La imagen es accesoria en el alta rápida desde caja: si falla, el
+    // producto igual entra al catálogo y se puede vender. Reabrir el modal
+    // con el error haría que el cajero lo cree dos veces.
+    if (value.imageFile) {
+      try {
+        const url = await this.productService.uploadImage(value.imageFile, newProduct.id);
+        await this.productService.setImageUrl(newProduct.id, url);
+        newProduct = { ...newProduct, image_url: url };
+      } catch (err: unknown) {
+        console.error('No se pudo subir la imagen del producto rápido', err);
+      }
+    }
+
+    this.products.update((list) => [...list, newProduct]);
+    this.closeNewProductModal();
+  }
+
+  openNewClientModal(): void {
+    this.showNewClientModal.set(true);
+    this.newClientError.set(null);
+  }
+
+  closeNewClientModal(): void {
+    this.showNewClientModal.set(false);
+    this.newClientError.set(null);
+  }
+
+  // El cliente recién creado queda elegido en la venta en curso: crearlo desde
+  // acá y tener que buscarlo después en el select sería media función.
+  async handleQuickClient(input: CreateClientInput): Promise<void> {
+    this.newClientSubmitting.set(true);
+    this.newClientError.set(null);
+    try {
+      const created = await this.clientService.createClient(input);
+      this.clients.update((list) => [created, ...list]);
+      this.cartCustomerId.set(created.id);
+      this.closeNewClientModal();
+    } catch (err: unknown) {
+      this.newClientError.set(errorMessage(err, 'Error al crear el cliente'));
+    } finally {
+      this.newClientSubmitting.set(false);
     }
   }
 
@@ -281,9 +520,14 @@ export class CajaSalesNewComponent {
   clearCart(): void {
     this.cart.set([]);
     this.cartCustomerId.set('');
+    this.destination.set('');
     this.cashReceived.set(0);
     this.orderNote.set('');
     this.formError.set(null);
+    this.splitMode.set(false);
+    this.paymentLines.set([]);
+    this.showNote.set(false);
+    this.activePendingKey.set(null);
     this.pendingSaleUuid = null;
   }
 
@@ -299,49 +543,210 @@ export class CajaSalesNewComponent {
     this.cartCustomerId.set(id);
   }
 
+  selectDestination(value: string): void {
+    this.destination.set(value);
+  }
+
   setPaymentMethod(m: PaymentMethod): void {
     this.paymentMethod.set(m);
     if (m !== 'cash') this.cashReceived.set(0);
+  }
+
+  setSplitMode(split: boolean): void {
+    this.splitMode.set(split);
+    this.cashReceived.set(0);
+    this.paymentLines.set(
+      split ? [{ method: this.paymentMethod(), amount: this.cartSubtotal() }] : [],
+    );
   }
 
   setCashReceived(value: number): void {
     this.cashReceived.set(Math.max(0, isFinite(value) ? value : 0));
   }
 
-  async charge(): Promise<void> {
-    if (!this.canCharge()) return;
-    this.submitting.set(true);
-    this.formError.set(null);
+  // ── Cuentas abiertas ────────────────────────────────────────────────────
 
-    const orderInput = {
-      client_id:       this.cartCustomerId() || null,
-      payment_method:  this.paymentMethod(),
-      notes:           this.orderNote().trim() || null,
-      cash_session_id: this.cashSession()?.id ?? null,
-      items:           this.cart().map((item) => ({
-        product_id: item.product_id,
-        quantity:   item.quantity,
-        unit_price: item.unit_price,
-      })),
-    };
+  selectPending(card: PendingCard): void {
+    this.activePendingKey.set(card.key);
+    this.formError.set(null);
+  }
+
+  clearActivePending(): void {
+    this.activePendingKey.set(null);
+    this.formError.set(null);
+  }
+
+  // Del aviso de "esta mesa ya tiene cuenta": pasa directo a sumarle productos.
+  useConflictingPending(): void {
+    const conflict = this.tableConflict();
+    if (!conflict) return;
+    this.destination.set('');
+    this.selectPending(conflict);
+  }
+
+  openSettle(card: PendingCard): void {
+    this.settleTarget.set(card);
+    this.settleError.set(null);
+  }
+
+  closeSettle(): void {
+    if (this.settleSubmitting()) return;
+    this.settleTarget.set(null);
+    this.settleError.set(null);
+  }
+
+  async confirmSettle(payments: PaymentLine[]): Promise<void> {
+    const card = this.settleTarget();
+    if (!card) return;
+
+    this.settleSubmitting.set(true);
+    this.settleError.set(null);
+
+    const sessionId = this.cashSession()?.id ?? null;
 
     if (!this.network.isOnline()) {
-      this.offlineQueue.enqueue(orderInput);
-      this.clearCart();
-      this.submitting.set(false);
-      this.queuedMessage.set('Venta guardada localmente — se sincronizará al recuperar conexión');
-      setTimeout(() => this.queuedMessage.set(null), 4000);
+      if (!card.order_uuid) {
+        this.settleError.set('Esta cuenta se abrió en otro dispositivo: necesitas conexión para cobrarla.');
+        this.settleSubmitting.set(false);
+        return;
+      }
+      // El turno abierto AHORA viaja con la operación: al sincronizar, el cobro
+      // se imputa a este turno y no al que esté abierto en ese momento (RF-27).
+      this.offlineQueue.enqueueSettle(card.order_uuid, payments, card.total, sessionId);
+      this.settleTarget.set(null);
+      this.settleSubmitting.set(false);
+      this.flashMessage('Cobro guardado localmente — se sincronizará al recuperar conexión');
       return;
     }
 
-    this.pendingSaleUuid ??= crypto.randomUUID();
+    try {
+      await this.orderService.settleOrder(
+        crypto.randomUUID(),
+        { uuid: card.order_uuid, id: card.order_id },
+        payments,
+        card.total,
+        sessionId,
+      );
+      this.settleTarget.set(null);
+      if (this.activePendingKey() === card.key) this.activePendingKey.set(null);
+      await this.refreshPending();
+      this.flashMessage('Cuenta cobrada');
+    } catch (err: unknown) {
+      this.settleError.set(errorMessage(err, 'Error al cobrar la cuenta'));
+      // El total pudo haber cambiado en otro dispositivo (VORA6): recargar deja
+      // la tarjeta con el importe real para volver a cobrar sobre ese.
+      await this.refreshPending();
+    } finally {
+      this.settleSubmitting.set(false);
+    }
+  }
+
+  // ── Registrar ───────────────────────────────────────────────────────────
+
+  async charge(): Promise<void> {
+    if (!this.canCharge()) return;
+    await this.register('settled');
+  }
+
+  async leavePending(): Promise<void> {
+    if (!this.canLeavePending()) return;
+    await this.register('pending');
+  }
+
+  async addToActivePending(): Promise<void> {
+    if (!this.canAddToPending()) return;
+    const card = this.activePending();
+    if (!card) return;
+
+    this.submitting.set(true);
+    this.formError.set(null);
+    const items = this.cartItems();
+
+    if (!this.network.isOnline()) {
+      if (!card.order_uuid) {
+        this.formError.set('Esta cuenta se abrió en otro dispositivo: necesitas conexión para agregarle productos.');
+        this.submitting.set(false);
+        return;
+      }
+      this.offlineQueue.enqueueAddItems(card.order_uuid, items);
+      this.clearCart();
+      this.submitting.set(false);
+      this.flashMessage('Productos guardados localmente — se sincronizarán al recuperar conexión');
+      return;
+    }
 
     try {
-      await this.orderService.registerOrder(orderInput, this.pendingSaleUuid);
+      await this.orderService.addItems(
+        crypto.randomUUID(),
+        { uuid: card.order_uuid, id: card.order_id },
+        items,
+      );
+      this.clearCart();
+      await this.refreshPending();
+      this.flashMessage(`Productos agregados a ${card.destination}`);
+    } catch (err: unknown) {
+      this.formError.set(errorMessage(err, 'Error al agregar productos a la cuenta'));
+    } finally {
+      this.submitting.set(false);
+    }
+  }
+
+  private async register(status: 'pending' | 'settled'): Promise<void> {
+    this.submitting.set(true);
+    this.formError.set(null);
+
+    const total = this.cartSubtotal();
+    const payments: PaymentLine[] | null = status === 'pending'
+      ? null
+      : this.splitMode()
+        ? this.paymentLines()
+        : total > 0 ? [{ method: this.paymentMethod(), amount: total }] : [];
+
+    const orderInput: RegisterOrderInput = {
+      client_id:       this.cartCustomerId() || null,
+      payment_method:  status === 'pending' ? null : this.paymentMethod(),
+      notes:           this.orderNote().trim() || null,
+      cash_session_id: this.cashSession()?.id ?? null,
+      table_id:        this.selectedTableId(),
+      is_takeaway:     this.destination() === TAKEAWAY_VALUE,
+      status,
+      payments,
+      items:           this.cartItems(),
+    };
+
+    // El uuid se genera acá y no en el servidor: es la identidad con la que las
+    // operaciones siguientes (agregar ítems, cobrar) referencian al pedido,
+    // incluso si todavía no llegó a sincronizar.
+    this.pendingSaleUuid ??= crypto.randomUUID();
+    const orderUuid = this.pendingSaleUuid;
+
+    if (!this.network.isOnline()) {
+      this.offlineQueue.enqueueCreate(orderUuid, orderInput);
+      this.clearCart();
+      this.submitting.set(false);
+      this.flashMessage(
+        status === 'pending'
+          ? 'Cuenta abierta localmente — se sincronizará al recuperar conexión'
+          : 'Venta guardada localmente — se sincronizará al recuperar conexión',
+      );
+      return;
+    }
+
+    try {
+      await this.orderService.registerOrder(orderInput, orderUuid);
       this.pendingSaleUuid = null;
+      if (status === 'pending') {
+        this.clearCart();
+        await this.refreshPending();
+        this.flashMessage('Cuenta abierta');
+        this.submitting.set(false);
+        return;
+      }
       this.goBack();
     } catch (err: unknown) {
-      this.formError.set(errorMessage(err, 'Error al procesar la venta'));
+      this.formError.set(
+        errorMessage(err, status === 'pending' ? 'Error al abrir la cuenta' : 'Error al procesar la venta'),
+      );
       this.submitting.set(false);
     }
   }
@@ -356,4 +761,45 @@ export class CajaSalesNewComponent {
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
+
+  // ── Internos ────────────────────────────────────────────────────────────
+
+  private selectedTableId(): string | null {
+    const value = this.destination();
+    return value && value !== TAKEAWAY_VALUE ? value : null;
+  }
+
+  private cartItems(): RegisterProductItem[] {
+    return this.cart().map((item) => ({
+      product_id: item.product_id,
+      quantity:   item.quantity,
+      unit_price: item.unit_price,
+    }));
+  }
+
+  private itemsTotal(items: RegisterProductItem[]): number {
+    return items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
+  }
+
+  private summarizeItems(items: RegisterProductItem[]): string {
+    const first = items[0];
+    if (!first) return '—';
+    const name = this.products().find((p) => p.id === first.product_id)?.name ?? 'Producto';
+    const extra = items.length - 1;
+    return extra > 0 ? `${name} (+${extra} más)` : name;
+  }
+
+  private destinationLabelFor(input: RegisterOrderInput): string {
+    if (input.table_id) {
+      return this.tables().find((t) => t.id === input.table_id)?.name ?? 'Mesa';
+    }
+    return input.is_takeaway ? 'Para llevar' : 'Sin mesa';
+  }
+
+  private flashMessage(message: string): void {
+    this.queuedMessage.set(message);
+    setTimeout(() => this.queuedMessage.set(null), 4000);
+  }
+
+  readonly TAKEAWAY_VALUE = TAKEAWAY_VALUE;
 }

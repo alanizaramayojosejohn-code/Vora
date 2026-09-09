@@ -1,0 +1,106 @@
+<div class="space-y-4">
+  <!-- Topbar -->
+  <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl px-5 py-4 flex items-center gap-4 flex-wrap">
+    <div>
+      <h3 class="text-base font-semibold text-foreground tracking-tight">Mesas</h3>
+      <p class="text-[11px] text-foreground-muted mt-0.5">
+        {{ tables().length }} registradas · {{ activeCount() }} activas
+      </p>
+    </div>
+    <div class="flex-1"></div>
+    <div class="flex items-center gap-2 bg-elevated border border-border-subtle rounded-xl px-3.5 py-2.5 w-full md:w-72">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted flex-shrink-0">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input type="text" [value]="search()" (input)="setSearch($any($event.target).value)"
+             placeholder="Buscar por nombre…"
+             class="bg-transparent text-foreground text-xs font-medium outline-none flex-1 min-w-0 placeholder:text-foreground-muted" />
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-surface backdrop-blur-xl border border-border-subtle rounded-2xl overflow-hidden">
+    @if (loading()) {
+      <app-skeleton-rows [rows]="5" />
+    } @else if (filtered().length === 0) {
+      <div class="px-6 py-16 text-center">
+        @if (tables().length === 0) {
+          <p class="text-sm text-foreground-muted">Aún no hay mesas registradas.</p>
+          <p class="text-xs text-foreground-faint mt-1">Crea la primera con el botón "Nueva mesa".</p>
+        } @else {
+          <p class="text-sm text-foreground-muted">Sin resultados para la búsqueda actual.</p>
+        }
+      </div>
+    } @else {
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-sm">
+          <thead class="bg-muted/40 border-b border-border-subtle whitespace-nowrap">
+            <tr>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Mesa</th>
+              <th class="text-left px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Estado</th>
+              <th class="text-right px-5 py-3 font-semibold text-[10px] tracking-wider uppercase text-foreground-muted">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (table of filtered(); track table.id; let even = $even) {
+              <tr [class.bg-muted]="even" class="hover:bg-muted/40 transition border-b border-border-subtle/50 last:border-b-0">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                          [class]="table.is_active ? 'bg-primary text-primary-fg' : 'bg-muted text-foreground-faint border border-border-subtle'">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9h18"/><path d="M5 9V6a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M8 9v10"/><path d="M16 9v10"/>
+                      </svg>
+                    </span>
+                    <span class="font-semibold text-foreground">{{ table.name }}</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    @if (table.is_active) {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-success/10 text-success border border-success/20">
+                        Activa
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-muted text-foreground-muted border border-border-subtle">
+                        Inactiva
+                      </span>
+                    }
+                    @if (isOccupied(table)) {
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-warning/10 text-warning border border-warning/20"
+                            title="Tiene un pedido pendiente: no se puede desactivar ni eliminar">
+                        Con cuenta abierta
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <button type="button" (click)="edit.emit(table)" title="Editar"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                      </svg>
+                    </button>
+                    <button type="button" (click)="remove.emit(table)" title="Eliminar"
+                            class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="px-5 py-3 flex items-center justify-between gap-3 border-t border-border-subtle bg-elevated/30">
+        <span class="text-[11px] text-foreground-muted font-medium">
+          Mostrando {{ filtered().length }} de {{ tables().length }} mesas
+        </span>
+      </div>
+    }
+  </div>
+</div>

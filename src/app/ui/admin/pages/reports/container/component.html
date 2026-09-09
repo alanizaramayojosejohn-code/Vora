@@ -131,8 +131,9 @@
   <!-- Tab: Resumen general -->
   @if (activeTab() === 'resumen' && hasAdvancedReports()) {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <app-admin-reports-monthly-income [rows]="monthly()" [loading]="loading()" />
-      <app-admin-reports-daily-income [rows]="daily()" [loading]="loading()" />
+      <app-admin-reports-monthly-income [rows]="monthly()" [payroll]="payrollMonthly()"
+                                         [zeroCostCount]="monthlyZeroCost()" [loading]="loading()" />
+      <app-admin-reports-daily-income [rows]="daily()" [zeroCostCount]="dailyZeroCost()" [loading]="loading()" />
       <app-admin-reports-low-stock [rows]="lowStock()" [loading]="loading()" />
     </div>
   }
