@@ -8,7 +8,7 @@
   </div>
 
   @if (error(); as msg) {
-    <div class="rounded-xl border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger">
+    <div class="rounded-xl border border-danger-line bg-danger-wash px-4 py-3 text-sm text-danger">
       {{ msg }}
     </div>
   }
@@ -41,8 +41,8 @@
 
       <div class="px-5 py-4 border-t"
            [class]="r.difference === 0
-             ? 'bg-success/8 border-success/20'
-             : (r.difference > 0 ? 'bg-warning/8 border-warning/20' : 'bg-danger/8 border-danger/20')">
+             ? 'bg-success-wash border-success-line'
+             : (r.difference > 0 ? 'bg-warning-wash border-warning-line' : 'bg-danger-wash border-danger-line')">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold"
                 [class]="r.difference === 0 ? 'text-success' : (r.difference > 0 ? 'text-warning' : 'text-danger')">
@@ -80,7 +80,7 @@
             Desde {{ current()!.opened_at | date:'dd/MM/yyyy HH:mm' }}
           </p>
         </div>
-        <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-success/12 text-success flex-shrink-0">
+        <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-success-wash text-success flex-shrink-0">
           Abierto
         </span>
       </div>

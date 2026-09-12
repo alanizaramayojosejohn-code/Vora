@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Category } from '../../../../../models/category.model';
 import { Client } from '../../../../../models/client.model';
 import { Product } from '../../../../../models/product.model';
-import { Table } from '../../../../../models/table.model';
+import { Table, TAKEAWAY_LABEL } from '../../../../../models/table.model';
 import {
   canSettleOrder,
   orderDestinationLabel,
   orderPrimaryLabel,
   OrderWithDetails,
+  PAYMENT_METHOD_STYLE,
 } from '../../../../../models/order.model';
 import { PaymentLine, validatePaymentSplit } from '../../../../../models/payment-split.model';
 import { CategoryQueryService } from '../../../../../services/category/query.service';
@@ -49,6 +50,10 @@ interface CartItem {
   stock_available: number;
   has_stock: boolean;
   quantity: number;
+  // Solo para la miniatura del ticket (RF-7 rediseño): viaja con el ítem
+  // porque el producto puede salir del catálogo (filtro, página) antes de
+  // que el carrito se vacíe.
+  image_url: string | null;
 }
 
 type PaymentMethod = 'cash' | 'card' | 'qr';
@@ -66,6 +71,12 @@ interface PendingCard {
   can_settle: boolean;
   synced: boolean;
   table_id: string | null;
+  // Para la tarjeta rediseñada ("N ítems · X min"): itemCount ya se cargaba
+  // en items.length de cada fuente, createdAt es el created_at de la orden
+  // (o de la operación 'create' encolada) y no se pisa con add_items
+  // posteriores, para que el tiempo mostrado sea el de apertura de la cuenta.
+  itemCount: number;
+  createdAt: string;
 }
 
 @Component({
@@ -95,6 +106,13 @@ export class CajaSalesNewComponent {
   private readonly cashSessions   = inject(CashSessionService);
   private readonly subscriptionState = inject(SubscriptionStateService);
   private readonly auth           = inject(AuthService);
+  private readonly destroyRef     = inject(DestroyRef);
+
+  // Reloj para "X min" en las cuentas abiertas (RF-7 rediseño). No es un
+  // computed: nada obliga a recalcular "cuánto pasó" salvo el paso del
+  // tiempo, así que necesita su propio tick. Un minuto de resolución alcanza
+  // para un dato que solo se lee como aproximación ("hace un rato").
+  readonly nowMs = signal(Date.now());
 
   // Turno abierto. Si no hay, la venta se registra igual pero queda fuera del
   // arqueo — el aviso en pantalla hace visible el hueco en vez de callarlo.
@@ -173,6 +191,17 @@ export class CajaSalesNewComponent {
     return Array.from(set).sort();
   });
 
+  // Conteo por categoría para el número en cada chip de filtro (rediseño).
+  readonly categoryCounts = computed<Record<string, number>>(() => {
+    const counts: Record<string, number> = {};
+    for (const p of this.availableProducts()) {
+      const name = p.category?.name;
+      if (!name) continue;
+      counts[name] = (counts[name] ?? 0) + 1;
+    }
+    return counts;
+  });
+
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     const cat = this.activeCategory();
@@ -233,6 +262,8 @@ export class CajaSalesNewComponent {
         can_settle: canSettleOrder(order, userId, role),
         synced: true,
         table_id: order.table_id,
+        itemCount: order.items.length,
+        createdAt: order.created_at,
       });
     }
 
@@ -249,6 +280,8 @@ export class CajaSalesNewComponent {
           can_settle: true,
           synced: false,
           table_id: op.input.table_id ?? null,
+          itemCount: op.input.items.length,
+          createdAt: op.created_at,
         });
         continue;
       }
@@ -260,6 +293,7 @@ export class CajaSalesNewComponent {
         cards.set(op.order_uuid, {
           ...card,
           total: card.total + this.itemsTotal(op.items),
+          itemCount: card.itemCount + op.items.length,
           synced: false,
         });
       } else {
@@ -271,6 +305,12 @@ export class CajaSalesNewComponent {
 
     return [...cards.values()];
   });
+
+  // Suma de las cuentas abiertas, para el "Pendiente de cobro" de la franja
+  // (rediseño). No es plata cobrada: es lo que todavía falta cobrar.
+  readonly pendingTotalAmount = computed(() =>
+    this.pendingCards().reduce((sum, c) => sum + c.total, 0),
+  );
 
   readonly activePending = computed<PendingCard | null>(() => {
     const key = this.activePendingKey();
@@ -330,6 +370,9 @@ export class CajaSalesNewComponent {
       this.activeCategory();
       this.productPage.set(1);
     });
+
+    const timer = setInterval(() => this.nowMs.set(Date.now()), 30_000);
+    this.destroyRef.onDestroy(() => clearInterval(timer));
   }
 
   async load(): Promise<void> {
@@ -496,8 +539,15 @@ export class CajaSalesNewComponent {
         stock_available: product.stock,
         has_stock: product.has_stock,
         quantity: 1,
+        image_url: product.image_url,
       },
     ]);
+  }
+
+  // Cantidad de un producto ya en el carrito, para resaltar su tarjeta en el
+  // catálogo (rediseño). 0 si no está.
+  cartQuantityFor(productId: string): number {
+    return this.cart().find((i) => i.product_id === productId)?.quantity ?? 0;
   }
 
   updateQty(productId: string, delta: number): void {
@@ -762,6 +812,45 @@ export class CajaSalesNewComponent {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  // Minutos desde que se abrió una cuenta pendiente, para "N ítems · X min"
+  // en la franja de cuentas abiertas (rediseño). Depende de nowMs() para
+  // refrescarse solo con el reloj, no con datos que ya no cambian.
+  elapsedMinutes(createdAt: string): number {
+    const diff = this.nowMs() - new Date(createdAt).getTime();
+    return Math.max(0, Math.round(diff / 60_000));
+  }
+
+  // "07" para "Mesa 07", "—" para llevar, iniciales para cualquier otro
+  // nombre de mesa: el badge de la tarjeta de cuenta abierta (rediseño).
+  destinationBadge(destination: string): string {
+    if (destination === TAKEAWAY_LABEL) return '—';
+    const digits = destination.match(/(\d+)\s*$/);
+    if (digits) return digits[1].padStart(2, '0');
+    return destination.trim().slice(0, 2).toUpperCase();
+  }
+
+  private static readonly CAT_TEXT_CLASSES = [
+    'text-cat-1', 'text-cat-2', 'text-cat-3', 'text-cat-4', 'text-cat-5', 'text-cat-6',
+  ];
+  private static readonly CAT_DOT_CLASSES = [
+    'bg-cat-1', 'bg-cat-2', 'bg-cat-3', 'bg-cat-4', 'bg-cat-5', 'bg-cat-6',
+  ];
+
+  // Color categórico estable por nombre de categoría (rediseño: texto de
+  // categoría en la tarjeta de producto y punto en el chip de filtro). El
+  // índice sale de categories(), que ya está ordenado, así que una misma
+  // categoría no cambia de color mientras dure la sesión.
+  categoryTextClass(name: string | null | undefined): string {
+    if (!name) return 'text-foreground-faint';
+    const idx = this.categories().indexOf(name);
+    return CajaSalesNewComponent.CAT_TEXT_CLASSES[idx >= 0 ? idx % 6 : 0];
+  }
+
+  categoryDotClass(name: string): string {
+    const idx = this.categories().indexOf(name);
+    return CajaSalesNewComponent.CAT_DOT_CLASSES[idx >= 0 ? idx % 6 : 0];
+  }
+
   // ── Internos ────────────────────────────────────────────────────────────
 
   private selectedTableId(): string | null {
@@ -802,4 +891,9 @@ export class CajaSalesNewComponent {
   }
 
   readonly TAKEAWAY_VALUE = TAKEAWAY_VALUE;
+  readonly paymentStyle = PAYMENT_METHOD_STYLE;
+  // Tipado explícito para el @for del segmentado de método de pago: un
+  // literal inline en la plantilla infiere string[] y rompe la indexación
+  // de paymentStyle (que espera PaymentMethod).
+  readonly paymentMethodOptions: PaymentMethod[] = ['cash', 'card', 'qr'];
 }

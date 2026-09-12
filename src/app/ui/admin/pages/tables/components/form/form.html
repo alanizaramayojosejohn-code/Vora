@@ -14,7 +14,7 @@
       <label for="table-name" class="block text-sm font-medium text-foreground-muted mb-1">Nombre</label>
       <input id="table-name" type="text" formControlName="name"
              placeholder="Mesa 1, Barra, Terraza 2…"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <label class="flex items-start gap-3 cursor-pointer">
@@ -31,7 +31,7 @@
   </div>
 
   @if (errorMessage(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">
       {{ msg }}
     </div>
   }

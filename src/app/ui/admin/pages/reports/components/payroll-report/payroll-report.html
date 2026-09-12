@@ -4,13 +4,13 @@
   <div class="flex items-center justify-between gap-4 flex-wrap">
     <div class="flex items-center gap-2">
       <select [value]="month()" (change)="onMonthChange($any($event.target).value)"
-              class="select-field px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              class="select-field px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary-edge">
         @for (label of monthLabels; track $index) {
           <option [value]="$index + 1">{{ label }}</option>
         }
       </select>
       <select [value]="year()" (change)="onYearChange($any($event.target).value)"
-              class="select-field px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40">
+              class="select-field px-3 py-1.5 text-sm rounded-lg bg-surface border border-border-subtle text-foreground focus:outline-none focus:ring-2 focus:ring-primary-edge">
         @for (y of years(); track y) {
           <option [value]="y">{{ y }}</option>
         }
@@ -30,7 +30,7 @@
   </div>
 
   @if (error()) {
-    <div class="rounded-xl border border-danger/30 bg-danger/10 px-5 py-3 text-sm text-danger">
+    <div class="rounded-xl border border-danger-line bg-danger-wash px-5 py-3 text-sm text-danger">
       {{ error() }}
     </div>
   }
@@ -130,11 +130,11 @@
                 </td>
                 <td class="px-6 py-2 text-right">
                   @if (row.isPaid) {
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-success/15 text-success">Pagado</span>
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-success-wash text-success">Pagado</span>
                   } @else if (row.paid > 0) {
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning">Parcial</span>
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-warning-wash text-warning">Parcial</span>
                   } @else {
-                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-danger/15 text-danger">Sin pagar</span>
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-danger-wash text-danger">Sin pagar</span>
                   }
                 </td>
               </tr>

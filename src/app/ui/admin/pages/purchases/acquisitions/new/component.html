@@ -28,7 +28,7 @@
             <label class="block text-sm font-medium text-foreground-muted mb-1">Proveedor</label>
             <select [ngModel]="supplierId()" (ngModelChange)="supplierId.set($event)"
                     [ngModelOptions]="{standalone: true}"
-                    class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                    class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary">
               <option value="">— Sin proveedor —</option>
               @for (s of suppliers(); track s.id) {
                 <option [value]="s.id">{{ s.name }}</option>
@@ -39,14 +39,14 @@
             <label class="block text-sm font-medium text-foreground-muted mb-1">Fecha de llegada</label>
             <input type="date" [ngModel]="acquiredAt()" (ngModelChange)="acquiredAt.set($event)"
                    [ngModelOptions]="{standalone: true}"
-                   class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm" />
+                   class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm" />
           </div>
           <div class="md:col-span-3">
             <label class="block text-sm font-medium text-foreground-muted mb-1">Notas (opcional)</label>
             <input type="text" [ngModel]="notes()" (ngModelChange)="notes.set($event)"
                    [ngModelOptions]="{standalone: true}"
                    placeholder="Nro. de factura, observaciones…"
-                   class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                   class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
           </div>
         </div>
       </div>
@@ -56,7 +56,7 @@
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-semibold text-foreground">Productos recibidos</h2>
           <button type="button" (click)="addItem()"
-                  class="px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition">
+                  class="px-3 py-1.5 text-xs font-semibold bg-primary-wash text-primary rounded-lg hover:bg-primary/20 transition">
             + Agregar producto
           </button>
         </div>
@@ -76,7 +76,7 @@
                   }
                   <select [ngModel]="item.product_id" (ngModelChange)="updateItem(i, 'product_id', $event)"
                           [ngModelOptions]="{standalone: true}"
-                          class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm">
+                          class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary text-sm">
                     <option value="">— Seleccionar —</option>
                     @for (p of products(); track p.id) {
                       <option [value]="p.id">{{ p.name }} (stock: {{ p.stock }})</option>
@@ -90,7 +90,7 @@
                   }
                   <input type="number" min="1" [ngModel]="item.quantity" (ngModelChange)="updateItem(i, 'quantity', +$event)"
                          [ngModelOptions]="{standalone: true}"
-                         class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm font-mono" />
+                         class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary text-sm font-mono" />
                 </div>
                 <!-- Costo unitario -->
                 <div class="col-span-5 md:col-span-3">
@@ -99,7 +99,7 @@
                   }
                   <input type="number" min="0" step="0.01" [ngModel]="item.unit_cost" (ngModelChange)="updateItem(i, 'unit_cost', +$event)"
                          [ngModelOptions]="{standalone: true}"
-                         class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm font-mono" />
+                         class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary text-sm font-mono" />
                 </div>
                 <!-- Eliminar -->
                 <div class="col-span-2 md:col-span-1 flex items-end">
@@ -126,7 +126,7 @@
       </div>
 
       @if (submitError(); as msg) {
-        <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+        <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-4 py-3">{{ msg }}</div>
       }
 
       <!-- Acciones -->

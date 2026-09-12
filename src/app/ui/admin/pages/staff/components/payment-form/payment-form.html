@@ -9,7 +9,7 @@
     <div>
       <label for="period_month" class="block text-sm font-medium text-foreground-muted mb-1">Mes</label>
       <select id="period_month" formControlName="period_month"
-              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary">
         @for (m of months; track m.v) {
           <option [value]="m.v">{{ m.l }}</option>
         }
@@ -19,30 +19,30 @@
     <div>
       <label for="period_year" class="block text-sm font-medium text-foreground-muted mb-1">Año</label>
       <input id="period_year" type="number" formControlName="period_year" min="2000"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
     </div>
 
     <div>
       <label for="amount" class="block text-sm font-medium text-foreground-muted mb-1">Monto pagado</label>
       <input id="amount" type="number" formControlName="amount" min="1" step="100"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
     </div>
 
     <div>
       <label for="paid_at" class="block text-sm font-medium text-foreground-muted mb-1">Fecha de pago</label>
       <input id="paid_at" type="date" formControlName="paid_at"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
     </div>
 
     <div class="md:col-span-2">
       <label for="notes" class="block text-sm font-medium text-foreground-muted mb-1">Notas <span class="text-foreground-faint">(opcional)</span></label>
       <input id="notes" type="text" formControlName="notes" placeholder="Ej: Adelanto, descuento por falta…"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
   </div>
 
   @if (errorMessage(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">
       {{ msg }}
     </div>
   }

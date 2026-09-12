@@ -13,42 +13,42 @@
     <div>
       <label for="name" class="block text-sm font-medium text-foreground-muted mb-1">Nombre completo</label>
       <input id="name" type="text" formControlName="name"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="ci" class="block text-sm font-medium text-foreground-muted mb-1">CI</label>
       <input id="ci" type="text" formControlName="ci"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="phone" class="block text-sm font-medium text-foreground-muted mb-1">Teléfono <span class="text-foreground-faint">(opcional)</span></label>
       <input id="phone" type="text" formControlName="phone"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="position" class="block text-sm font-medium text-foreground-muted mb-1">Cargo</label>
       <input id="position" type="text" formControlName="position" placeholder="Ej: Barista, Encargado…"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="salary" class="block text-sm font-medium text-foreground-muted mb-1">Sueldo mensual</label>
       <input id="salary" type="number" formControlName="salary" min="0" step="100"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="hired_at" class="block text-sm font-medium text-foreground-muted mb-1">Fecha de ingreso</label>
       <input id="hired_at" type="date" formControlName="hired_at"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
     </div>
   </div>
 
   @if (errorMessage(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">
       {{ msg }}
     </div>
   }

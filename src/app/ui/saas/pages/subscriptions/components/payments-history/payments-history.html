@@ -53,7 +53,7 @@
               <td class="px-5 py-3 text-xs">
                 <span class="font-semibold text-foreground">{{ p.amount | currency: 'ARS' : 'symbol' : '1.0-0' }}</span>
                 @if (p.is_late) {
-                  <span class="inline-flex items-center gap-1 ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-warning/10 text-warning border border-warning/20">
+                  <span class="inline-flex items-center gap-1 ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-warning-wash text-warning border border-warning-line">
                     <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
                       <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" />
                     </svg>
@@ -74,7 +74,7 @@
               <td class="px-5 py-3 text-foreground-muted text-xs">{{ p.notes ?? '—' }}</td>
               <td class="px-5 py-3 text-right">
                 <button type="button" (click)="deletePayment.emit(p)" title="Eliminar pago"
-                        class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
+                        class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger-wash rounded-md transition">
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>

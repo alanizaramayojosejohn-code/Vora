@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import {
   OrderItemWithDetails,
   OrderPayment,
+  OrderStatus,
   OrderWithDetails,
 } from '../../models/order.model';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -25,6 +26,28 @@ export class OrderQueryService {
       .select(ORDER_SELECT)
       .order('created_at', { ascending: false })
       .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map(mapOrder);
+  }
+
+  // Para filtros por rango de fecha (día/semana/mes): acotar por fecha en vez
+  // de por cantidad. `listOrders(100)` truncaba "30 días" a lo que entrara en
+  // los últimos 100 pedidos sin mirar la fecha — en un negocio con más de 100
+  // ventas en el mes, el filtro de 30 días mentía mostrando menos días de los
+  // que decía. `limit` es un techo de seguridad, no el criterio de selección;
+  // 2000 replica el mismo techo que ya usa SalesReportQueryService.listOrders
+  // para su ventana de fechas.
+  async listOrdersSince(fromIso: string, opts: { status?: OrderStatus; limit?: number } = {}): Promise<OrderWithDetails[]> {
+    let query = this.client
+      .from('orders')
+      .select(ORDER_SELECT)
+      .gte('created_at', fromIso)
+      .order('created_at', { ascending: false })
+      .limit(opts.limit ?? 2000);
+
+    if (opts.status) query = query.eq('status', opts.status);
+
+    const { data, error } = await query;
     if (error) throw error;
     return (data ?? []).map(mapOrder);
   }

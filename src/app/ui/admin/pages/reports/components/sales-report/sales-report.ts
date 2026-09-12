@@ -18,13 +18,31 @@ import {
 } from '../../../../../../services/report/sales-report.query.service';
 import { Profile } from '../../../../../../models/profile.model';
 import { errorMessage } from '../../../../../../utilities/error-message';
-import { ZeroCostNoticeComponent } from '../zero-cost-notice/zero-cost-notice';
 
 const ALL_METHODS: PaymentMethod[] = ['cash', 'card', 'qr'];
 
+// Colores del chip de método en la tabla y la barra de filtros: el rediseño
+// los tipa por color (RF del rediseño de reporte de ventas) en vez del mismo
+// tono para los tres. Vive acá y no en PAYMENT_METHOD_STYLE (order.model.ts)
+// porque ese record es compartido con otras pantallas (caja, historial de
+// pagos) que no piden este cambio de paleta — tocarlo ahí las afectaría.
+const METHOD_CHIP_CLASSES: Record<PaymentMethod, string> = {
+  cash: 'bg-success-wash text-success border-success-line',
+  qr: 'bg-primary-wash text-primary border-primary-line',
+  card: 'bg-cat-4-wash text-cat-4 border-cat-4-line',
+};
+
+// Mismo criterio de color, pero como fondo sólido para el punto de la
+// leyenda "Cobrado por método" (ahí no hay chip con borde, solo un dot).
+const METHOD_DOT_CLASSES: Record<PaymentMethod, string> = {
+  cash: 'bg-success',
+  qr: 'bg-primary',
+  card: 'bg-cat-4',
+};
+
 @Component({
   selector: 'app-admin-sales-report',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, FormsModule, ZeroCostNoticeComponent],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, FormsModule],
   templateUrl: './sales-report.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -81,7 +99,79 @@ export class SalesReportComponent implements OnInit {
 
   readonly methodLabels = PAYMENT_METHOD_LABEL;
   readonly methodStyle = PAYMENT_METHOD_STYLE;
+  readonly methodChipClasses = METHOD_CHIP_CLASSES;
+  readonly methodDotClasses = METHOD_DOT_CLASSES;
   readonly allMethods = ALL_METHODS;
+
+  // ---- Derivados para el rediseño de la tarjeta "Resultado del periodo" ----
+  // Ancho de cada tramo de la barra partida costo/ganancia, como % del
+  // ingreso total. Se acota a [0, 100]: si la ganancia es negativa (se vendió
+  // por debajo del costo) el tramo verde se lee como 0 en vez de invertir la
+  // barra, que sería ilegible.
+  readonly costShare = computed(() => {
+    const { total, cost } = this.summary();
+    if (total <= 0) return 0;
+    return Math.max(0, Math.min(100, (cost / total) * 100));
+  });
+  readonly profitShare = computed(() => {
+    const { total, profit } = this.summary();
+    if (total <= 0) return 0;
+    return Math.max(0, Math.min(100, (profit / total) * 100));
+  });
+
+  // ---- Derivado para la tarjeta "Cobrado por método" ----
+  // El diseño muestra cada método ordenado de mayor a menor monto, con su
+  // porcentaje sobre el ingreso total. summary().byMethod ya trae los montos
+  // (spec 002); acá solo se ordena y se calcula el %, sin pedir nada nuevo.
+  readonly methodBreakdown = computed(() => {
+    const { total, byMethod } = this.summary();
+    return ALL_METHODS.map((method) => {
+      const amount = byMethod[method];
+      return {
+        method,
+        label: this.methodLabels[method],
+        amount,
+        pct: total > 0 ? (amount / total) * 100 : 0,
+      };
+    }).sort((a, b) => b.amount - a.amount);
+  });
+
+  // ---- Derivado para la tarjeta "Volumen" ----
+  // Ítems vendidos en las ventas cobradas, con el mismo filtro que
+  // buildSummary() (status === 'settled'): una cuenta pendiente todavía no
+  // vendió nada en firme, así que sus ítems no cuentan acá tampoco.
+  readonly totalItems = computed(() =>
+    this.rows()
+      .filter((r) => r.status === 'settled')
+      .reduce((sum, r) => sum + r.item_count, 0),
+  );
+
+  // ---- Paginación numerada ----
+  // Lista de páginas a mostrar, con '…' cuando hay más de las que entran.
+  // Siempre primera, última, y una ventana de 3 alrededor de la actual.
+  readonly pageNumbers = computed(() => {
+    const total = this.totalPages();
+    const current = this.page() + 1; // 1-indexado para mostrar
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const items: (number | 'ellipsis')[] = [1];
+    if (current > 3) items.push('ellipsis');
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+    for (let i = start; i <= end; i++) items.push(i);
+    if (current < total - 2) items.push('ellipsis');
+    items.push(total);
+    return items;
+  });
+
+  readonly pageRangeLabel = computed(() => {
+    const total = this.rows().length;
+    if (total === 0) return 'Sin resultados';
+    const start = this.page() * this.pageSize + 1;
+    const end = Math.min((this.page() + 1) * this.pageSize, total);
+    return `Mostrando ${start}–${end} de ${total} resultados`;
+  });
 
   async ngOnInit(): Promise<void> {
     const [users, products] = await Promise.all([
@@ -168,6 +258,11 @@ export class SalesReportComponent implements OnInit {
 
   nextPage(): void {
     if (this.page() < this.totalPages() - 1) this.page.update((p) => p + 1);
+  }
+
+  goToPage(index: number): void {
+    if (index < 0 || index >= this.totalPages()) return;
+    this.page.set(index);
   }
 
   private today(): string {

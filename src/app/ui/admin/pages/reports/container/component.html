@@ -7,15 +7,14 @@
   </div>
 
   <!-- Tabs -->
-  <div class="flex items-center gap-1 bg-muted/60 border border-border-subtle rounded-xl p-1 w-fit flex-wrap">
+  <div class="flex items-center gap-0.5 bg-input border border-border-subtle rounded-xl p-[3px] w-fit flex-wrap">
 
     <!-- Hoy: en los dos planes -->
     <button type="button" (click)="setTab('dia')"
-            [class.bg-surface]="activeTab() === 'dia'"
-            [class.shadow-sm]="activeTab() === 'dia'"
-            [class.text-foreground]="activeTab() === 'dia'"
-            [class.text-foreground-muted]="activeTab() !== 'dia'"
-            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+            class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+            [class]="activeTab() === 'dia'
+              ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+              : 'text-foreground-muted hover:text-foreground'">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
@@ -25,11 +24,10 @@
 
     @if (hasAdvancedReports()) {
     <button type="button" (click)="setTab('ventas')"
-            [class.bg-surface]="activeTab() === 'ventas'"
-            [class.shadow-sm]="activeTab() === 'ventas'"
-            [class.text-foreground]="activeTab() === 'ventas'"
-            [class.text-foreground-muted]="activeTab() !== 'ventas'"
-            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+            class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+            [class]="activeTab() === 'ventas'
+              ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+              : 'text-foreground-muted hover:text-foreground'">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
@@ -38,11 +36,10 @@
       Reporte de ventas
     </button>
     <button type="button" (click)="setTab('resumen')"
-            [class.bg-surface]="activeTab() === 'resumen'"
-            [class.shadow-sm]="activeTab() === 'resumen'"
-            [class.text-foreground]="activeTab() === 'resumen'"
-            [class.text-foreground-muted]="activeTab() !== 'resumen'"
-            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+            class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+            [class]="activeTab() === 'resumen'
+              ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+              : 'text-foreground-muted hover:text-foreground'">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 3v18h18"/><path d="M7 12v5"/><path d="M12 8v9"/><path d="M17 5v12"/>
@@ -50,11 +47,10 @@
       Resumen general
     </button>
     <button type="button" (click)="setTab('clientes')"
-            [class.bg-surface]="activeTab() === 'clientes'"
-            [class.shadow-sm]="activeTab() === 'clientes'"
-            [class.text-foreground]="activeTab() === 'clientes'"
-            [class.text-foreground-muted]="activeTab() !== 'clientes'"
-            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+            class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+            [class]="activeTab() === 'clientes'
+              ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+              : 'text-foreground-muted hover:text-foreground'">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -66,11 +62,10 @@
 
     @if (hasStaff()) {
     <button type="button" (click)="setTab('planilla')"
-            [class.bg-surface]="activeTab() === 'planilla'"
-            [class.shadow-sm]="activeTab() === 'planilla'"
-            [class.text-foreground]="activeTab() === 'planilla'"
-            [class.text-foreground-muted]="activeTab() !== 'planilla'"
-            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+            class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+            [class]="activeTab() === 'planilla'
+              ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+              : 'text-foreground-muted hover:text-foreground'">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
@@ -81,11 +76,10 @@
     }
 
     <button type="button" (click)="setTab('arqueos')"
-            [class.bg-surface]="activeTab() === 'arqueos'"
-            [class.shadow-sm]="activeTab() === 'arqueos'"
-            [class.text-foreground]="activeTab() === 'arqueos'"
-            [class.text-foreground-muted]="activeTab() !== 'arqueos'"
-            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+            class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+            [class]="activeTab() === 'arqueos'
+              ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+              : 'text-foreground-muted hover:text-foreground'">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>
@@ -95,11 +89,10 @@
 
     @if (!hasAdvancedReports()) {
       <button type="button" (click)="setTab('stock')"
-              [class.bg-surface]="activeTab() === 'stock'"
-              [class.shadow-sm]="activeTab() === 'stock'"
-              [class.text-foreground]="activeTab() === 'stock'"
-              [class.text-foreground-muted]="activeTab() !== 'stock'"
-              class="px-4 py-1.5 text-sm font-semibold rounded-lg transition flex items-center gap-2">
+              class="px-3 py-[7px] text-[11.5px] sm:text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+              [class]="activeTab() === 'stock'
+                ? 'bg-surface border border-border text-foreground shadow-[0_2px_8px_0_var(--c-primary-glow-soft)]'
+                : 'text-foreground-muted hover:text-foreground'">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>

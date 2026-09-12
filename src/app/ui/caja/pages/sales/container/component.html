@@ -65,7 +65,7 @@
 
       <!-- Header -->
       <div class="px-7 pt-7 pb-5 flex flex-col items-center text-center gap-4">
-        <div class="w-16 h-16 rounded-2xl bg-danger/10 text-danger flex items-center justify-center">
+        <div class="w-16 h-16 rounded-2xl bg-danger-wash text-danger flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
           </svg>
@@ -108,7 +108,7 @@
                     (blur)="cancelReasonTouched.set(true)"
                     placeholder="Ej: Error en el pedido, cliente canceló, cobro duplicado…"
                     [disabled]="cancellingSubmitting()"
-                    class="w-full px-3 py-2 bg-input text-foreground text-sm border rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none placeholder:text-foreground-faint transition disabled:opacity-60"
+                    class="w-full px-3 py-2 bg-input text-foreground text-sm border rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary resize-none placeholder:text-foreground-faint transition disabled:opacity-60"
                     [class.border-danger]="cancelReasonTouched() && !cancelReason().trim()"
                     [class.border-border-subtle]="!cancelReasonTouched() || cancelReason().trim()">
           </textarea>
@@ -118,7 +118,7 @@
         </div>
 
         @if (cancellingError(); as err) {
-          <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">{{ err }}</div>
+          <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">{{ err }}</div>
         }
       </div>
 
