@@ -259,11 +259,11 @@
         <div class="grid grid-cols-2 gap-5">
           <!-- Color primario -->
           <div class="space-y-3">
-            <label class="block text-xs font-medium text-foreground-muted">Color primario</label>
+            <label for="customPrimary" class="block text-xs font-medium text-foreground-muted">Color primario</label>
             <div class="flex items-center gap-3">
               <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-border-subtle cursor-pointer flex-shrink-0"
                    [style.background]="customPrimary()">
-                <input type="color" formControlName="customPrimary"
+                <input id="customPrimary" type="color" formControlName="customPrimary"
                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
               </div>
               <input type="text" formControlName="customPrimary" maxlength="7"
@@ -300,11 +300,11 @@
 
           <!-- Color de acento -->
           <div class="space-y-3">
-            <label class="block text-xs font-medium text-foreground-muted">Color de acento</label>
+            <label for="customAccent" class="block text-xs font-medium text-foreground-muted">Color de acento</label>
             <div class="flex items-center gap-3">
               <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-border-subtle cursor-pointer flex-shrink-0"
                    [style.background]="customAccent()">
-                <input type="color" formControlName="customAccent"
+                <input id="customAccent" type="color" formControlName="customAccent"
                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
               </div>
               <input type="text" formControlName="customAccent" maxlength="7"
@@ -446,7 +446,7 @@
   }
 
   <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
-    <button type="button" (click)="cancel.emit()"
+    <button type="button" (click)="cancelled.emit()"
             class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
       Cancelar
     </button>

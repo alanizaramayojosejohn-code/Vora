@@ -25,11 +25,7 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-route-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet],
-  template: `
-    <div #box class="anim-page">
-      <router-outlet (activate)="replay()" />
-    </div>
-  `,
+  templateUrl: './route-view.component.html',
 })
 export class RouteViewComponent {
   private readonly box = viewChild.required<ElementRef<HTMLElement>>('box');

@@ -52,10 +52,39 @@ type NewOperation<T = PendingOperation> = T extends PendingOperation
 const STORAGE_KEY = 'saas_offline_queue_v3';
 const LEGACY_KEYS = ['saas_offline_queue_v1', 'saas_offline_queue_v2'];
 
+// Mensaje único para las dos formas de no poder persistir: al cajero no le
+// aporta nada distinguir "no está lista la clave" de "se llenó el storage",
+// solo necesita saber que no debe cerrar la app ni el navegador todavía.
+const PERSIST_ERROR_MESSAGE =
+  'Hay ventas sin guardar en este dispositivo. No cierres la app hasta que se sincronicen.';
+
 @Injectable({ providedIn: 'root' })
 export class OfflineQueueService {
   private readonly encryption = inject(StorageEncryptionService);
   readonly pending = signal<PendingOperation[]>([]);
+
+  // Se prende cuando la cola en memoria (this.pending) no coincide con lo
+  // último que se logró escribir en localStorage: sin clave de cifrado lista,
+  // o porque encrypt()/setItem() fallaron (típicamente cuota excedida). Un
+  // refresh en ese estado pierde ventas reales, así que esto es lo que le
+  // permite al cajero (vía offline-status.component) enterarse antes de que
+  // pase.
+  readonly persistError = signal<string | null>(null);
+
+  // Serialización de escrituras a disco (fix de un bug real): dos commit()
+  // seguidos antes de que la escritura anterior termine antes lanzaban dos
+  // encrypt() en paralelo, y ganaba el que resolviera último — que podía ser
+  // el estado VIEJO, dejando la cola persistida atrasada respecto de la cola
+  // en memoria.
+  //
+  // Patrón: `writeInFlight` marca si hay una escritura corriendo; mientras
+  // haya una, los commits que lleguen solo actualizan `latestSnapshot` (el
+  // último gana, no se apilan). Al terminar la escritura en curso, el loop de
+  // `drainPersist` relee `latestSnapshot`: si llegó algo más nuevo mientras
+  // escribía, lo escribe también, sin crecer una cadena de promesas sin
+  // límite (siempre hay como mucho una escritura en vuelo).
+  private writeInFlight = false;
+  private latestSnapshot: PendingOperation[] | null = null;
 
   async loadFromStorage(): Promise<void> {
     for (const key of LEGACY_KEYS) localStorage.removeItem(key);
@@ -72,6 +101,10 @@ export class OfflineQueueService {
   clearStorage(): void {
     localStorage.removeItem(STORAGE_KEY);
     this.pending.set([]);
+    // Con la cola vacía no queda nada que perder: si había un aviso de
+    // persistencia colgado (p. ej. de la sesión anterior), no tiene sentido
+    // seguir mostrándolo.
+    this.persistError.set(null);
   }
 
   enqueueCreate(orderUuid: string, input: RegisterOrderInput): string {
@@ -147,10 +180,45 @@ export class OfflineQueueService {
 
   private commit(operations: PendingOperation[]): void {
     this.pending.set(operations);
-    if (!this.encryption.isReady) return;
-    this.encryption
-      .encrypt(operations)
-      .then((encrypted) => localStorage.setItem(STORAGE_KEY, encrypted))
-      .catch(() => { /* quota exceeded or encryption error */ });
+    this.schedulePersist(operations);
+  }
+
+  private schedulePersist(operations: PendingOperation[]): void {
+    this.latestSnapshot = operations;
+    // Ya hay una escritura en curso: cuando termine, drainPersist va a
+    // recoger este snapshot (el más nuevo) en vez del que tenía cuando
+    // arrancó. No hace falta lanzar otra escritura ahora.
+    if (this.writeInFlight) return;
+    this.writeInFlight = true;
+    void this.drainPersist();
+  }
+
+  private async drainPersist(): Promise<void> {
+    while (this.latestSnapshot !== null) {
+      const snapshot = this.latestSnapshot;
+      this.latestSnapshot = null;
+      await this.persistSnapshot(snapshot);
+    }
+    this.writeInFlight = false;
+  }
+
+  private async persistSnapshot(operations: PendingOperation[]): Promise<void> {
+    if (!this.encryption.isReady) {
+      // Antes esto dejaba la cola SOLO en memoria en silencio: un refresh acá
+      // perdía ventas reales sin que nadie se enterara. Si no hay nada
+      // pendiente no hay nada que perder, así que no hace falta alarmar.
+      this.persistError.set(operations.length > 0 ? PERSIST_ERROR_MESSAGE : null);
+      return;
+    }
+    try {
+      const encrypted = await this.encryption.encrypt(operations);
+      localStorage.setItem(STORAGE_KEY, encrypted);
+      this.persistError.set(null);
+    } catch {
+      // Cuota excedida o fallo de cifrado. Antes el catch se lo tragaba
+      // (comentario original: "quota exceeded or encryption error") y nadie
+      // se enteraba de que la cola había dejado de guardarse.
+      this.persistError.set(PERSIST_ERROR_MESSAGE);
+    }
   }
 }

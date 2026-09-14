@@ -1,0 +1,12 @@
+<div class="px-6 py-5 space-y-4" aria-hidden="true">
+  @for (w of widths(); track $index) {
+    <div>
+      <div class="flex items-center justify-between mb-1.5">
+        <div class="skeleton h-2.5" style="width: 30%"></div>
+        <div class="skeleton h-2.5" style="width: 18%"></div>
+      </div>
+      <div class="skeleton h-2 rounded-full" [style.width]="w"></div>
+    </div>
+  }
+</div>
+<span class="sr-only" role="status">Cargando…</span>

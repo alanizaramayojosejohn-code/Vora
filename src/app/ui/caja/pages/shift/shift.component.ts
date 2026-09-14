@@ -51,8 +51,8 @@ export class CajaShiftComponent implements OnInit {
       && !this.readonlyMode();
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.refresh();
+  ngOnInit(): void {
+    void this.refresh();
   }
 
   private async refresh(): Promise<void> {

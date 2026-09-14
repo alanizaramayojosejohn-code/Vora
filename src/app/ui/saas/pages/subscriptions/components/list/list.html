@@ -47,7 +47,7 @@
               </p>
             </div>
           </div>
-          <button type="button" (click)="select.emit(item)"
+          <button type="button" (click)="selected.emit(item)"
                   class="px-3 py-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20 flex-shrink-0">
             Registrar pago
           </button>
@@ -133,7 +133,7 @@
                 </td>
                 <td class="px-5 py-3 text-right">
                   <div class="inline-flex items-center gap-1">
-                    <button type="button" (click)="select.emit(item)" title="Ver pagos"
+                    <button type="button" (click)="selected.emit(item)" title="Ver pagos"
                             class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-foreground hover:bg-input rounded-md transition">
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>

@@ -99,7 +99,7 @@
                     Factura
                   </button>
                   @if (!order.cancelled_at) {
-                    <button type="button" (click)="cancel.emit(order)"
+                    <button type="button" (click)="cancelled.emit(order)"
                             class="text-danger hover:underline text-xs font-medium transition">
                       Cancelar
                     </button>
@@ -156,7 +156,7 @@
                 Factura
               </button>
               @if (!order.cancelled_at) {
-                <button type="button" (click)="cancel.emit(order)"
+                <button type="button" (click)="cancelled.emit(order)"
                         class="text-xs font-medium text-danger">Cancelar</button>
               }
             </div>

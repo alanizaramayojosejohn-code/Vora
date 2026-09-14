@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Supplier } from '../../../../../models/supplier.model';
-import { SupplierService } from '../../../../../services/supplier/supplier.service';
-import { errorMessage } from '../../../../../utilities/error-message';
+import { SupplierInput, SupplierService } from '../../../../../services/supplier/supplier.service';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { createCrudState } from '../../../../shared/crud-state';
 import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 
 @Component({
@@ -17,28 +17,34 @@ export class PurchasesSuppliersComponent {
   private readonly supplierService = inject(SupplierService);
   private readonly fb = inject(FormBuilder);
 
-  readonly suppliers = signal<Supplier[]>([]);
-  readonly loading = signal(true);
-
-  readonly formState = signal<null | 'create' | Supplier>(null);
-  readonly editing = computed<Supplier | null>(() => {
-    const s = this.formState();
-    return s && s !== 'create' ? s : null;
+  private readonly crud = createCrudState<Supplier, SupplierInput>({
+    list: () => this.supplierService.listSuppliers(),
+    create: (input) => this.supplierService.createSupplier(input),
+    update: (id, input) => this.supplierService.updateSupplier(id, input),
+    remove: (id) => this.supplierService.deleteSupplier(id),
+    labels: {
+      load: 'Error al listar proveedores',
+      // El form original no distingue mensaje entre crear y editar.
+      create: 'Error al guardar proveedor',
+      update: 'Error al guardar proveedor',
+      remove: 'Error al eliminar proveedor',
+    },
   });
-  readonly showForm = computed(() => this.formState() !== null);
-  readonly submitting = signal(false);
-  readonly formError = signal<string | null>(null);
 
-  readonly deleting = signal<Supplier | null>(null);
-  readonly deletingSubmitting = signal(false);
-  readonly deletingError = signal<string | null>(null);
+  readonly suppliers = this.crud.items;
+  readonly loading = this.crud.loading;
+  readonly loadError = this.crud.loadError;
 
-  readonly deletingInitials = computed(() => {
-    const s = this.deleting();
-    if (!s) return null;
-    const parts = s.name.trim().split(/\s+/).filter(Boolean);
-    return parts.length === 1 ? parts[0].slice(0, 2).toUpperCase() : (parts[0][0] + parts[1][0]).toUpperCase();
-  });
+  readonly formState = this.crud.formState;
+  readonly editing = this.crud.editing;
+  readonly showForm = this.crud.showForm;
+  readonly submitting = this.crud.submitting;
+  readonly formError = this.crud.formError;
+
+  readonly deleting = this.crud.deleting;
+  readonly deletingSubmitting = this.crud.deletingSubmitting;
+  readonly deletingError = this.crud.deletingError;
+  readonly deletingInitials = this.crud.deletingInitials;
 
   readonly form = this.fb.nonNullable.group({
     name:    ['', [Validators.required, Validators.minLength(2)]],
@@ -48,6 +54,12 @@ export class PurchasesSuppliersComponent {
     notes:   [''],
   });
 
+  readonly refresh = this.crud.refresh;
+  readonly closeForm = this.crud.closeForm;
+  readonly handleDelete = this.crud.handleDelete;
+  readonly cancelDelete = this.crud.cancelDelete;
+  readonly confirmDelete = this.crud.confirmDelete;
+
   constructor() {
     void this.refresh();
   }
@@ -56,21 +68,12 @@ export class PurchasesSuppliersComponent {
     return v.trim() || null;
   }
 
-  async refresh(): Promise<void> {
-    this.loading.set(true);
-    try {
-      this.suppliers.set(await this.supplierService.listSuppliers());
-    } catch (err: unknown) {
-      console.error('Error cargando proveedores', err);
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
+  // openCreate/openEdit no son simples alias: además de abrir el form
+  // genérico, tienen que sincronizar el FormGroup reactivo (este contenedor,
+  // a diferencia de los otros 7, no usa un componente de formulario aparte).
   openCreate(): void {
     this.form.reset({ name: '', contact: '', phone: '', email: '', notes: '' });
-    this.formState.set('create');
-    this.formError.set(null);
+    this.crud.openCreate();
   }
 
   openEdit(s: Supplier): void {
@@ -81,68 +84,18 @@ export class PurchasesSuppliersComponent {
       email:   s.email ?? '',
       notes:   s.notes ?? '',
     });
-    this.formState.set(s);
-    this.formError.set(null);
-  }
-
-  closeForm(): void {
-    this.formState.set(null);
-    this.formError.set(null);
+    this.crud.openEdit(s);
   }
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.submitting()) return;
-    this.submitting.set(true);
-    this.formError.set(null);
     const raw = this.form.getRawValue();
-    const input = {
+    await this.crud.handleSubmit({
       name:    raw.name.trim(),
       contact: this.nullIfEmpty(raw.contact),
       phone:   this.nullIfEmpty(raw.phone),
       email:   this.nullIfEmpty(raw.email),
       notes:   this.nullIfEmpty(raw.notes),
-    };
-    const editing = this.editing();
-    try {
-      if (editing) {
-        await this.supplierService.updateSupplier(editing.id, input);
-      } else {
-        await this.supplierService.createSupplier(input);
-      }
-      this.formState.set(null);
-      await this.refresh();
-    } catch (err: unknown) {
-      this.formError.set(errorMessage(err, 'Error al guardar proveedor'));
-    } finally {
-      this.submitting.set(false);
-    }
-  }
-
-  handleDelete(s: Supplier): void {
-    this.deleting.set(s);
-    this.deletingError.set(null);
-  }
-
-  cancelDelete(): void {
-    if (this.deletingSubmitting()) return;
-    this.deleting.set(null);
-    this.deletingError.set(null);
-  }
-
-  async confirmDelete(): Promise<void> {
-    const s = this.deleting();
-    if (!s) return;
-    this.deletingSubmitting.set(true);
-    this.deletingError.set(null);
-    try {
-      await this.supplierService.deleteSupplier(s.id);
-      if (this.editing()?.id === s.id) this.formState.set(null);
-      this.deleting.set(null);
-      await this.refresh();
-    } catch (err: unknown) {
-      this.deletingError.set(errorMessage(err, 'Error al eliminar proveedor'));
-    } finally {
-      this.deletingSubmitting.set(false);
-    }
+    });
   }
 }

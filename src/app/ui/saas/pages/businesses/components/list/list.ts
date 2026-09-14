@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { DatePipe } from '@angular/common';
 import { Business } from '../../../../../../models/business.model';
 import { contrastColor, getPreset } from '../../../../../../services/theme/theme.presets';
+import { initials as computeInitials } from '../../../../../../utilities/initials';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type BusinessSort = 'name' | 'created' | 'preset';
@@ -25,10 +26,7 @@ export class BusinessesListComponent {
   readonly sortMenuOpen = signal(false);
 
   initials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '··';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return computeInitials(name);
   }
 
   primaryColor(business: Business): string {
@@ -61,7 +59,7 @@ export class BusinessesListComponent {
     switch (this.sort()) {
       case 'name': return 'Nombre A→Z';
       case 'preset': return 'Paleta A→Z';
-      default: return 'Recientes primero';
+      case 'created': return 'Recientes primero';
     }
   });
 

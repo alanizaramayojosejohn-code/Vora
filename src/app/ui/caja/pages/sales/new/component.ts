@@ -5,21 +5,50 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Category } from '../../../../../models/category.model';
 import { Client } from '../../../../../models/client.model';
 import { Product } from '../../../../../models/product.model';
-import { Table, TAKEAWAY_LABEL } from '../../../../../models/table.model';
-import {
-  canSettleOrder,
-  orderDestinationLabel,
-  orderPrimaryLabel,
-  OrderWithDetails,
-  PAYMENT_METHOD_STYLE,
-} from '../../../../../models/order.model';
+import { Table } from '../../../../../models/table.model';
+import { OrderWithDetails, PAYMENT_METHOD_STYLE } from '../../../../../models/order.model';
 import { PaymentLine, validatePaymentSplit } from '../../../../../models/payment-split.model';
+import {
+  CartItem,
+  cartQuantityFor as cartQuantityFor_,
+  cartSubtotal as cartSubtotal_,
+  cartItemCount as cartItemCount_,
+  cartTotalQuantity as cartTotalQuantity_,
+  cashChange as cashChange_,
+  itemAtMax as itemAtMax_,
+  toRegisterItems,
+} from '../../../../../models/cart.model';
+import {
+  buildPendingCards,
+  canAddToPendingCart,
+  canChargeCart,
+  canLeavePendingCart,
+  findActivePending,
+  findTableConflict,
+  PendingCard,
+  pendingTotalAmount as pendingTotalAmount_,
+} from '../../../../../models/pending-card.model';
+import {
+  categoryDotClass as categoryDotClass_,
+  categoryTextClass as categoryTextClass_,
+  destinationBadge as destinationBadge_,
+  elapsedMinutes as elapsedMinutes_,
+} from '../../../../../models/sale-display.model';
+import {
+  availableProducts as availableProducts_,
+  catalogCategories,
+  catalogCategoryCounts,
+  filterProducts,
+  paginateProducts,
+  productPageNumbers as productPageNumbers_,
+  totalProductPages as totalProductPages_,
+} from '../../../../../models/product-catalog.model';
 import { CategoryQueryService } from '../../../../../services/category/query.service';
 import { ClientQueryService } from '../../../../../services/client/query.service';
 import { ClientService, CreateClientInput } from '../../../../../services/client/client.service';
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { ProductService } from '../../../../../services/product/product.service';
-import { OrderService, RegisterOrderInput, RegisterProductItem } from '../../../../../services/order/order.service';
+import { OrderService, RegisterOrderInput } from '../../../../../services/order/order.service';
 import { OrderQueryService } from '../../../../../services/order/query.service';
 import { TableQueryService } from '../../../../../services/table/query.service';
 import { AuthService } from '../../../../../services/auth/auth.service';
@@ -29,6 +58,7 @@ import { NetworkService } from '../../../../../services/network/network.service'
 import { OfflineQueueService } from '../../../../../services/offline/offline-queue.service';
 import { ProductCacheService } from '../../../../../services/offline/product-cache.service';
 import { errorMessage } from '../../../../../utilities/error-message';
+import { initials } from '../../../../../utilities/initials';
 import { ClientsFormComponent } from '../../../../admin/pages/clients/components/form/form';
 import { ProductFormValue, ProductsFormComponent } from '../../../../admin/pages/products/components/form/form';
 import { FormModalComponent } from '../../../../shared/form-modal.component';
@@ -42,42 +72,7 @@ const PRODUCT_PAGE_SIZE = 20;
 // sin ninguna validación cruzada.
 const TAKEAWAY_VALUE = '__takeaway__';
 
-interface CartItem {
-  product_id: string;
-  product_name: string;
-  category: string | null;
-  unit_price: number;
-  stock_available: number;
-  has_stock: boolean;
-  quantity: number;
-  // Solo para la miniatura del ticket (RF-7 rediseño): viaja con el ítem
-  // porque el producto puede salir del catálogo (filtro, página) antes de
-  // que el carrito se vacíe.
-  image_url: string | null;
-}
-
 type PaymentMethod = 'cash' | 'card' | 'qr';
-
-// Una cuenta abierta, tal como se ve en la franja de tarjetas (RF-7). Puede
-// venir del servidor o de la cola offline de este dispositivo: la pantalla no
-// distingue, salvo por la marca de "sin sincronizar".
-interface PendingCard {
-  key: string;
-  order_uuid: string | null;
-  order_id: string | null;
-  destination: string;
-  total: number;
-  summary: string;
-  can_settle: boolean;
-  synced: boolean;
-  table_id: string | null;
-  // Para la tarjeta rediseñada ("N ítems · X min"): itemCount ya se cargaba
-  // en items.length de cada fuente, createdAt es el created_at de la orden
-  // (o de la operación 'create' encolada) y no se pisa con add_items
-  // posteriores, para que el tiempo mostrado sea el de apertura de la cuenta.
-  itemCount: number;
-  createdAt: string;
-}
 
 @Component({
   selector: 'app-caja-sales-new',
@@ -179,58 +174,36 @@ export class CajaSalesNewComponent {
   // se descarta al vaciar el carrito (que es una venta distinta).
   private pendingSaleUuid: string | null = null;
 
-  readonly availableProducts = computed(() =>
-    this.products().filter((p) => !p.has_stock || p.stock > 0)
-  );
+  // Cálculo puro del catálogo (búsqueda + categoría + paginación): ver
+  // models/product-catalog.model.ts. Los computed acá son finos a propósito.
+  readonly availableProducts = computed(() => availableProducts_(this.products()));
 
-  readonly categories = computed<string[]>(() => {
-    const set = new Set<string>();
-    for (const p of this.availableProducts()) {
-      if (p.category?.name) set.add(p.category.name);
-    }
-    return Array.from(set).sort();
-  });
+  readonly categories = computed<string[]>(() => catalogCategories(this.availableProducts()));
 
   // Conteo por categoría para el número en cada chip de filtro (rediseño).
-  readonly categoryCounts = computed<Record<string, number>>(() => {
-    const counts: Record<string, number> = {};
-    for (const p of this.availableProducts()) {
-      const name = p.category?.name;
-      if (!name) continue;
-      counts[name] = (counts[name] ?? 0) + 1;
-    }
-    return counts;
-  });
+  readonly categoryCounts = computed<Record<string, number>>(() =>
+    catalogCategoryCounts(this.availableProducts()),
+  );
 
-  readonly filteredProducts = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
-    const cat = this.activeCategory();
-    return this.availableProducts().filter((p) => {
-      if (cat && p.category?.name !== cat) return false;
-      if (q && !p.name.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  });
+  readonly filteredProducts = computed(() =>
+    filterProducts(this.availableProducts(), this.searchQuery(), this.activeCategory()),
+  );
 
   readonly totalProductPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredProducts().length / PRODUCT_PAGE_SIZE)),
+    totalProductPages_(this.filteredProducts().length, PRODUCT_PAGE_SIZE),
   );
 
-  readonly paginatedProducts = computed(() => {
-    const p = this.productPage();
-    return this.filteredProducts().slice((p - 1) * PRODUCT_PAGE_SIZE, p * PRODUCT_PAGE_SIZE);
-  });
-
-  readonly productPageNumbers = computed(() =>
-    Array.from({ length: this.totalProductPages() }, (_, i) => i + 1),
+  readonly paginatedProducts = computed(() =>
+    paginateProducts(this.filteredProducts(), this.productPage(), PRODUCT_PAGE_SIZE),
   );
 
-  readonly cartSubtotal = computed(() =>
-    this.cart().reduce((s, i) => s + i.unit_price * i.quantity, 0),
-  );
-  readonly cartItemCount = computed(() => this.cart().length);
-  readonly cartTotalQuantity = computed(() => this.cart().reduce((s, i) => s + i.quantity, 0));
-  readonly cashChange = computed(() => this.cashReceived() - this.cartSubtotal());
+  readonly productPageNumbers = computed(() => productPageNumbers_(this.totalProductPages()));
+
+  // Cálculo puro del carrito: ver models/cart.model.ts.
+  readonly cartSubtotal = computed(() => cartSubtotal_(this.cart()));
+  readonly cartItemCount = computed(() => cartItemCount_(this.cart()));
+  readonly cartTotalQuantity = computed(() => cartTotalQuantity_(this.cart()));
+  readonly cashChange = computed(() => cashChange_(this.cashReceived(), this.cartSubtotal()));
 
   readonly selectedCustomer = computed<Client | null>(() => {
     const id = this.cartCustomerId();
@@ -243,125 +216,73 @@ export class CajaSalesNewComponent {
   readonly readonlyMode = computed(() => this.subscriptionState.status()?.isBlocked ?? false);
 
   // La franja de cuentas abiertas: lo del servidor más lo que este dispositivo
-  // encoló y todavía no sincronizó. Sin esta superposición, un pendiente
-  // creado sin conexión desaparecería de la pantalla hasta volver la señal.
-  readonly pendingCards = computed<PendingCard[]>(() => {
-    const userId = this.auth.session()?.user.id ?? null;
-    const role = this.auth.role();
-    const cards = new Map<string, PendingCard>();
-
-    for (const order of this.remotePending()) {
-      const key = order.client_uuid ?? order.id;
-      cards.set(key, {
-        key,
-        order_uuid: order.client_uuid,
-        order_id: order.id,
-        destination: orderDestinationLabel(order) ?? 'Sin mesa',
-        total: Number(order.total_amount),
-        summary: orderPrimaryLabel(order),
-        can_settle: canSettleOrder(order, userId, role),
-        synced: true,
-        table_id: order.table_id,
-        itemCount: order.items.length,
-        createdAt: order.created_at,
-      });
-    }
-
-    for (const op of this.offlineQueue.pending()) {
-      if (op.kind === 'create') {
-        if (op.input.status !== 'pending') continue;
-        cards.set(op.order_uuid, {
-          key: op.order_uuid,
-          order_uuid: op.order_uuid,
-          order_id: null,
-          destination: this.destinationLabelFor(op.input),
-          total: this.itemsTotal(op.input.items),
-          summary: this.summarizeItems(op.input.items),
-          can_settle: true,
-          synced: false,
-          table_id: op.input.table_id ?? null,
-          itemCount: op.input.items.length,
-          createdAt: op.created_at,
-        });
-        continue;
-      }
-
-      const card = cards.get(op.order_uuid);
-      if (!card) continue;
-
-      if (op.kind === 'add_items') {
-        cards.set(op.order_uuid, {
-          ...card,
-          total: card.total + this.itemsTotal(op.items),
-          itemCount: card.itemCount + op.items.length,
-          synced: false,
-        });
-      } else {
-        // Ya está cobrada en este dispositivo: sacarla de la franja evita que
-        // se cobre dos veces mientras la operación espera para sincronizar.
-        cards.delete(op.order_uuid);
-      }
-    }
-
-    return [...cards.values()];
-  });
+  // encoló y todavía no sincronizó. Cálculo puro en models/pending-card.model.ts;
+  // sin esta superposición, un pendiente creado sin conexión desaparecería de
+  // la pantalla hasta volver la señal.
+  readonly pendingCards = computed<PendingCard[]>(() =>
+    buildPendingCards({
+      remoteOrders: this.remotePending(),
+      queue: this.offlineQueue.pending(),
+      products: this.products(),
+      tables: this.tables(),
+      userId: this.auth.session()?.user.id ?? null,
+      role: this.auth.role(),
+    }),
+  );
 
   // Suma de las cuentas abiertas, para el "Pendiente de cobro" de la franja
   // (rediseño). No es plata cobrada: es lo que todavía falta cobrar.
-  readonly pendingTotalAmount = computed(() =>
-    this.pendingCards().reduce((sum, c) => sum + c.total, 0),
-  );
+  readonly pendingTotalAmount = computed(() => pendingTotalAmount_(this.pendingCards()));
 
-  readonly activePending = computed<PendingCard | null>(() => {
-    const key = this.activePendingKey();
-    if (!key) return null;
-    return this.pendingCards().find((c) => c.key === key) ?? null;
-  });
+  readonly activePending = computed<PendingCard | null>(() =>
+    findActivePending(this.pendingCards(), this.activePendingKey()),
+  );
 
   readonly activeTables = computed(() => this.tables());
 
   // RF-6: la mesa elegida ya tiene una cuenta abierta. En vez de dejar que el
   // servidor rechace la creación, se avisa antes y se ofrece lo que el cajero
   // realmente quiere hacer: sumar los productos a esa cuenta.
-  readonly tableConflict = computed<PendingCard | null>(() => {
-    if (this.activePending()) return null;
-    const tableId = this.selectedTableId();
-    if (!tableId) return null;
-    return this.pendingCards().find((c) => c.table_id === tableId) ?? null;
-  });
+  readonly tableConflict = computed<PendingCard | null>(() =>
+    findTableConflict(this.pendingCards(), this.selectedTableId(), !!this.activePending()),
+  );
 
   readonly splitCheck = computed(() => validatePaymentSplit(this.paymentLines(), this.cartSubtotal()));
 
-  readonly canCharge = computed(() => {
-    if (this.cart().length === 0) return false;
-    if (this.submitting()) return false;
-    if (this.readonlyMode()) return false;
-    if (this.activePending()) return false;
-    if (this.splitMode()) return this.splitCheck().valid;
-    if (this.paymentMethod() === 'cash' && this.cashReceived() < this.cartSubtotal()) return false;
-    return true;
-  });
+  readonly canCharge = computed(() =>
+    canChargeCart({
+      cartEmpty: this.cart().length === 0,
+      submitting: this.submitting(),
+      readonlyMode: this.readonlyMode(),
+      hasActivePending: !!this.activePending(),
+      splitMode: this.splitMode(),
+      splitValid: this.splitCheck().valid,
+      paymentMethod: this.paymentMethod(),
+      cashReceived: this.cashReceived(),
+      subtotal: this.cartSubtotal(),
+    }),
+  );
 
   // Dejar pendiente no exige método de pago (RF-5): todavía no se cobra nada.
-  readonly canLeavePending = computed(() => {
-    if (this.cart().length === 0) return false;
-    if (this.submitting()) return false;
-    if (this.readonlyMode()) return false;
-    if (this.activePending()) return false;
-    if (this.tableConflict()) return false;
-    return true;
-  });
+  readonly canLeavePending = computed(() =>
+    canLeavePendingCart({
+      cartEmpty: this.cart().length === 0,
+      submitting: this.submitting(),
+      readonlyMode: this.readonlyMode(),
+      hasActivePending: !!this.activePending(),
+      hasTableConflict: !!this.tableConflict(),
+    }),
+  );
 
-  readonly canAddToPending = computed(() => {
-    if (this.cart().length === 0) return false;
-    if (this.submitting()) return false;
-    if (this.readonlyMode()) return false;
-    const pending = this.activePending();
-    if (!pending) return false;
-    // RF-28: sin conexión, sobre un pedido que este dispositivo no puede
-    // identificar por uuid no se encola nada a ciegas.
-    return pending.order_uuid !== null || this.network.isOnline();
-  });
+  readonly canAddToPending = computed(() =>
+    canAddToPendingCart({
+      cartEmpty: this.cart().length === 0,
+      submitting: this.submitting(),
+      readonlyMode: this.readonlyMode(),
+      activePending: this.activePending(),
+      isOnline: this.network.isOnline(),
+    }),
+  );
 
   constructor() {
     void this.load();
@@ -547,7 +468,7 @@ export class CajaSalesNewComponent {
   // Cantidad de un producto ya en el carrito, para resaltar su tarjeta en el
   // catálogo (rediseño). 0 si no está.
   cartQuantityFor(productId: string): number {
-    return this.cart().find((i) => i.product_id === productId)?.quantity ?? 0;
+    return cartQuantityFor_(this.cart(), productId);
   }
 
   updateQty(productId: string, delta: number): void {
@@ -802,53 +723,38 @@ export class CajaSalesNewComponent {
   }
 
   itemAtMax(item: CartItem): boolean {
-    return item.has_stock && item.quantity >= item.stock_available;
+    return itemAtMax_(item);
   }
 
+  // El componente conserva el wrapper para no tocar el HTML; la lógica vive en
+  // utilities/initials.ts (compartida con listas y modales de borrado).
   productInitials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '··';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return initials(name);
   }
 
   // Minutos desde que se abrió una cuenta pendiente, para "N ítems · X min"
   // en la franja de cuentas abiertas (rediseño). Depende de nowMs() para
   // refrescarse solo con el reloj, no con datos que ya no cambian.
   elapsedMinutes(createdAt: string): number {
-    const diff = this.nowMs() - new Date(createdAt).getTime();
-    return Math.max(0, Math.round(diff / 60_000));
+    return elapsedMinutes_(createdAt, this.nowMs());
   }
 
   // "07" para "Mesa 07", "—" para llevar, iniciales para cualquier otro
   // nombre de mesa: el badge de la tarjeta de cuenta abierta (rediseño).
   destinationBadge(destination: string): string {
-    if (destination === TAKEAWAY_LABEL) return '—';
-    const digits = destination.match(/(\d+)\s*$/);
-    if (digits) return digits[1].padStart(2, '0');
-    return destination.trim().slice(0, 2).toUpperCase();
+    return destinationBadge_(destination);
   }
-
-  private static readonly CAT_TEXT_CLASSES = [
-    'text-cat-1', 'text-cat-2', 'text-cat-3', 'text-cat-4', 'text-cat-5', 'text-cat-6',
-  ];
-  private static readonly CAT_DOT_CLASSES = [
-    'bg-cat-1', 'bg-cat-2', 'bg-cat-3', 'bg-cat-4', 'bg-cat-5', 'bg-cat-6',
-  ];
 
   // Color categórico estable por nombre de categoría (rediseño: texto de
   // categoría en la tarjeta de producto y punto en el chip de filtro). El
   // índice sale de categories(), que ya está ordenado, así que una misma
   // categoría no cambia de color mientras dure la sesión.
   categoryTextClass(name: string | null | undefined): string {
-    if (!name) return 'text-foreground-faint';
-    const idx = this.categories().indexOf(name);
-    return CajaSalesNewComponent.CAT_TEXT_CLASSES[idx >= 0 ? idx % 6 : 0];
+    return categoryTextClass_(name, this.categories());
   }
 
   categoryDotClass(name: string): string {
-    const idx = this.categories().indexOf(name);
-    return CajaSalesNewComponent.CAT_DOT_CLASSES[idx >= 0 ? idx % 6 : 0];
+    return categoryDotClass_(name, this.categories());
   }
 
   // ── Internos ────────────────────────────────────────────────────────────
@@ -858,31 +764,8 @@ export class CajaSalesNewComponent {
     return value && value !== TAKEAWAY_VALUE ? value : null;
   }
 
-  private cartItems(): RegisterProductItem[] {
-    return this.cart().map((item) => ({
-      product_id: item.product_id,
-      quantity:   item.quantity,
-      unit_price: item.unit_price,
-    }));
-  }
-
-  private itemsTotal(items: RegisterProductItem[]): number {
-    return items.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
-  }
-
-  private summarizeItems(items: RegisterProductItem[]): string {
-    const first = items[0];
-    if (!first) return '—';
-    const name = this.products().find((p) => p.id === first.product_id)?.name ?? 'Producto';
-    const extra = items.length - 1;
-    return extra > 0 ? `${name} (+${extra} más)` : name;
-  }
-
-  private destinationLabelFor(input: RegisterOrderInput): string {
-    if (input.table_id) {
-      return this.tables().find((t) => t.id === input.table_id)?.name ?? 'Mesa';
-    }
-    return input.is_takeaway ? 'Para llevar' : 'Sin mesa';
+  private cartItems() {
+    return toRegisterItems(this.cart());
   }
 
   private flashMessage(message: string): void {

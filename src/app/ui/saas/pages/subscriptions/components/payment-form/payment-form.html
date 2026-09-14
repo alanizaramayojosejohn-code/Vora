@@ -15,8 +15,10 @@
 
   <!-- Meses a pagar -->
   <div class="space-y-2">
-    <label class="block text-sm font-medium text-foreground-muted">Meses a pagar</label>
-    <div class="flex items-center gap-3">
+    <!-- <p> + role="group": no hay UN control al que asociar el rótulo,
+         es un grupo de botones (stepper), no un <input>. -->
+    <p id="months-label" class="block text-sm font-medium text-foreground-muted">Meses a pagar</p>
+    <div role="group" aria-labelledby="months-label" class="flex items-center gap-3">
       <button type="button" (click)="decrementMonths()" [disabled]="monthsCount() <= 1"
               class="w-9 h-9 flex items-center justify-center rounded-lg border border-border-subtle bg-muted hover:bg-input disabled:opacity-35 disabled:cursor-not-allowed text-foreground transition">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
@@ -44,8 +46,8 @@
 
   <!-- Método de pago -->
   <div class="space-y-2">
-    <label class="block text-sm font-medium text-foreground-muted">Método de pago</label>
-    <div class="grid grid-cols-4 gap-2">
+    <p id="method-label" class="block text-sm font-medium text-foreground-muted">Método de pago</p>
+    <div role="group" aria-labelledby="method-label" class="grid grid-cols-4 gap-2">
       @for (method of paymentMethods; track method) {
         <button type="button" (click)="selectMethod(method)"
                 [class.border-primary]="selectedMethod() === method"
@@ -134,7 +136,7 @@
   }
 
   <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
-    <button type="button" (click)="cancel.emit()"
+    <button type="button" (click)="cancelled.emit()"
             class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
       Cancelar
     </button>

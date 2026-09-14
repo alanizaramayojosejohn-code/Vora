@@ -31,7 +31,7 @@ export class ProductsFormComponent {
   readonly submitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
   readonly submitForm = output<ProductFormValue>();
-  readonly cancel = output<void>();
+  readonly cancelled = output<void>();
 
   readonly isEdit = computed(() => this.value() !== null);
 

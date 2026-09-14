@@ -19,6 +19,16 @@
     }
   </div>
 
+  @if (loadError(); as err) {
+    <div class="flex items-start gap-3 text-sm text-danger bg-danger-wash border border-danger-line rounded-xl px-4 py-3">
+      <span class="flex-1">{{ err }}</span>
+      <button type="button" (click)="refresh()"
+              class="text-xs font-semibold text-danger hover:underline flex-shrink-0">
+        Reintentar
+      </button>
+    </div>
+  }
+
   <!-- Formulario -->
   @if (showForm()) {
     <form [formGroup]="form" (ngSubmit)="onSubmit()"
@@ -29,28 +39,28 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-foreground-muted mb-1">Nombre *</label>
-          <input formControlName="name" type="text" placeholder="Distribuidora XYZ"
+          <label for="sup-name" class="block text-sm font-medium text-foreground-muted mb-1">Nombre *</label>
+          <input id="sup-name" formControlName="name" type="text" placeholder="Distribuidora XYZ"
                  class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-foreground-muted mb-1">Contacto</label>
-          <input formControlName="contact" type="text" placeholder="Nombre del vendedor"
+          <label for="sup-contact" class="block text-sm font-medium text-foreground-muted mb-1">Contacto</label>
+          <input id="sup-contact" formControlName="contact" type="text" placeholder="Nombre del vendedor"
                  class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-foreground-muted mb-1">Teléfono</label>
-          <input formControlName="phone" type="tel" placeholder="+591 70000000"
+          <label for="sup-phone" class="block text-sm font-medium text-foreground-muted mb-1">Teléfono</label>
+          <input id="sup-phone" formControlName="phone" type="tel" placeholder="+591 70000000"
                  class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-foreground-muted mb-1">Email</label>
-          <input formControlName="email" type="email" placeholder="ventas@proveedor.com"
+          <label for="sup-email" class="block text-sm font-medium text-foreground-muted mb-1">Email</label>
+          <input id="sup-email" formControlName="email" type="email" placeholder="ventas@proveedor.com"
                  class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-foreground-muted mb-1">Notas</label>
-          <input formControlName="notes" type="text" placeholder="Entrega los martes…"
+          <label for="sup-notes" class="block text-sm font-medium text-foreground-muted mb-1">Notas</label>
+          <input id="sup-notes" formControlName="notes" type="text" placeholder="Entrega los martes…"
                  class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary" />
         </div>
       </div>

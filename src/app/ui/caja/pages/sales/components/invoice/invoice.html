@@ -1,9 +1,12 @@
-<!-- Backdrop -->
-<div class="anim-backdrop fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="close.emit()">
+<!-- Backdrop. Cierra al click, pero no es la única salida por teclado: el
+     botón "×" de abajo es un <button> real, enfocable con Tab. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+<div class="anim-backdrop fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="closed.emit()">
 
   <!-- Comprobante. `surface-solid` en vez de `bg-surface`: la superficie del
        tema es translúcida y sobre el velo oscuro dejaba pasar el fondo, con
        el texto compitiendo contra lo que hubiera detrás. -->
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
   <div class="invoice-print-area anim-panel surface-solid border border-border-subtle rounded-2xl shadow-2xl shadow-black/30 w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col"
        (click)="$event.stopPropagation()">
 
@@ -19,7 +22,7 @@
             <p class="text-xs text-foreground-subtle">Comprobante de venta</p>
           </div>
         </div>
-        <button type="button" (click)="close.emit()"
+        <button type="button" (click)="closed.emit()"
                 class="p-1.5 rounded-lg hover:bg-muted text-foreground-muted hover:text-foreground transition flex-shrink-0 print:hidden">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
@@ -124,7 +127,7 @@
         </svg>
         Imprimir
       </button>
-      <button type="button" (click)="close.emit()"
+      <button type="button" (click)="closed.emit()"
               class="px-4 py-2.5 bg-elevated border border-border-subtle text-foreground-muted text-sm font-semibold rounded-xl hover:bg-muted transition">
         Cerrar
       </button>

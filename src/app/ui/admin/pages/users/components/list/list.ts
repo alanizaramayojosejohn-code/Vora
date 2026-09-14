@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Profile } from '../../../../../../models/profile.model';
+import { initials as computeInitials } from '../../../../../../utilities/initials';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type UserFilter = 'all' | 'admin' | 'caja';
@@ -26,10 +27,7 @@ export class UsersListComponent {
   readonly sortMenuOpen = signal(false);
 
   initials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '··';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return computeInitials(name);
   }
 
   readonly counts = computed(() => {
@@ -69,7 +67,7 @@ export class UsersListComponent {
     switch (this.sort()) {
       case 'name': return 'Nombre A→Z';
       case 'ci': return 'CI ascendente';
-      default: return 'Recientes primero';
+      case 'created': return 'Recientes primero';
     }
   });
 

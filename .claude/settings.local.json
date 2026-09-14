@@ -130,7 +130,14 @@
       "Bash(echo \"EXIT_CODE=$?\")",
       "Bash(echo \"exit: $?\")",
       "Bash(echo \"BUILD_GREP_EXIT=$?\")",
-      "Bash(grep -o \".\\\\{0,20\\\\}text-\\\\\\\\\\\\\\\\\\\\[9px.\\\\{0,15\\\\}\" styles-*.css)"
+      "Bash(grep -o \".\\\\{0,20\\\\}text-\\\\\\\\\\\\\\\\\\\\[9px.\\\\{0,15\\\\}\" styles-*.css)",
+      "Bash(git stash *)",
+      "Bash(bunx vitest *)",
+      "Bash(certutil -hashfile src/app/services/export/export.service.ts MD5)",
+      "Bash(bunx tsc *)",
+      "Bash(rm -f src/app/env-check.spec.ts)",
+      "Bash(bunx ng *)",
+      "Bash(bunx eslint *)"
     ]
   },
   "enableAllProjectMcpServers": true,

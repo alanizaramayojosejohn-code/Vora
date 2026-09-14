@@ -134,8 +134,10 @@
           <div class="grid grid-cols-2 gap-5">
 
             <!-- ── Color primario ── -->
-            <div class="space-y-3">
-              <label class="block text-xs font-medium text-foreground-muted">Color primario</label>
+            <!-- role="group" en vez de <label for>: app-hsv-picker es un
+                 componente propio (slider), no un <input> con id que asociar. -->
+            <div role="group" aria-labelledby="primary-color-label" class="space-y-3">
+              <p id="primary-color-label" class="block text-xs font-medium text-foreground-muted">Color primario</p>
 
               <app-hsv-picker [value]="customPrimary()" (valueChange)="customPrimary.set($event)" />
 
@@ -166,8 +168,8 @@
             </div>
 
             <!-- ── Color de acento ── -->
-            <div class="space-y-3">
-              <label class="block text-xs font-medium text-foreground-muted">Color de acento</label>
+            <div role="group" aria-labelledby="accent-color-label" class="space-y-3">
+              <p id="accent-color-label" class="block text-xs font-medium text-foreground-muted">Color de acento</p>
 
               <app-hsv-picker [value]="customAccent()" (valueChange)="customAccent.set($event)" />
 

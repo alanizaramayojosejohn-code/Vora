@@ -64,7 +64,7 @@ export class LoginComponent {
       case 'caja':
         await this.router.navigateByUrl('/caja');
         break;
-      default:
+      case null:
         this.error.set('Tu usuario no tiene un rol asignado.');
     }
   }

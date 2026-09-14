@@ -7,6 +7,7 @@ import { BusinessQueryService } from '../../../../../services/business/query.ser
 import { SubscriptionService } from '../../../../../services/subscription/subscription.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { createCrudState } from '../../../../shared/crud-state';
 import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { BusinessesFormComponent, BusinessFormValue } from '../components/form/form';
 import { BusinessesListComponent } from '../components/list/list';
@@ -23,81 +24,68 @@ export class SaasBusinessesContainerComponent {
   private readonly subscriptionService = inject(SubscriptionService);
   private readonly router              = inject(Router);
 
-  readonly businesses = signal<Business[]>([]);
-  readonly loading    = signal(false);
-
-  // Map businessId → subscription para pasarle al form al editar
+  // Map businessId → subscription para pasarle al form al editar. No entra
+  // en el CRUD genérico: es un recurso propio, cargado junto a la lista de
+  // negocios dentro de `list` (ver abajo) pero con su propio best-effort.
   private readonly subsMap = signal<Map<string, BusinessSubscription>>(new Map());
 
-  readonly formState = signal<null | 'create' | Business>(null);
-  readonly editing   = computed<Business | null>(() => {
-    const s = this.formState();
-    return s && s !== 'create' ? s : null;
+  // No entra en el CRUD genérico: handleSubmit de negocios hace un alta/edición
+  // multi-paso (logo, suscripción) y redirige a /login si la sesión expiró
+  // a mitad de camino — nada de eso es común con las otras 7 pantallas.
+  private readonly crud = createCrudState<Business, never>({
+    list: async () => {
+      const items = await this.businessQuery.listBusinesses();
+      // Suscripciones en paralelo: si fallan, los negocios igual se muestran.
+      try {
+        const subs = await this.subscriptionService.listBusinessesWithSubscriptions();
+        const map = new Map<string, BusinessSubscription>();
+        for (const item of subs) {
+          if (item.subscription) map.set(item.business.id, item.subscription);
+        }
+        this.subsMap.set(map);
+      } catch (err: unknown) {
+        console.error('Error listando suscripciones', err);
+      }
+      return items;
+    },
+    remove: (id) => this.businessService.deleteBusiness(id),
+    labels: {
+      load: 'Error al listar negocios',
+      remove: 'Error al borrar negocio',
+    },
   });
+
+  readonly businesses = this.crud.items;
+  readonly loading    = this.crud.loading;
+  readonly loadError  = this.crud.loadError;
+
+  readonly formState = this.crud.formState;
+  readonly editing    = this.crud.editing;
   readonly editingSubscription = computed<BusinessSubscription | null>(() => {
     const b = this.editing();
     return b ? (this.subsMap().get(b.id) ?? null) : null;
   });
-  readonly showForm = computed(() => this.formState() !== null);
+  readonly showForm = this.crud.showForm;
 
-  readonly submitting = signal(false);
-  readonly formError  = signal<string | null>(null);
+  readonly submitting = this.crud.submitting;
+  readonly formError  = this.crud.formError;
 
-  // Modal de borrado
-  readonly deleting            = signal<Business | null>(null);
-  readonly deletingError       = signal<string | null>(null);
-  readonly deletingSubmitting  = signal(false);
-
-  readonly deletingInitials = computed(() => {
-    const b = this.deleting();
-    if (!b) return null;
-    const parts = b.name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return null;
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  });
-
+  readonly deleting            = this.crud.deleting;
+  readonly deletingError       = this.crud.deletingError;
+  readonly deletingSubmitting  = this.crud.deletingSubmitting;
+  readonly deletingInitials    = this.crud.deletingInitials;
   readonly deletingSublabel = computed(() => this.deleting()?.name ?? null);
+
+  readonly refresh = this.crud.refresh;
+  readonly openCreate = this.crud.openCreate;
+  readonly openEdit = this.crud.openEdit;
+  readonly closeForm = this.crud.closeForm;
+  readonly handleDelete = this.crud.handleDelete;
+  readonly cancelDelete = this.crud.cancelDelete;
+  readonly confirmDelete = this.crud.confirmDelete;
 
   constructor() {
     void this.refresh();
-  }
-
-  async refresh(): Promise<void> {
-    this.loading.set(true);
-    try {
-      this.businesses.set(await this.businessQuery.listBusinesses());
-    } catch (err: unknown) {
-      console.error('Error listando negocios', err);
-    } finally {
-      this.loading.set(false);
-    }
-    // Suscripciones en paralelo: si fallan, los negocios igual se muestran
-    try {
-      const items = await this.subscriptionService.listBusinessesWithSubscriptions();
-      const map = new Map<string, BusinessSubscription>();
-      for (const item of items) {
-        if (item.subscription) map.set(item.business.id, item.subscription);
-      }
-      this.subsMap.set(map);
-    } catch (err: unknown) {
-      console.error('Error listando suscripciones', err);
-    }
-  }
-
-  openCreate(): void {
-    this.formState.set('create');
-    this.formError.set(null);
-  }
-
-  openEdit(business: Business): void {
-    this.formState.set(business);
-    this.formError.set(null);
-  }
-
-  closeForm(): void {
-    this.formState.set(null);
-    this.formError.set(null);
   }
 
   async handleSubmit(input: BusinessFormValue): Promise<void> {
@@ -169,7 +157,7 @@ export class SaasBusinessesContainerComponent {
       this.formState.set(null);
       await this.refresh();
     } catch (err: unknown) {
-      if (err instanceof Error && (err as any)['code'] === 'SESSION_EXPIRED') {
+      if (err instanceof Error && (err as Error & { code?: string }).code === 'SESSION_EXPIRED') {
         await this.router.navigate(['/login']);
         return;
       }
@@ -178,34 +166,6 @@ export class SaasBusinessesContainerComponent {
       );
     } finally {
       this.submitting.set(false);
-    }
-  }
-
-  handleDelete(business: Business): void {
-    this.deleting.set(business);
-    this.deletingError.set(null);
-  }
-
-  cancelDelete(): void {
-    if (this.deletingSubmitting()) return;
-    this.deleting.set(null);
-    this.deletingError.set(null);
-  }
-
-  async confirmDelete(): Promise<void> {
-    const business = this.deleting();
-    if (!business) return;
-    this.deletingSubmitting.set(true);
-    this.deletingError.set(null);
-    try {
-      await this.businessService.deleteBusiness(business.id);
-      if (this.editing()?.id === business.id) this.formState.set(null);
-      this.deleting.set(null);
-      await this.refresh();
-    } catch (err: unknown) {
-      this.deletingError.set(errorMessage(err, 'Error al borrar negocio'));
-    } finally {
-      this.deletingSubmitting.set(false);
     }
   }
 }

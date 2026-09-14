@@ -587,10 +587,10 @@
                   <div class="space-y-2">
                     <div class="grid grid-cols-2 gap-2">
                       <div>
-                        <label class="block text-[8.5px] font-bold uppercase tracking-wider text-foreground-faint mb-1">Recibido</label>
+                        <label for="cash-received" class="block text-[8.5px] font-bold uppercase tracking-wider text-foreground-faint mb-1">Recibido</label>
                         <div class="flex items-center gap-1.5 h-[38px] px-2.5 bg-input border border-primary rounded-[10px] focus-within:ring-2 focus-within:ring-primary-line">
                           <span class="text-[10.5px] font-semibold font-mono text-foreground-faint flex-shrink-0">Bs</span>
-                          <input type="number" min="0" step="0.01"
+                          <input id="cash-received" type="number" min="0" step="0.01"
                                  [value]="cashReceived() || ''"
                                  (input)="setCashReceived(+$any($event.target).value)"
                                  placeholder="0,00"
@@ -598,7 +598,9 @@
                         </div>
                       </div>
                       <div>
-                        <label class="block text-[8.5px] font-bold uppercase tracking-wider text-foreground-faint mb-1">Cambio</label>
+                        <!-- <span>, no <label>: "Cambio" es solo lectura, calculado -
+                             no hay ningún control al que asociarlo. -->
+                        <span class="block text-[8.5px] font-bold uppercase tracking-wider text-foreground-faint mb-1">Cambio</span>
                         <div class="flex items-center gap-1.5 h-[38px] px-2.5 rounded-[10px] border"
                              [class.bg-success-wash]="cashChange() >= 0"
                              [class.border-success-line]="cashChange() >= 0"
@@ -681,7 +683,7 @@
       [submitting]="newProductSubmitting()"
       [errorMessage]="newProductError()"
       (submitForm)="handleQuickProduct($event)"
-      (cancel)="closeNewProductModal()" />
+      (cancelled)="closeNewProductModal()" />
   </app-form-modal>
 }
 
@@ -697,7 +699,7 @@
       [submitting]="newClientSubmitting()"
       [errorMessage]="newClientError()"
       (submitForm)="handleQuickClient($event)"
-      (cancel)="closeNewClientModal()" />
+      (cancelled)="closeNewClientModal()" />
   </app-form-modal>
 }
 

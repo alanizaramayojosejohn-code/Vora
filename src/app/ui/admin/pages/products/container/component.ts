@@ -6,6 +6,7 @@ import { ProductService } from '../../../../../services/product/product.service'
 import { ProductQueryService } from '../../../../../services/product/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { createCrudState } from '../../../../shared/crud-state';
 import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { ProductFormValue, ProductsFormComponent } from '../components/form/form';
@@ -22,36 +23,42 @@ export class AdminProductsContainerComponent {
   private readonly productQuery = inject(ProductQueryService);
   private readonly categoryQuery = inject(CategoryQueryService);
 
-  readonly products = signal<Product[]>([]);
+  // Categorías para el <select> del form. Se cargan aparte porque son un
+  // recurso distinto (no participan del CRUD de productos) y su fallo no
+  // debe tapar el listado de productos — por eso sigue en console.error.
   readonly categories = signal<Category[]>([]);
-  readonly loading = signal(false);
 
-  readonly formState = signal<null | 'create' | Product>(null);
-  readonly editing = computed<Product | null>(() => {
-    const s = this.formState();
-    return s && s !== 'create' ? s : null;
+  // No entra en el CRUD genérico: handleSubmit de productos necesita el id
+  // devuelto por create/update para subir la imagen después, y un fallo de
+  // imagen no debe tratarse como error de formulario (el producto ya quedó
+  // guardado). Por eso config no lleva create/update: este contenedor arma
+  // su propio handleSubmit reutilizando los signals de abajo.
+  private readonly crud = createCrudState<Product, never>({
+    list: () => this.productQuery.listProducts(),
+    remove: (id) => this.productService.softDeleteProduct(id),
+    labels: {
+      load: 'Error al listar productos',
+      remove: 'Error al eliminar producto',
+    },
   });
-  readonly showForm = computed(() => this.formState() !== null);
 
-  readonly submitting = signal(false);
-  readonly formError = signal<string | null>(null);
+  readonly products = this.crud.items;
+  readonly loading = this.crud.loading;
+  readonly loadError = this.crud.loadError;
+
+  readonly formState = this.crud.formState;
+  readonly editing = this.crud.editing;
+  readonly showForm = this.crud.showForm;
+
+  readonly submitting = this.crud.submitting;
+  readonly formError = this.crud.formError;
   // Aviso de nivel página: el producto se guardó pero su imagen no.
   readonly imageNotice = signal<string | null>(null);
 
-  // Soft delete via modal — los productos no requieren type-to-confirm porque
-  // queda en deleted_at, las ventas históricas siguen viendolo.
-  readonly deleting = signal<Product | null>(null);
-  readonly deletingError = signal<string | null>(null);
-  readonly deletingSubmitting = signal(false);
-
-  readonly deletingInitials = computed(() => {
-    const p = this.deleting();
-    if (!p) return null;
-    const parts = p.name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return null;
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  });
+  readonly deleting = this.crud.deleting;
+  readonly deletingError = this.crud.deletingError;
+  readonly deletingSubmitting = this.crud.deletingSubmitting;
+  readonly deletingInitials = this.crud.deletingInitials;
 
   // Precio formateado como string para el slot "amount" del modal.
   readonly deletingPrice = computed(() => {
@@ -67,20 +74,17 @@ export class AdminProductsContainerComponent {
     return `${cat} · Stock ${p.stock}`;
   });
 
+  readonly refresh = this.crud.refresh;
+  readonly openCreate = this.crud.openCreate;
+  readonly openEdit = this.crud.openEdit;
+  readonly closeForm = this.crud.closeForm;
+  readonly handleDelete = this.crud.handleDelete;
+  readonly cancelDelete = this.crud.cancelDelete;
+  readonly confirmDelete = this.crud.confirmDelete;
+
   constructor() {
     void this.refresh();
     void this.loadCategories();
-  }
-
-  async refresh(): Promise<void> {
-    this.loading.set(true);
-    try {
-      this.products.set(await this.productQuery.listProducts());
-    } catch (err: unknown) {
-      console.error('Error listando productos', err);
-    } finally {
-      this.loading.set(false);
-    }
   }
 
   async loadCategories(): Promise<void> {
@@ -89,21 +93,6 @@ export class AdminProductsContainerComponent {
     } catch (err: unknown) {
       console.error('Error listando categorías', err);
     }
-  }
-
-  openCreate(): void {
-    this.formState.set('create');
-    this.formError.set(null);
-  }
-
-  openEdit(product: Product): void {
-    this.formState.set(product);
-    this.formError.set(null);
-  }
-
-  closeForm(): void {
-    this.formState.set(null);
-    this.formError.set(null);
   }
 
   async handleSubmit(value: ProductFormValue): Promise<void> {
@@ -156,33 +145,5 @@ export class AdminProductsContainerComponent {
 
   dismissImageNotice(): void {
     this.imageNotice.set(null);
-  }
-
-  handleDelete(product: Product): void {
-    this.deleting.set(product);
-    this.deletingError.set(null);
-  }
-
-  cancelDelete(): void {
-    if (this.deletingSubmitting()) return;
-    this.deleting.set(null);
-    this.deletingError.set(null);
-  }
-
-  async confirmDelete(): Promise<void> {
-    const product = this.deleting();
-    if (!product) return;
-    this.deletingSubmitting.set(true);
-    this.deletingError.set(null);
-    try {
-      await this.productService.softDeleteProduct(product.id);
-      if (this.editing()?.id === product.id) this.formState.set(null);
-      this.deleting.set(null);
-      await this.refresh();
-    } catch (err: unknown) {
-      this.deletingError.set(errorMessage(err, 'Error al eliminar producto'));
-    } finally {
-      this.deletingSubmitting.set(false);
-    }
   }
 }

@@ -17,7 +17,7 @@ export class SubscriptionPaymentsHistoryComponent {
   readonly item = input.required<BusinessWithSubscription>();
   readonly payments = input<SubscriptionPayment[]>([]);
   readonly loading = input<boolean>(false);
-  readonly close = output<void>();
+  readonly closed = output<void>();
   readonly addPayment = output<void>();
   readonly deletePayment = output<SubscriptionPayment>();
 

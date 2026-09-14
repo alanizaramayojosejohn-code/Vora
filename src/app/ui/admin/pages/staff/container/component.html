@@ -12,6 +12,16 @@
     }
   </div>
 
+  @if (loadError(); as err) {
+    <div class="flex items-start gap-3 text-sm text-danger bg-danger-wash border border-danger-line rounded-xl px-4 py-3">
+      <span class="flex-1">{{ err }}</span>
+      <button type="button" (click)="refresh()"
+              class="text-xs font-semibold text-danger hover:underline flex-shrink-0">
+        Reintentar
+      </button>
+    </div>
+  }
+
   <app-form-modal [open]="showForm()" [submitting]="submitting()"
                   label="Formulario de empleado" (closed)="closeForm()">
     <app-admin-staff-form
@@ -19,7 +29,7 @@
       [submitting]="submitting()"
       [errorMessage]="formError()"
       (submitForm)="handleSubmit($event)"
-      (cancel)="closeForm()" />
+      (cancelled)="closeForm()" />
   </app-form-modal>
 
   @if (selectedEmployee(); as emp) {
@@ -30,14 +40,14 @@
         [submitting]="paymentSubmitting()"
         [errorMessage]="paymentError()"
         (submitForm)="handlePayment($event)"
-        (cancel)="showPaymentForm.set(false)" />
+        (cancelled)="showPaymentForm.set(false)" />
     </app-form-modal>
 
     <app-admin-staff-payments-history
       [employee]="emp"
       [payments]="payments()"
       [loading]="paymentsLoading()"
-      (close)="closePayments()"
+      (closed)="closePayments()"
       (addPayment)="showPaymentForm.set(true)"
       (deletePayment)="handleDeletePayment($event)" />
 

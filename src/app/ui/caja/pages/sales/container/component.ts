@@ -4,6 +4,7 @@ import { OrderWithDetails, orderPrimaryLabel } from '../../../../../models/order
 import { OrderService } from '../../../../../services/order/order.service';
 import { OrderQueryService } from '../../../../../services/order/query.service';
 import { errorMessage } from '../../../../../utilities/error-message';
+import { initialsOrNull } from '../../../../../utilities/initials';
 import { OrderInvoiceComponent } from '../components/invoice/invoice';
 import { SalesListComponent } from '../components/list/list';
 
@@ -55,13 +56,7 @@ export class CajaSalesContainerComponent {
     return orderPrimaryLabel(o);
   });
 
-  readonly cancellingInitials = computed(() => {
-    const label = this.cancellingLabel();
-    if (!label) return null;
-    const parts = label.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  });
+  readonly cancellingInitials = computed(() => initialsOrNull(this.cancellingLabel()));
 
   readonly cancellingSublabel = computed(() => {
     const o = this.cancelling();

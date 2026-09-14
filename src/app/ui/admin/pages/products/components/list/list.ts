@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { Product } from '../../../../../../models/product.model';
+import { initials as computeInitials } from '../../../../../../utilities/initials';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 type ProductFilter = 'all' | 'in-stock' | 'low-stock' | 'out-of-stock' | 'no-category';
@@ -26,10 +27,7 @@ export class ProductsListComponent {
   readonly sortMenuOpen = signal(false);
 
   initials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '··';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return computeInitials(name);
   }
 
   // Bajo stock = (1, 5). Sin stock = 0. Solo aplica a productos con has_stock = true.
@@ -77,7 +75,7 @@ export class ProductsListComponent {
       case 'name': return 'Nombre A→Z';
       case 'stock-asc': return 'Stock ascendente';
       case 'price-desc': return 'Precio descendente';
-      default: return 'Recientes primero';
+      case 'created': return 'Recientes primero';
     }
   });
 

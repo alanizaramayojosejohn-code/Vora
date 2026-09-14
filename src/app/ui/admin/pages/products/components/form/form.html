@@ -12,9 +12,12 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <!-- Imagen -->
     <div class="md:col-span-2">
-      <label class="block text-sm font-medium text-foreground-muted mb-1">
+      <!-- <p>, no <label>: no rotula UN control puntual, es el título de todo el
+           bloque de imagen (preview + el input real, que ya tiene su propia
+           etiqueta "Cambiar/Elegir imagen" envolviéndolo más abajo). -->
+      <p class="block text-sm font-medium text-foreground-muted mb-1">
         Imagen <span class="text-foreground-faint">(opcional)</span>
-      </label>
+      </p>
       <div class="flex items-start gap-4">
         <div class="w-24 h-24 rounded-xl border border-border-subtle bg-elevated overflow-hidden flex items-center justify-center flex-shrink-0">
           @if (compressing()) {
@@ -180,7 +183,7 @@
   }
 
   <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
-    <button type="button" (click)="cancel.emit()"
+    <button type="button" (click)="cancelled.emit()"
             class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
       Cancelar
     </button>

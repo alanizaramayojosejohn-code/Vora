@@ -173,7 +173,11 @@ export class SalesReportComponent implements OnInit {
     return `Mostrando ${start}–${end} de ${total} resultados`;
   });
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    void this.loadInitial();
+  }
+
+  private async loadInitial(): Promise<void> {
     const [users, products] = await Promise.all([
       this.query.listUsersForFilter(),
       this.query.listProductsForFilter(),
@@ -244,12 +248,20 @@ export class SalesReportComponent implements OnInit {
     void this.applyFilters();
   }
 
-  exportExcel(): void {
-    this.exportSvc.exportSalesToExcel(this.rows(), this.summary(), this.dateRangeLabel());
+  async exportExcel(): Promise<void> {
+    try {
+      await this.exportSvc.exportSalesToExcel(this.rows(), this.summary(), this.dateRangeLabel());
+    } catch (err: unknown) {
+      this.error.set(errorMessage(err, 'No se pudo exportar a Excel'));
+    }
   }
 
-  exportPdf(): void {
-    this.exportSvc.exportSalesToPdf(this.rows(), this.summary(), this.dateRangeLabel());
+  async exportPdf(): Promise<void> {
+    try {
+      await this.exportSvc.exportSalesToPdf(this.rows(), this.summary(), this.dateRangeLabel());
+    } catch (err: unknown) {
+      this.error.set(errorMessage(err, 'No se pudo exportar a PDF'));
+    }
   }
 
   prevPage(): void {

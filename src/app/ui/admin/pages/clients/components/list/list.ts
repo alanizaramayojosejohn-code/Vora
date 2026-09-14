@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Client } from '../../../../../../models/client.model';
+import { initials as computeInitials } from '../../../../../../utilities/initials';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 // Tabs del listado: filtran sobre el array completo en memoria.
@@ -28,10 +29,7 @@ export class ClientsListComponent {
 
   // Iniciales del avatar: 2 chars del nombre.
   initials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '··';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return computeInitials(name);
   }
 
   // Recientes = creados en últimos 30 días.
@@ -80,7 +78,7 @@ export class ClientsListComponent {
     switch (this.sort()) {
       case 'name': return 'Nombre A→Z';
       case 'ci': return 'CI ascendente';
-      default: return 'Recientes primero';
+      case 'created': return 'Recientes primero';
     }
   });
 

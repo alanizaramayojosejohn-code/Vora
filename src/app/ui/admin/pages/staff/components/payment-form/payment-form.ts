@@ -16,7 +16,7 @@ export class StaffPaymentFormComponent {
   readonly submitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
   readonly submitForm = output<CreatePaymentInput>();
-  readonly cancel = output<void>();
+  readonly cancelled = output<void>();
 
   readonly form = this.fb.nonNullable.group({
     amount: [0, [Validators.required, Validators.min(1)]],

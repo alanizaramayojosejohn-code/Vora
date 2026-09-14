@@ -21,11 +21,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 @Component({
   selector: 'app-ambient-glow',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div class="ambient-primary absolute rounded-full w-[76.4%] h-[85.4%] left-[36.1%] -top-[39.6%]"></div>
-      <div class="ambient-accent absolute rounded-full w-[56.9%] h-[66.7%] -left-[12.5%] top-[58.3%]"></div>
-    </div>
-  `,
+  templateUrl: './ambient-glow.component.html',
 })
 export class AmbientGlowComponent {}

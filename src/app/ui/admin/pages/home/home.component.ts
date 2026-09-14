@@ -11,6 +11,7 @@ import { Product } from '../../../../models/product.model';
 import { MonthlyIncome } from '../../../../models/monthly-income.model';
 import { computeMargin } from '../../../../models/profit.model';
 import { LowStockProduct } from '../../../../models/low-stock-product.model';
+import { initials } from '../../../../utilities/initials';
 import {
   DailySalesSummary,
   EMPTY_DAILY_SUMMARY,
@@ -404,15 +405,9 @@ export class AdminHomeComponent {
     return Array.from(map.values()).sort((a, b) => b.qty - a.qty).slice(0, 5);
   });
 
-  // Iniciales del placeholder de producto sin foto — mismo criterio que
-  // initials() en products/list.ts (no se puede importar de un componente a
-  // otro sin acoplarlos, así que se replica la regla, no el código).
-  initials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '··';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
+  // Iniciales del placeholder de producto sin foto — helper compartido en
+  // utilities/initials.ts (antes era una copia local de la misma regla).
+  readonly initials = initials;
 
   // ── Ingresos por categoría ─────────────────────────────────────────────
   readonly categoryRevenueWithPct = computed(() => {
@@ -466,12 +461,20 @@ export class AdminHomeComponent {
     return `${now.toLocaleString('es-BO', { month: 'long', year: 'numeric' })}`;
   }
 
-  exportExcel(): void {
-    this.exportService.exportSalesToExcel(this.exportRows(), this.exportSummary(), this.dateRangeLabel);
+  async exportExcel(): Promise<void> {
+    try {
+      await this.exportService.exportSalesToExcel(this.exportRows(), this.exportSummary(), this.dateRangeLabel);
+    } catch (err) {
+      console.error('Error exportando ventas a Excel', err);
+    }
   }
 
-  exportPdf(): void {
-    this.exportService.exportSalesToPdf(this.exportRows(), this.exportSummary(), this.dateRangeLabel);
+  async exportPdf(): Promise<void> {
+    try {
+      await this.exportService.exportSalesToPdf(this.exportRows(), this.exportSummary(), this.dateRangeLabel);
+    } catch (err) {
+      console.error('Error exportando ventas a PDF', err);
+    }
   }
 
   constructor() {
@@ -509,7 +512,8 @@ export class AdminHomeComponent {
           .then(v => this.orders.set(v)),
         this.dailySales.summary('today').then(v => this.todaySummary.set(v)),
         // Los turnos en curso los sirve una RPC que exige rol admin. Un fallo
-        // acá no debe tumbar el resto del panel.
+        // acá no debe tumbar el resto del panel: se ignora a propósito.
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         this.dailySales.openSessions().then(v => this.openSessions.set(v)).catch(() => {}),
         // Foto y categoría para las miniaturas de "Productos TOP". Es la
         // única llamada nueva al backend de todo este cambio.

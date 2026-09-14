@@ -1,11 +1,25 @@
 import { inject, Injectable } from '@angular/core';
 import {
+  Order,
+  OrderItem,
   OrderItemWithDetails,
   OrderPayment,
   OrderStatus,
   OrderWithDetails,
 } from '../../models/order.model';
 import { SupabaseService } from '../supabase/supabase.service';
+
+// Forma cruda de una fila de ORDER_SELECT: Order + las relaciones anidadas
+// que trae el `*, clients(...), tables(...), order_items(...), ...` de
+// abajo. `amount` de order_payments viene como `numeric` de Postgres, que
+// PostgREST puede devolver serializado como string — por eso el tipo lo
+// admite y mapOrder() lo normaliza con Number().
+interface OrderRow extends Order {
+  clients: { ci: string; name: string } | null;
+  tables: { name: string } | null;
+  order_items: (OrderItem & { products: { name: string } | null })[];
+  order_payments: (Omit<OrderPayment, 'amount'> & { amount: number | string })[];
+}
 
 const ORDER_SELECT = `
   *,
@@ -71,17 +85,17 @@ export class OrderQueryService {
   }
 }
 
-function mapOrder(row: any): OrderWithDetails {
+function mapOrder(row: OrderRow): OrderWithDetails {
   const { clients, tables, order_items, order_payments, ...order } = row;
 
-  const items: OrderItemWithDetails[] = (order_items ?? []).map((item: any) => {
+  const items: OrderItemWithDetails[] = (order_items ?? []).map((item) => {
     const { products, ...rest } = item;
     return { ...rest, product_name: products?.name ?? null };
   });
 
   const payments: OrderPayment[] = (order_payments ?? [])
-    .map((p: any) => ({ ...p, amount: Number(p.amount) }))
-    .sort((a: OrderPayment, b: OrderPayment) => a.created_at.localeCompare(b.created_at));
+    .map((p) => ({ ...p, amount: Number(p.amount) }))
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
 
   return {
     ...order,
@@ -89,5 +103,5 @@ function mapOrder(row: any): OrderWithDetails {
     table_name: tables?.name ?? null,
     items,
     payments,
-  } as OrderWithDetails;
+  };
 }

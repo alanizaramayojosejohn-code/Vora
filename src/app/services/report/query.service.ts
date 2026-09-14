@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { DailyIncome } from '../../models/daily-income.model';
 import { LowStockProduct } from '../../models/low-stock-product.model';
 import { MonthlyIncome } from '../../models/monthly-income.model';
+import { localMonthStart } from '../../utilities/local-date';
 import { SupabaseService } from '../supabase/supabase.service';
 
 export interface CategoryRevenue {
@@ -61,11 +62,10 @@ export class ReportQueryService {
   // miles de filas para mostrar cinco. La vista revenue_by_category ya agrega
   // en la base y devuelve una fila por categoría.
   async listRevenueByCategoryThisMonth(): Promise<CategoryRevenue[]> {
-    const now = new Date();
     // Primer día del mes en hora local. La vista agrupa en hora de Bolivia, así
     // que armar el filtro con toISOString() erraría el mes durante la tarde del
     // día 1 y del último día.
-    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const month = localMonthStart(new Date());
 
     const { data, error } = await this.client
       .from('revenue_by_category')
