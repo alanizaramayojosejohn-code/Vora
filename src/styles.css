@@ -11,10 +11,13 @@
      asi clases como bg-base, text-foreground, border-border-subtle funcionan
      y reaccionan al cambio de tema sin reload.
 
-   Para agregar un nuevo token:
+   Para agregar un nuevo token BASE:
    1. Agregar a ThemeTokens en theme.presets.ts
    2. Sumarlo a writeTokensToRoot() en theme.service.ts
    3. Declarar default aca y reexportar en @theme
+
+   Para agregar un token DERIVADO no hace falta tocar TypeScript: se compone
+   aca con color-mix sobre un token base (ver el bloque de abajo).
    ===================================================================== */
 
 :root {
@@ -49,6 +52,177 @@
 }
 
 /* =====================================================================
+   Tokens derivados.
+
+   Los 18 tokens de arriba alcanzan para pintar texto, fondos y bordes,
+   pero no para lo que realmente distingue una interfaz trabajada: el chip
+   de estado que tiñe apenas su fondo, el borde de la fila seleccionada, el
+   halo de un botón enfocado, la barra de un gráfico. Todo eso venía
+   resolviéndose con `bg-primary/10` suelto en cada plantilla, y el valor
+   terminaba siendo distinto en cada pantalla.
+
+   Acá se nombran una sola vez. Ninguno es un color nuevo: todos son el
+   mismo token base a distinta opacidad, compuesto con color-mix. Eso tiene
+   tres consecuencias que valen más que el ahorro de líneas:
+
+   · No hay que sumarlos a ThemeTokens ni a writeTokensToRoot(). Siguen a
+     --c-primary sin que nadie los escriba.
+   · El preset 'custom' —donde el negocio elige su propio primary— los
+     obtiene gratis. Si fueran valores fijos por preset, custom quedaría
+     sin ellos.
+   · No existe la posibilidad de que el wash y el primary se desincronicen,
+     que es exactamente lo que pasa cuando se hardcodea un rgba().
+
+   Las opacidades no son las mismas en claro y en oscuro. Sobre un fondo
+   claro un 10% ya se lee; sobre uno oscuro el mismo 10% desaparece, porque
+   el contraste contra negro es menor. Por eso las proporciones viven en
+   variables --a-* y solo esas se reescriben por modo: las definiciones de
+   color quedan una sola vez.
+   ===================================================================== */
+:root {
+  /* Proporciones — valores de modo claro. */
+  --a-primary-wash: 9%;
+  --a-primary-line: 28%;
+  --a-primary-edge: 42%;
+  --a-primary-glow: 28%;
+  --a-primary-glow-soft: 14%;
+  --a-accent-glow: 12%;
+  --a-sem-wash: 10%;
+  --a-sem-line: 26%;
+  --a-cat-wash: 10%;
+  --a-cat-line: 24%;
+
+  /* Paleta categórica — para gráficos y etiquetas de categoría, donde hace
+     falta distinguir series entre sí y no marcar jerarquía. Es el único
+     grupo que no deriva de la marca: si las categorías usaran primary, seis
+     series se verían como seis versiones del mismo color. Cambia por modo
+     (tonos oscuros sobre claro, saturados sobre oscuro) pero no por preset,
+     así una categoría mantiene su color aunque el negocio cambie de tema. */
+  --c-cat-1: #B45309;
+  --c-cat-2: #0E7490;
+  --c-cat-3: #C2410C;
+  --c-cat-4: #7E22CE;
+  --c-cat-5: #047857;
+  --c-cat-6: #475569;
+
+  /* --- Marca ------------------------------------------------------- */
+  /* wash: fondo de chip o fila activa. line: su borde. edge: borde de un
+     control enfocado, ya legible por sí solo. */
+  --c-primary-wash: color-mix(in srgb, var(--c-primary) var(--a-primary-wash), transparent);
+  --c-primary-line: color-mix(in srgb, var(--c-primary) var(--a-primary-line), transparent);
+  --c-primary-edge: color-mix(in srgb, var(--c-primary) var(--a-primary-edge), transparent);
+
+  /* glow: halo de foco y sombra de color. La variante -soft es el segundo
+     tramo del degradado, para que el halo se apague en vez de cortarse. */
+  --c-primary-glow: color-mix(in srgb, var(--c-primary) var(--a-primary-glow), transparent);
+  --c-primary-glow-soft: color-mix(in srgb, var(--c-primary) var(--a-primary-glow-soft), transparent);
+  --c-accent-glow: color-mix(in srgb, var(--c-accent) var(--a-accent-glow), transparent);
+
+  /* fade: el mismo color a opacidad cero. Existe para degradados: si el
+     extremo se declara `transparent` a secas, Safari interpola pasando por
+     negro y aparece una banda sucia en el medio. Manteniendo el tono, la
+     interpolación es limpia. */
+  --c-primary-fade: color-mix(in srgb, var(--c-primary) 0%, transparent);
+  --c-accent-fade: color-mix(in srgb, var(--c-accent) 0%, transparent);
+
+  /* Sobre una superficie ya pintada de primary el texto no puede usar
+     foreground-muted —está calculado contra la página, no contra la marca—.
+     Estos dos derivan de primary-fg, que es el color que sí contrasta ahí. */
+  --c-on-primary-wash: color-mix(in srgb, var(--c-primary-fg) 18%, transparent);
+  --c-on-primary-dim: color-mix(in srgb, var(--c-primary-fg) 80%, transparent);
+
+  /* Velo de modal y barras pegajosas: el fondo de la página a media
+     opacidad, así lo que pasa por debajo se insinúa sin competir. */
+  --c-base-dim: color-mix(in srgb, var(--c-base) 62%, transparent);
+
+  /* --- Semánticos --------------------------------------------------- */
+  --c-success-wash: color-mix(in srgb, var(--c-success) var(--a-sem-wash), transparent);
+  --c-success-line: color-mix(in srgb, var(--c-success) var(--a-sem-line), transparent);
+  --c-warning-wash: color-mix(in srgb, var(--c-warning) var(--a-sem-wash), transparent);
+  --c-warning-line: color-mix(in srgb, var(--c-warning) var(--a-sem-line), transparent);
+  --c-danger-wash: color-mix(in srgb, var(--c-danger) var(--a-sem-wash), transparent);
+  --c-danger-line: color-mix(in srgb, var(--c-danger) var(--a-sem-line), transparent);
+
+  /* --- Categóricos derivados ---------------------------------------- */
+  --c-cat-1-wash: color-mix(in srgb, var(--c-cat-1) var(--a-cat-wash), transparent);
+  --c-cat-1-line: color-mix(in srgb, var(--c-cat-1) var(--a-cat-line), transparent);
+  --c-cat-2-wash: color-mix(in srgb, var(--c-cat-2) var(--a-cat-wash), transparent);
+  --c-cat-2-line: color-mix(in srgb, var(--c-cat-2) var(--a-cat-line), transparent);
+  --c-cat-3-wash: color-mix(in srgb, var(--c-cat-3) var(--a-cat-wash), transparent);
+  --c-cat-3-line: color-mix(in srgb, var(--c-cat-3) var(--a-cat-line), transparent);
+  --c-cat-4-wash: color-mix(in srgb, var(--c-cat-4) var(--a-cat-wash), transparent);
+  --c-cat-4-line: color-mix(in srgb, var(--c-cat-4) var(--a-cat-line), transparent);
+  --c-cat-5-wash: color-mix(in srgb, var(--c-cat-5) var(--a-cat-wash), transparent);
+  --c-cat-5-line: color-mix(in srgb, var(--c-cat-5) var(--a-cat-line), transparent);
+  --c-cat-6-wash: color-mix(in srgb, var(--c-cat-6) var(--a-cat-wash), transparent);
+  --c-cat-6-line: color-mix(in srgb, var(--c-cat-6) var(--a-cat-line), transparent);
+
+  /* --- Marca en el logo --------------------------------------------- */
+  /* El isotipo necesita dos tonos del primary para que el degradado tenga
+     volumen. Derivarlos evita mantener catorce pares a mano y hace que el
+     logo acompañe al preset del negocio, incluido 'custom'. */
+  --c-logo-a: color-mix(in srgb, #FFFFFF 30%, var(--c-primary));
+  --c-logo-b: color-mix(in srgb, #000000 22%, var(--c-primary));
+
+  /* --- Sobre fotografía ---------------------------------------------- */
+  /* Deliberadamente fuera del tema. Estos chips se apoyan sobre la foto de
+     un producto, cuyo color no controlamos: si siguieran al preset, en un
+     tema claro quedaría texto claro sobre una foto clara. Son fijos y
+     oscuros porque el contraste tiene que garantizarse contra la imagen,
+     no contra la página. */
+  --c-photo-chip: rgba(10, 10, 10, 0.75);
+  --c-photo-chip-fg: #FFFFFF;
+  --c-photo-chip-low: rgba(194, 65, 12, 0.85);
+}
+
+/* Reajuste por modo: solo proporciones y la paleta categórica. Las
+   definiciones con color-mix de arriba no se repiten. */
+:root[data-mode="dark"] {
+  --a-primary-wash: 14%;
+  --a-primary-line: 36%;
+  --a-primary-edge: 50%;
+  --a-primary-glow: 42%;
+  --a-primary-glow-soft: 22%;
+  --a-accent-glow: 20%;
+  --a-sem-wash: 13%;
+  --a-sem-line: 32%;
+  --a-cat-wash: 16%;
+  --a-cat-line: 32%;
+
+  --c-cat-1: #FBBF24;
+  --c-cat-2: #22D3EE;
+  --c-cat-3: #FB923C;
+  --c-cat-4: #C084FC;
+  --c-cat-5: #34D399;
+  --c-cat-6: #94A3B8;
+}
+
+/* Mismo ajuste para la pantalla de login, que se dibuja antes de que
+   ThemeService escriba data-mode. Sin esto, el primer render en un sistema
+   oscuro usaría las proporciones de modo claro y los chips no se verían. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode="light"]) {
+    --a-primary-wash: 14%;
+    --a-primary-line: 36%;
+    --a-primary-edge: 50%;
+    --a-primary-glow: 42%;
+    --a-primary-glow-soft: 22%;
+    --a-accent-glow: 20%;
+    --a-sem-wash: 13%;
+    --a-sem-line: 32%;
+    --a-cat-wash: 16%;
+    --a-cat-line: 32%;
+
+    --c-cat-1: #FBBF24;
+    --c-cat-2: #22D3EE;
+    --c-cat-3: #FB923C;
+    --c-cat-4: #C084FC;
+    --c-cat-5: #34D399;
+    --c-cat-6: #94A3B8;
+  }
+}
+
+/* =====================================================================
    Tokens semanticos en Tailwind v4.
 
    Genera utilities: bg-base, bg-surface, bg-primary, text-foreground,
@@ -77,14 +251,77 @@
   --color-success: var(--c-success);
   --color-danger: var(--c-danger);
   --color-warning: var(--c-warning);
+
+  /* Derivados. Generan bg-primary-wash, border-primary-line,
+     text-cat-3, ring-primary-edge, from-primary-glow, etc. */
+  --color-primary-wash: var(--c-primary-wash);
+  --color-primary-line: var(--c-primary-line);
+  --color-primary-edge: var(--c-primary-edge);
+  --color-primary-glow: var(--c-primary-glow);
+  --color-primary-glow-soft: var(--c-primary-glow-soft);
+  --color-primary-fade: var(--c-primary-fade);
+  --color-accent-glow: var(--c-accent-glow);
+  --color-accent-fade: var(--c-accent-fade);
+
+  --color-on-primary-wash: var(--c-on-primary-wash);
+  --color-on-primary-dim: var(--c-on-primary-dim);
+  --color-base-dim: var(--c-base-dim);
+
+  --color-success-wash: var(--c-success-wash);
+  --color-success-line: var(--c-success-line);
+  --color-warning-wash: var(--c-warning-wash);
+  --color-warning-line: var(--c-warning-line);
+  --color-danger-wash: var(--c-danger-wash);
+  --color-danger-line: var(--c-danger-line);
+
+  --color-cat-1: var(--c-cat-1);
+  --color-cat-1-wash: var(--c-cat-1-wash);
+  --color-cat-1-line: var(--c-cat-1-line);
+  --color-cat-2: var(--c-cat-2);
+  --color-cat-2-wash: var(--c-cat-2-wash);
+  --color-cat-2-line: var(--c-cat-2-line);
+  --color-cat-3: var(--c-cat-3);
+  --color-cat-3-wash: var(--c-cat-3-wash);
+  --color-cat-3-line: var(--c-cat-3-line);
+  --color-cat-4: var(--c-cat-4);
+  --color-cat-4-wash: var(--c-cat-4-wash);
+  --color-cat-4-line: var(--c-cat-4-line);
+  --color-cat-5: var(--c-cat-5);
+  --color-cat-5-wash: var(--c-cat-5-wash);
+  --color-cat-5-line: var(--c-cat-5-line);
+  --color-cat-6: var(--c-cat-6);
+  --color-cat-6-wash: var(--c-cat-6-wash);
+  --color-cat-6-line: var(--c-cat-6-line);
+
+  --color-logo-a: var(--c-logo-a);
+  --color-logo-b: var(--c-logo-b);
+
+  --color-photo-chip: var(--c-photo-chip);
+  --color-photo-chip-fg: var(--c-photo-chip-fg);
+  --color-photo-chip-low: var(--c-photo-chip-low);
 }
 
 /* =====================================================================
-   Page background. Aplicar el color base al body para que el tema
-   cubra toda la viewport (no solo donde haya cards).
+   Page background.
+
+   El color base va SOLO en <html>, nunca también en <body>. El navegador
+   propaga el fondo de <html> al canvas, así que igual cubre toda la
+   viewport; pero si además se lo pone al body, el body lo pinta otra vez
+   como fondo de un bloque normal, y eso ocurre DESPUÉS de los hijos con
+   z-index negativo (orden de pintado: primero los negativos, después los
+   fondos de los descendientes en flujo). El resplandor ambiente de
+   <app-ambient-glow> es `fixed -z-10`: con el fondo duplicado en el body
+   queda tapado y no se ve absolutamente nada.
+
+   Verificado en Chromium: con `html, body` el glow es invisible; con
+   `html` solo, se ve. Si alguna vez el fondo del tema "desaparece",
+   el arreglo NO es devolverle el background al body.
    ===================================================================== */
-html, body {
+html {
   background: var(--c-base);
+}
+
+html, body {
   color: var(--c-foreground);
   min-height: 100vh;
 }
@@ -222,6 +459,46 @@ html, body {
 .elevated-solid {
   background-color: var(--c-base);
   background-image: linear-gradient(var(--c-elevated), var(--c-elevated));
+}
+
+/* =====================================================================
+   Resplandor ambiente (glow) de fondo.
+
+   Tailwind no tiene utility para un radial-gradient de dos paradas, así
+   que las dos únicas clases de color "nuevas" del archivo viven acá, y
+   ambas se arman con tokens (`--c-*`), nunca con un color propio.
+
+   El extremo exterior usa la variante `*-fade` del token, no `transparent`
+   a secas: Safari interpola `transparent` pasando por negro puro, y el
+   borde del degradado sale con una banda oscura visible en vez de
+   desvanecerse limpio. `*-fade` es el mismo tono a opacidad 0, así que la
+   interpolación se mantiene dentro de la misma familia de color.
+   ===================================================================== */
+.ambient-primary {
+  background: radial-gradient(closest-side, var(--c-primary-glow), var(--c-primary-fade));
+}
+
+.ambient-accent {
+  background: radial-gradient(closest-side, var(--c-accent-glow), var(--c-accent-fade));
+}
+
+/* =====================================================================
+   Bloqueo de scroll con el drawer móvil abierto.
+
+   Sin esto, al abrir el sidebar en el teléfono la página de atrás sigue
+   arrastrándose bajo el panel -se ve el contenido de fondo moverse, lo que
+   rompe la sensación de que el drawer es una capa separada. Los shells
+   agregan/sacan esta clase en <body> vía un effect() atado a sidebarOpen.
+
+   Solo aplica por debajo de `lg` (1024px): de ahí para arriba el sidebar
+   deja de ser un drawer flotante y pasa a ser una columna fija en el
+   flujo, así que bloquear el scroll del body rompería el desktop (cada
+   panel scrollea el suyo, no la página entera).
+   ===================================================================== */
+@media (max-width: 1023.98px) {
+  .scroll-locked {
+    overflow: hidden;
+  }
 }
 
 /* =====================================================================

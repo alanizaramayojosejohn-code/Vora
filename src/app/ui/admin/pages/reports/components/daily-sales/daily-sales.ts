@@ -70,8 +70,8 @@ export class DailySalesReportComponent implements OnInit {
     return this.topProducts().reduce((max, p) => Math.max(max, Number(p[key])), 0);
   });
 
-  async ngOnInit(): Promise<void> {
-    await this.refresh();
+  ngOnInit(): void {
+    void this.refresh();
   }
 
   async setRange(range: DayRange): Promise<void> {

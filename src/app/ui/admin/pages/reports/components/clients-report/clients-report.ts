@@ -59,7 +59,7 @@ export class ClientsReportComponent implements OnInit {
     switch (this.view()) {
       case 'inactivos': return this.inactiveClients();
       case 'nuevos':    return this.neverBought();
-      default:          return this.topClients();
+      case 'top':       return this.topClients();
     }
   });
 
@@ -76,8 +76,8 @@ export class ClientsReportComponent implements OnInit {
 
   readonly daysSince = daysSinceLastPurchase;
 
-  async ngOnInit(): Promise<void> {
-    await this.refresh();
+  ngOnInit(): void {
+    void this.refresh();
   }
 
   setView(view: ClientView): void {
@@ -101,19 +101,27 @@ export class ClientsReportComponent implements OnInit {
     }
   }
 
-  exportExcel(): void {
-    this.exportSvc.exportClientsToExcel(this.visibleRows(), this.viewLabel());
+  async exportExcel(): Promise<void> {
+    try {
+      await this.exportSvc.exportClientsToExcel(this.visibleRows(), this.viewLabel());
+    } catch (err: unknown) {
+      this.error.set(errorMessage(err, 'No se pudo exportar a Excel'));
+    }
   }
 
-  exportPdf(): void {
-    this.exportSvc.exportClientsToPdf(this.visibleRows(), this.viewLabel());
+  async exportPdf(): Promise<void> {
+    try {
+      await this.exportSvc.exportClientsToPdf(this.visibleRows(), this.viewLabel());
+    } catch (err: unknown) {
+      this.error.set(errorMessage(err, 'No se pudo exportar a PDF'));
+    }
   }
 
   viewLabel(): string {
     switch (this.view()) {
       case 'inactivos': return `Sin comprar hace ${INACTIVE_CLIENT_DAYS} días o más`;
       case 'nuevos':    return 'Clientes sin compras';
-      default:          return 'Clientes por gasto total';
+      case 'top':       return 'Clientes por gasto total';
     }
   }
 }

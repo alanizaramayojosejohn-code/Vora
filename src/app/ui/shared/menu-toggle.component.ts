@@ -14,18 +14,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 @Component({
   selector: 'app-menu-toggle',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <button type="button" (click)="toggled.emit()"
-            [attr.aria-expanded]="open()"
-            [attr.aria-label]="open() ? 'Cerrar menú' : 'Abrir menú'"
-            class="p-2 -ml-2 rounded-lg hover:bg-muted text-foreground-muted hover:text-foreground transition">
-      <span class="relative block w-5 h-5">
-        <span class="bar" [class.top]="true" [class.is-open]="open()"></span>
-        <span class="bar" [class.mid]="true" [class.is-open]="open()"></span>
-        <span class="bar" [class.bot]="true" [class.is-open]="open()"></span>
-      </span>
-    </button>
-  `,
+  templateUrl: './menu-toggle.component.html',
   styles: `
     .bar {
       position: absolute;
@@ -66,5 +55,11 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 })
 export class MenuToggleComponent {
   readonly open = input<boolean>(false);
+
+  // Id del <aside> que este botón controla. Sin esto `aria-expanded` dice
+  // que algo se abrió pero no qué, y un lector de pantalla no puede saltar
+  // directo al panel.
+  readonly controls = input<string>('');
+
   readonly toggled = output<void>();
 }

@@ -24,7 +24,7 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 @Component({
   selector: 'app-profile-page',
   imports: [ReactiveFormsModule, HsvPickerComponent],
-  templateUrl: './component.html',
+  templateUrl: './profile-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfilePageComponent {

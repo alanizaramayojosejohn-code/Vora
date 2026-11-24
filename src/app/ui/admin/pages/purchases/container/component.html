@@ -29,11 +29,11 @@
   @if (loading()) {
     <div class="flex items-center justify-center py-16 text-foreground-muted text-sm">Cargando…</div>
   } @else if (error(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-4 py-3">{{ msg }}</div>
   } @else {
 
     @if (actionError(); as msg) {
-      <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+      <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-4 py-3">{{ msg }}</div>
     }
 
     <!-- Pedidos pendientes -->
@@ -41,7 +41,7 @@
       <h2 class="text-base font-semibold text-foreground mb-3">
         Pedidos pendientes
         @if (pendingOrders().length > 0) {
-          <span class="ml-2 text-xs font-bold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning">
+          <span class="ml-2 text-xs font-bold px-1.5 py-0.5 rounded-full bg-warning-wash text-warning">
             {{ pendingOrders().length }}
           </span>
         }
@@ -83,7 +83,7 @@
                 </button>
                 <button (click)="receiveOrder(order.id)"
                         [disabled]="receivingId() === order.id || cancellingId() === order.id"
-                        class="px-3 py-1.5 text-xs font-semibold bg-success/15 text-success border border-success/25 rounded-lg hover:bg-success/25 disabled:opacity-50 transition">
+                        class="px-3 py-1.5 text-xs font-semibold bg-success-wash text-success border border-success-line rounded-lg hover:bg-success/25 disabled:opacity-50 transition">
                   @if (receivingId() === order.id) { Recibiendo… } @else { Recibir }
                 </button>
               </div>

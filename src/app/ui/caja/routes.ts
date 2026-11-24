@@ -5,7 +5,7 @@ export const CajaRoutes: Routes = [
   {
     path: 'profile',
     loadComponent: () =>
-      import('../shared/profile-page/component').then((m) => m.ProfilePageComponent),
+      import('../shared/profile-page/profile-page.component').then((m) => m.ProfilePageComponent),
   },
   {
     path: 'home',

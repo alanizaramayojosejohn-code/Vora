@@ -20,7 +20,7 @@ import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.compo
 export class SalesListComponent {
   readonly sales = input.required<OrderWithDetails[]>();
   readonly loading = input<boolean>(false);
-  readonly cancel = output<OrderWithDetails>();
+  readonly cancelled = output<OrderWithDetails>();
   readonly invoice = output<OrderWithDetails>();
 
   readonly paymentLabel = PAYMENT_METHOD_LABEL;

@@ -1,11 +1,21 @@
 import { inject, Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// xlsx + jsPDF + autoTable pesan ~724 kB juntos: se cargan con import()
+// dinámico dentro de cada método, no acá arriba, para que ningún admin que
+// abra el dashboard los descargue sin haber pedido exportar nada. `import
+// type` no arrastra runtime (se borra en compilación), así que sirve para
+// tipar sin volver a importar el valor estático.
+import type jsPDF from 'jspdf';
 import { AuthService } from '../auth/auth.service';
 import { OrderStatus, paymentMethodsLabel, PaymentMethod } from '../../models/order.model';
 import { ClientSalesSummary, daysSinceLastPurchase } from '../../models/client-sales.model';
 import { PayrollPayment, PayrollStatusRow } from '../../models/payroll.model';
+
+// jspdf no tipa `.internal` en su .d.ts público (es un detalle interno de la
+// librería) — esta es la única parte de esa API que se usa acá, para el pie
+// de página con "Página X de Y".
+interface JsPdfInternal {
+  internal: { getNumberOfPages(): number };
+}
 
 export interface SalesReportPaymentLine {
   method: PaymentMethod;
@@ -45,7 +55,8 @@ export interface SalesSummary {
 export class ExportService {
   private readonly auth = inject(AuthService);
 
-  exportSalesToExcel(rows: SalesReportRow[], summary: SalesSummary, dateRange: string): void {
+  async exportSalesToExcel(rows: SalesReportRow[], summary: SalesSummary, dateRange: string): Promise<void> {
+    const XLSX = await import('xlsx');
     const businessName = this.auth.businessName() ?? 'Negocio';
     const filename = `ventas_${businessName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
@@ -96,7 +107,9 @@ export class ExportService {
     XLSX.writeFile(wb, filename);
   }
 
-  exportSalesToPdf(rows: SalesReportRow[], summary: SalesSummary, dateRange: string): void {
+  async exportSalesToPdf(rows: SalesReportRow[], summary: SalesSummary, dateRange: string): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
     const businessName = this.auth.businessName() ?? 'Negocio';
     const filename = `ventas_${businessName}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
@@ -180,7 +193,7 @@ export class ExportService {
     });
 
     // Pie de página
-    const pageCount = (doc as any).internal.getNumberOfPages();
+    const pageCount = (doc as unknown as JsPdfInternal).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(7);
@@ -197,7 +210,8 @@ export class ExportService {
 
   // ── Clientes ────────────────────────────────────────────────────────────
 
-  exportClientsToExcel(rows: ClientSalesSummary[], viewLabel: string): void {
+  async exportClientsToExcel(rows: ClientSalesSummary[], viewLabel: string): Promise<void> {
+    const XLSX = await import('xlsx');
     const businessName = this.auth.businessName() ?? 'Negocio';
     const filename = `clientes_${businessName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
@@ -234,7 +248,9 @@ export class ExportService {
     XLSX.writeFile(wb, filename);
   }
 
-  exportClientsToPdf(rows: ClientSalesSummary[], viewLabel: string): void {
+  async exportClientsToPdf(rows: ClientSalesSummary[], viewLabel: string): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
     const businessName = this.auth.businessName() ?? 'Negocio';
     const filename = `clientes_${businessName}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
@@ -268,11 +284,12 @@ export class ExportService {
 
   // ── Planilla ────────────────────────────────────────────────────────────
 
-  exportPayrollToExcel(
+  async exportPayrollToExcel(
     status: PayrollStatusRow[],
     payments: PayrollPayment[],
     periodLabel: string,
-  ): void {
+  ): Promise<void> {
+    const XLSX = await import('xlsx');
     const businessName = this.auth.businessName() ?? 'Negocio';
     const filename = `planilla_${businessName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
@@ -327,11 +344,13 @@ export class ExportService {
     XLSX.writeFile(wb, filename);
   }
 
-  exportPayrollToPdf(
+  async exportPayrollToPdf(
     status: PayrollStatusRow[],
     payments: PayrollPayment[],
     periodLabel: string,
-  ): void {
+  ): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
     const businessName = this.auth.businessName() ?? 'Negocio';
     const filename = `planilla_${businessName}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
@@ -393,7 +412,7 @@ export class ExportService {
   }
 
   private pdfFooter(doc: jsPDF): void {
-    const pageCount = (doc as any).internal.getNumberOfPages();
+    const pageCount = (doc as unknown as JsPdfInternal).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(7);

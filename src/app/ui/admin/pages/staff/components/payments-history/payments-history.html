@@ -10,7 +10,7 @@
               class="px-3 py-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-fg rounded-lg transition shadow-md shadow-primary/20">
         Registrar pago
       </button>
-      <button type="button" (click)="close.emit()"
+      <button type="button" (click)="closed.emit()"
               class="p-1.5 text-foreground-muted hover:text-foreground hover:bg-muted rounded-lg transition">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
@@ -56,7 +56,7 @@
               </td>
               <td class="px-5 py-3 text-right">
                 <button type="button" (click)="deletePayment.emit(p)" title="Eliminar pago"
-                        class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition">
+                        class="w-7 h-7 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger-wash rounded-md transition">
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   </svg>

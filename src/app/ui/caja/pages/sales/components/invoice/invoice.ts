@@ -19,7 +19,7 @@ export class OrderInvoiceComponent {
   private readonly elementRef = inject(ElementRef);
 
   readonly order = input.required<OrderWithDetails>();
-  readonly close = output<void>();
+  readonly closed = output<void>();
 
   readonly businessName = computed(() => this.auth.businessName() ?? 'Vora');
   readonly businessInitial = computed(() => (this.businessName()[0] ?? 'V').toUpperCase());
@@ -84,7 +84,7 @@ export class OrderInvoiceComponent {
       window.print();
       window.onafterprint = function() { window.close(); };
     };
-  <\/script>
+  </script>
 </body>
 </html>`);
     win.document.close();

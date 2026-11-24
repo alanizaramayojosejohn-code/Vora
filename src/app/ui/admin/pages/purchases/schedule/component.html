@@ -17,10 +17,10 @@
   </div>
 
   @if (error(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-4 py-3">{{ msg }}</div>
   }
   @if (actionError(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">{{ msg }}</div>
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-4 py-3">{{ msg }}</div>
   }
 
   @if (loading()) {
@@ -98,7 +98,7 @@
                     </button>
                     <button (click)="receive(order.id)"
                             [disabled]="receivingId() === order.id || cancellingId() === order.id"
-                            class="px-3 py-1.5 text-xs font-semibold bg-success/15 text-success border border-success/25 rounded-lg hover:bg-success/25 disabled:opacity-50 transition">
+                            class="px-3 py-1.5 text-xs font-semibold bg-success-wash text-success border border-success-line rounded-lg hover:bg-success/25 disabled:opacity-50 transition">
                       @if (receivingId() === order.id) { Recibiendo… } @else { Recibir }
                     </button>
                   </div>

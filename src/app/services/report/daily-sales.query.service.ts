@@ -7,7 +7,9 @@ import {
   TopProductOrderBy,
 } from '../../models/daily-sales.model';
 import { EMPTY_PROFIT_TOTALS, ProfitTotals } from '../../models/profit.model';
+import { localDate as toLocalDate } from '../../utilities/local-date';
 import { SupabaseService } from '../supabase/supabase.service';
+import { ReportQueryService } from './query.service';
 
 // Rangos ofrecidos al plan Caja. Son presets y no un selector libre de fechas
 // a propósito: el reporte con rango arbitrario es del plan Negocio, y además
@@ -35,15 +37,16 @@ export interface OpenSessionSales {
 @Injectable({ providedIn: 'root' })
 export class DailySalesQueryService {
   private readonly client = inject(SupabaseService).client;
+  private readonly reportQuery = inject(ReportQueryService);
 
   // Fechas en hora LOCAL, no UTC. `toISOString()` convierte a UTC y en Bolivia
   // (UTC-4) eso adelanta un día durante toda la tarde: a las 20:00 del lunes
   // ya devolvería el martes, y "Hoy" mostraría un día equivocado.
+  // Delegado a utilities/local-date.ts (misma lógica que usa ReportQueryService
+  // para el mes en curso); se conserva como wrapper porque hay componentes que
+  // llaman `DailySalesQueryService.localDate(...)` directamente.
   static localDate(d: Date): string {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
+    return toLocalDate(d);
   }
 
   static rangeBounds(range: DayRange, today: Date = new Date()): { from: string; to: string } {
@@ -99,14 +102,11 @@ export class DailySalesQueryService {
   }
 
   // Cuántos productos vendidos en el rango no tienen costo cargado (RF-23).
+  // La llamada a la RPC vive en ReportQueryService (spec 002, RF-22/RF-23);
+  // acá solo se traduce el DayRange al from/to que esa implementación espera.
   async zeroCostProductCount(range: DayRange): Promise<number> {
     const { from, to } = DailySalesQueryService.rangeBounds(range);
-    const { data, error } = await this.client.rpc('zero_cost_product_count', {
-      p_from: from,
-      p_to: to,
-    });
-    if (error) throw error;
-    return Number(data ?? 0);
+    return this.reportQuery.zeroCostProductCount(from, to);
   }
 
   async topProducts(range: DayRange, limit = 5, orderBy: TopProductOrderBy = 'quantity'): Promise<TopProduct[]> {

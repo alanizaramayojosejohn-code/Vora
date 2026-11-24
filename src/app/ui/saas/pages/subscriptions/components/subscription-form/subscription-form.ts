@@ -24,7 +24,7 @@ export class SubscriptionFormComponent {
   readonly submitting   = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
   readonly submitForm   = output<UpsertSubscriptionInput>();
-  readonly cancel       = output<void>();
+  readonly cancelled    = output<void>();
 
   readonly isEdit = computed(() => this.subscription() !== null);
 

@@ -14,18 +14,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 @Component({
   selector: 'app-skeleton-rows',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="divide-y divide-border-subtle" aria-hidden="true">
-      @for (row of rowList(); track row) {
-        <div class="px-6 py-3.5 flex items-center gap-4">
-          @for (w of widths(); track $index) {
-            <div class="skeleton h-3.5" [style.width]="w"></div>
-          }
-        </div>
-      }
-    </div>
-    <span class="sr-only" role="status">Cargando…</span>
-  `,
+  templateUrl: './skeleton-rows.component.html',
   styles: `
     .sr-only {
       position: absolute;

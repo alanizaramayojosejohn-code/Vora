@@ -25,7 +25,7 @@ export class UsersFormComponent {
   readonly submitting = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
   readonly submitForm = output<UserFormValue>();
-  readonly cancel = output<void>();
+  readonly cancelled = output<void>();
 
   readonly isEdit = computed(() => this.value() !== null);
 

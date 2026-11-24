@@ -15,7 +15,7 @@ export class PaymentsHistoryComponent {
   readonly employee = input.required<Employee>();
   readonly payments = input<SalaryPayment[]>([]);
   readonly loading = input<boolean>(false);
-  readonly close = output<void>();
+  readonly closed = output<void>();
   readonly addPayment = output<void>();
   readonly deletePayment = output<SalaryPayment>();
 

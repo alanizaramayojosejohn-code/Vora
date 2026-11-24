@@ -26,7 +26,7 @@
         [submitting]="configSubmitting()"
         [errorMessage]="configError()"
         (submitForm)="handleConfigure($event)"
-        (cancel)="closeConfigure()" />
+        (cancelled)="closeConfigure()" />
     </app-form-modal>
   }
 
@@ -39,14 +39,14 @@
         [submitting]="paymentSubmitting()"
         [errorMessage]="paymentError()"
         (submitForm)="handlePayment($event)"
-        (cancel)="showPaymentForm.set(false)" />
+        (cancelled)="showPaymentForm.set(false)" />
     </app-form-modal>
 
     <app-saas-subscription-payments-history
       [item]="item"
       [payments]="payments()"
       [loading]="paymentsLoading()"
-      (close)="closePayments()"
+      (closed)="closePayments()"
       (addPayment)="showPaymentForm.set(true)"
       (deletePayment)="handleDeletePayment($event)" />
 
@@ -70,7 +70,7 @@
     <app-saas-subscriptions-list
       [items]="items()"
       [loading]="loading()"
-      (select)="openPayments($event)"
+      (selected)="openPayments($event)"
       (configure)="openConfigure($event)" />
   }
 

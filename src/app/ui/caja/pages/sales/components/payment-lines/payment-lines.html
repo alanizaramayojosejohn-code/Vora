@@ -4,7 +4,7 @@
       <select [value]="line.method"
               [disabled]="disabled()"
               (change)="setMethod($index, $any($event.target).value)"
-              class="select-field flex-1 min-w-0 px-2 py-1.5 bg-input text-foreground text-xs font-semibold border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field flex-1 min-w-0 px-2 py-1.5 bg-input text-foreground text-xs font-semibold border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary-line focus:border-primary">
         @for (m of methods; track m) {
           <option [value]="m">{{ methodLabel[m] }}</option>
         }
@@ -14,7 +14,7 @@
              [disabled]="disabled()"
              (input)="setAmount($index, +$any($event.target).value)"
              placeholder="0.00"
-             class="w-24 px-2 py-1.5 bg-input text-foreground text-sm font-mono border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-24 px-2 py-1.5 bg-input text-foreground text-sm font-mono border border-border-subtle rounded-md outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
       <button type="button" (click)="removeLine($index)" [disabled]="disabled()"
               title="Quitar línea"
               class="w-7 h-7 flex-shrink-0 inline-flex items-center justify-center text-foreground-muted hover:text-danger hover:bg-danger/10 rounded-md transition disabled:opacity-40">

@@ -1,0 +1,88 @@
+<header class="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-14 bg-surface border-b border-border-subtle flex-shrink-0">
+  <app-menu-toggle [open]="sidebarOpen()" [controls]="'app-sidebar-aside'" (toggled)="sidebarOpen.set(!sidebarOpen())" />
+  <app-brand-logo [small]="true" [badge]="audienceLabel()" class="flex items-center gap-2.5 min-w-0" />
+</header>
+
+<div class="fixed inset-0 z-40 bg-base-dim lg:hidden transition-opacity duration-300 ease-out"
+     [class.opacity-0]="!sidebarOpen()"
+     [class.pointer-events-none]="!sidebarOpen()"
+     [class.opacity-100]="sidebarOpen()"
+     aria-hidden="true"
+     (click)="sidebarOpen.set(false)"></div>
+
+<aside id="app-sidebar-aside"
+       [class]="asideWidthClass()"
+       class="fixed inset-y-0 left-0 z-50 w-60 bg-surface backdrop-blur-xl border-r border-border-subtle flex flex-col flex-shrink-0 transition-[width,transform] duration-300 ease-in-out lg:sticky lg:inset-auto lg:top-0 lg:h-screen lg:z-auto lg:translate-x-0 relative"
+       [class.-translate-x-full]="!sidebarOpen()"
+       [attr.inert]="!sidebarOpen() && !viewport.isDesktop() ? '' : null">
+
+  <!-- Botón de colapso: solo escritorio. Hijo directo de <aside> (no del
+       nav ni de ningún div con overflow-hidden) para poder posicionarse
+       absolute contra el borde del sidebar. -->
+  <button type="button" (click)="toggleCollapsed()"
+          [attr.aria-pressed]="sidebarCollapsed()"
+          [attr.aria-label]="sidebarCollapsed() ? 'Expandir menú' : 'Colapsar menú'"
+          class="hidden lg:flex absolute -right-3 top-6 z-10 w-6 h-6 items-center justify-center rounded-full bg-surface border border-border-subtle text-foreground-muted shadow-sm hover:text-foreground hover:border-primary-line transition">
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+         class="transition-transform duration-300" [class.rotate-180]="sidebarCollapsed()">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+  </button>
+
+  <!-- Brand -->
+  <div [class]="brandContainerClass()">
+    <app-brand-logo [badge]="audienceLabel()" [compact]="isRailCollapsed()" class="flex items-center gap-2.5 min-w-0" />
+  </div>
+
+  <!-- Nav. El (click) no es un control propio: solo atrapa el burbujeo de
+       los <a> reales de app-sidebar-nav para cerrar el drawer móvil. No
+       necesita su propio soporte de teclado. -->
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+  <div class="flex-1 relative overflow-hidden" (click)="closeIfNavLink($event)">
+    <app-sidebar-nav [groups]="navGroups()" [collapsed]="isRailCollapsed()" />
+    <!-- Fade inferior para indicar scroll -->
+    <div class="pointer-events-none absolute bottom-0 inset-x-0 h-8 bg-gradient-to-t from-surface to-transparent"></div>
+  </div>
+
+  <!-- Footer: theme toggle + user profile + logout -->
+  <div class="p-3 border-t border-border-subtle space-y-3">
+    <div class="flex justify-center">
+      <app-theme-mode-toggle [compact]="isRailCollapsed()" />
+    </div>
+    @if (!isRailCollapsed()) {
+      <div class="flex items-center gap-2 p-2 rounded-lg bg-elevated border border-border-subtle">
+        <a [routerLink]="profileRoute()" (click)="sidebarOpen.set(false)"
+           class="flex items-center gap-2 flex-1 min-w-0 hover:opacity-75 transition">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-b from-logo-a to-logo-b border border-primary-line text-primary-fg flex items-center justify-center text-xs font-bold flex-shrink-0">
+            {{ initials() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-foreground truncate">{{ auth.profile()?.name }}</p>
+            <p class="text-[10px] text-foreground-subtle uppercase tracking-wider">{{ auth.profile()?.role }}</p>
+          </div>
+        </a>
+        <button (click)="logout()" title="Salir"
+                class="text-foreground-muted hover:text-foreground p-1.5 rounded hover:bg-muted transition flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    } @else {
+      <div class="flex flex-col items-center gap-2">
+        <a [routerLink]="profileRoute()" (click)="sidebarOpen.set(false)" [attr.title]="auth.profile()?.name"
+           class="hover:opacity-75 transition">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-b from-logo-a to-logo-b border border-primary-line text-primary-fg flex items-center justify-center text-xs font-bold flex-shrink-0">
+            {{ initials() }}
+          </div>
+        </a>
+        <button (click)="logout()" title="Salir"
+                class="text-foreground-muted hover:text-foreground p-1.5 rounded hover:bg-muted transition flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    }
+  </div>
+</aside>

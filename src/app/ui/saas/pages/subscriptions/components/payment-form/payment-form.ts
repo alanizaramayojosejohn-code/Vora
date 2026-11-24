@@ -26,7 +26,7 @@ export class SubscriptionPaymentFormComponent {
   readonly submitting   = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
   readonly submitForm   = output<PaymentFormOutput>();
-  readonly cancel       = output<void>();
+  readonly cancelled    = output<void>();
 
   readonly PAYMENT_METHOD_LABELS = PAYMENT_METHOD_LABELS;
   readonly paymentMethods: PaymentMethod[] = ['efectivo', 'tarjeta', 'qr', 'transferencia'];

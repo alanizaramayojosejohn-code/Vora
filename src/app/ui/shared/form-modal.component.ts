@@ -26,36 +26,7 @@ import {
   host: {
     '(document:keydown.escape)': 'onEscape()',
   },
-  template: `
-    @if (open()) {
-      <div
-        class="anim-backdrop fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 overflow-y-auto"
-        (click)="onBackdropClick()">
-        <!-- max-h propio: un formulario largo (productos, negocios) scrollea
-             dentro de la ventana en vez de estirarla fuera de la pantalla. -->
-        <div
-          class="anim-panel surface-solid relative w-full my-auto border border-border-subtle rounded-2xl shadow-2xl shadow-black/30 max-h-[calc(100dvh-2rem)] overflow-y-auto"
-          [class]="widthClass()"
-          role="dialog"
-          aria-modal="true"
-          [attr.aria-label]="label()"
-          (click)="$event.stopPropagation()">
-
-          <button type="button" (click)="onClose()" [disabled]="submitting()"
-                  aria-label="Cerrar"
-                  class="absolute top-4 right-4 z-10 w-8 h-8 inline-flex items-center justify-center rounded-lg
-                         text-foreground-muted hover:text-foreground hover:bg-muted transition disabled:opacity-40">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          </button>
-
-          <ng-content />
-        </div>
-      </div>
-    }
-  `,
+  templateUrl: './form-modal.component.html',
 })
 export class FormModalComponent {
   readonly open = input<boolean>(false);

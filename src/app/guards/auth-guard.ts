@@ -18,7 +18,7 @@ export const noAuthGuard: CanActivateFn = () => {
     case 'super_admin': return router.parseUrl('/saas');
     case 'admin':       return router.parseUrl('/admin');
     case 'caja':        return router.parseUrl('/caja');
-    default:            return router.parseUrl('/login');
+    case null:          return router.parseUrl('/login');
   }
 };
 

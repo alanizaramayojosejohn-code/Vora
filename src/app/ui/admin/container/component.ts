@@ -1,38 +1,42 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../../services/auth/auth.service';
-import { BrandLogoComponent } from '../../shared/brand-logo.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AmbientGlowComponent } from '../../shared/ambient-glow.component';
 import { RouteViewComponent } from '../../shared/route-view.component';
-import { MenuToggleComponent } from '../../shared/menu-toggle.component';
-import { IfPlanDirective } from '../../shared/if-plan.directive';
+import { SidebarComponent } from '../../shared/sidebar.component';
 import { SubscriptionStatusComponent } from '../../shared/subscription-status.component';
-import { ThemeModeToggleComponent } from '../../shared/theme-mode-toggle.component';
+import { SidebarNavGroup } from '../../shared/sidebar-nav.model';
 
 @Component({
   selector: 'app-admin-container',
-  imports: [MenuToggleComponent, RouteViewComponent, RouterLink, RouterLinkActive, ThemeModeToggleComponent, BrandLogoComponent, SubscriptionStatusComponent, IfPlanDirective],
+  imports: [AmbientGlowComponent, SidebarComponent, RouteViewComponent, SubscriptionStatusComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminContainerComponent {
-  private readonly router = inject(Router);
-  protected readonly auth = inject(AuthService);
-
   readonly audienceLabel = 'Admin';
-  readonly sidebarOpen = signal(false);
 
-  // 2 letras del nombre para el avatar circle del sidebar.
-  // Ej: "Daniela Mendez" → "DM", "Jose" → "JO".
-  readonly initials = computed(() => {
-    const name = this.auth.profile()?.name?.trim() ?? '';
-    if (!name) return '··';
-    const parts = name.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  });
-
-  async logout(): Promise<void> {
-    await this.auth.logout();
-    await this.router.navigateByUrl('/login');
-  }
+  readonly navGroups: SidebarNavGroup[] = [
+    { label: 'General', items: [
+        { route: '/admin/home', label: 'Inicio', icon: 'home', exact: true },
+    ]},
+    { label: 'Operación', items: [
+        { route: '/admin/clients', label: 'Clientes', icon: 'users' },
+        { route: '/admin/products', label: 'Productos', icon: 'box' },
+        { route: '/admin/categories', label: 'Categorías', icon: 'folder' },
+        { route: '/admin/tables', label: 'Mesas', icon: 'table' },
+        { route: '/admin/users', label: 'Usuarios', icon: 'user-cog' },
+    ]},
+    { label: 'Personal', planFeature: 'staff', items: [
+        { route: '/admin/staff', label: 'Personal', icon: 'users' },
+    ]},
+    { label: 'Provisiones', planFeature: 'purchases', items: [
+        { route: '/admin/purchases', label: 'Provisiones', icon: 'package' },
+    ]},
+    { label: 'Ventas', items: [
+        { route: '/admin/sales', label: 'Ventas', icon: 'cart' },
+        { route: '/admin/turno', label: 'Mi turno de caja', icon: 'clock' },
+    ]},
+    { label: 'Análisis', items: [
+        { route: '/admin/reports', label: 'Reportes', icon: 'bar-chart' },
+    ]},
+  ];
 }

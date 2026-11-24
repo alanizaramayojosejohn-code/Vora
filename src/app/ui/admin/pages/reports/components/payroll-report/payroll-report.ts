@@ -111,8 +111,8 @@ export class PayrollReportComponent implements OnInit {
 
   readonly periodLabel = computed(() => `${monthLabel(this.month())} ${this.year()}`);
 
-  async ngOnInit(): Promise<void> {
-    await this.refresh();
+  ngOnInit(): void {
+    void this.refresh();
   }
 
   async setPeriod(year: number, month: number): Promise<void> {
@@ -148,11 +148,19 @@ export class PayrollReportComponent implements OnInit {
     }
   }
 
-  exportExcel(): void {
-    this.exportSvc.exportPayrollToExcel(this.status(), this.payments(), this.periodLabel());
+  async exportExcel(): Promise<void> {
+    try {
+      await this.exportSvc.exportPayrollToExcel(this.status(), this.payments(), this.periodLabel());
+    } catch (err: unknown) {
+      this.error.set(errorMessage(err, 'No se pudo exportar a Excel'));
+    }
   }
 
-  exportPdf(): void {
-    this.exportSvc.exportPayrollToPdf(this.status(), this.payments(), this.periodLabel());
+  async exportPdf(): Promise<void> {
+    try {
+      await this.exportSvc.exportPayrollToPdf(this.status(), this.payments(), this.periodLabel());
+    } catch (err: unknown) {
+      this.error.set(errorMessage(err, 'No se pudo exportar a PDF'));
+    }
   }
 }

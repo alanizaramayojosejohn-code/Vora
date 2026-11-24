@@ -1,9 +1,10 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Employee, SalaryPayment } from '../../../../../models/employee.model';
 import { CreateEmployeeInput, CreatePaymentInput, StaffService } from '../../../../../services/staff/staff.service';
 import { errorMessage } from '../../../../../utilities/error-message';
 import { ConfirmDeleteModalComponent } from '../../../../shared/confirm-delete-modal.component';
+import { createCrudState } from '../../../../shared/crud-state';
 import { FormModalComponent } from '../../../../shared/form-modal.component';
 import { ReadonlyDisabledDirective } from '../../../../shared/readonly-disabled.directive';
 import { StaffFormComponent } from '../components/form/form';
@@ -13,7 +14,7 @@ import { PaymentsHistoryComponent } from '../components/payments-history/payment
 
 @Component({
   selector: 'app-admin-staff',
-  imports: [FormModalComponent, 
+  imports: [FormModalComponent,
     DatePipe,
     StaffListComponent,
     StaffFormComponent,
@@ -28,33 +29,9 @@ import { PaymentsHistoryComponent } from '../components/payments-history/payment
 export class AdminStaffContainerComponent {
   private readonly staffService = inject(StaffService);
 
-  readonly employees = signal<Employee[]>([]);
-  readonly loading = signal(false);
-
-  readonly formState = signal<null | 'create' | Employee>(null);
-  readonly editing = computed<Employee | null>(() => {
-    const s = this.formState();
-    return s && s !== 'create' ? s : null;
-  });
-  readonly showForm = computed(() => this.formState() !== null);
-
-  readonly submitting = signal(false);
-  readonly formError = signal<string | null>(null);
-
-  // Borrado de empleado
-  readonly deleting = signal<Employee | null>(null);
-  readonly deletingError = signal<string | null>(null);
-  readonly deletingSubmitting = signal(false);
-  readonly deletingInitials = computed(() => {
-    const e = this.deleting();
-    if (!e) return null;
-    const parts = e.name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return null;
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  });
-
-  // Panel de pagos
+  // Panel de pagos — no encaja en el CRUD genérico: no tiene modo "editar" y
+  // create/delete quedan en el propio negocio de sueldos, no en la entidad
+  // Employee. Se queda íntegro en el contenedor.
   readonly selectedEmployee = signal<Employee | null>(null);
   readonly payments = signal<SalaryPayment[]>([]);
   readonly paymentsLoading = signal(false);
@@ -65,81 +42,50 @@ export class AdminStaffContainerComponent {
   readonly deletingPaymentSubmitting = signal(false);
   readonly deletingPaymentError = signal<string | null>(null);
 
+  private readonly crud = createCrudState<Employee, CreateEmployeeInput>({
+    list: () => this.staffService.listEmployees(),
+    create: (input) => this.staffService.createEmployee(input),
+    update: (id, input) => this.staffService.updateEmployee(id, input),
+    remove: (id) => this.staffService.deleteEmployee(id),
+    labels: {
+      load: 'Error al listar empleados',
+      create: 'Error al crear empleado',
+      update: 'Error al guardar empleado',
+      remove: 'Error al eliminar empleado',
+    },
+    // Si el empleado borrado tenía el panel de pagos abierto, hay que cerrarlo:
+    // ya no hay a quién mostrarle pagos.
+    onRemoved: (emp) => {
+      if (this.selectedEmployee()?.id === emp.id) this.selectedEmployee.set(null);
+    },
+  });
+
+  readonly employees = this.crud.items;
+  readonly loading = this.crud.loading;
+  readonly loadError = this.crud.loadError;
+
+  readonly formState = this.crud.formState;
+  readonly editing = this.crud.editing;
+  readonly showForm = this.crud.showForm;
+  readonly submitting = this.crud.submitting;
+  readonly formError = this.crud.formError;
+
+  readonly deleting = this.crud.deleting;
+  readonly deletingError = this.crud.deletingError;
+  readonly deletingSubmitting = this.crud.deletingSubmitting;
+  readonly deletingInitials = this.crud.deletingInitials;
+
+  readonly refresh = this.crud.refresh;
+  readonly openCreate = this.crud.openCreate;
+  readonly openEdit = this.crud.openEdit;
+  readonly closeForm = this.crud.closeForm;
+  readonly handleSubmit = this.crud.handleSubmit;
+  readonly handleDelete = this.crud.handleDelete;
+  readonly cancelDelete = this.crud.cancelDelete;
+  readonly confirmDelete = this.crud.confirmDelete;
+
   constructor() {
     void this.refresh();
-  }
-
-  async refresh(): Promise<void> {
-    this.loading.set(true);
-    try {
-      this.employees.set(await this.staffService.listEmployees());
-    } catch (err: unknown) {
-      console.error('Error cargando empleados', err);
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  openCreate(): void {
-    this.formState.set('create');
-    this.formError.set(null);
-  }
-
-  openEdit(emp: Employee): void {
-    this.formState.set(emp);
-    this.formError.set(null);
-  }
-
-  closeForm(): void {
-    this.formState.set(null);
-    this.formError.set(null);
-  }
-
-  async handleSubmit(input: CreateEmployeeInput): Promise<void> {
-    this.submitting.set(true);
-    this.formError.set(null);
-    const editing = this.editing();
-    try {
-      if (editing) {
-        await this.staffService.updateEmployee(editing.id, input);
-      } else {
-        await this.staffService.createEmployee(input);
-      }
-      this.formState.set(null);
-      await this.refresh();
-    } catch (err: unknown) {
-      this.formError.set(errorMessage(err, editing ? 'Error al guardar empleado' : 'Error al crear empleado'));
-    } finally {
-      this.submitting.set(false);
-    }
-  }
-
-  handleDelete(emp: Employee): void {
-    this.deleting.set(emp);
-    this.deletingError.set(null);
-  }
-
-  cancelDelete(): void {
-    if (this.deletingSubmitting()) return;
-    this.deleting.set(null);
-    this.deletingError.set(null);
-  }
-
-  async confirmDelete(): Promise<void> {
-    const emp = this.deleting();
-    if (!emp) return;
-    this.deletingSubmitting.set(true);
-    this.deletingError.set(null);
-    try {
-      await this.staffService.deleteEmployee(emp.id);
-      if (this.selectedEmployee()?.id === emp.id) this.selectedEmployee.set(null);
-      this.deleting.set(null);
-      await this.refresh();
-    } catch (err: unknown) {
-      this.deletingError.set(errorMessage(err, 'Error al eliminar empleado'));
-    } finally {
-      this.deletingSubmitting.set(false);
-    }
   }
 
   async openPayments(emp: Employee): Promise<void> {

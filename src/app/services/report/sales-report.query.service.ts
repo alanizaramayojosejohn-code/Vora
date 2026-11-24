@@ -17,6 +17,32 @@ export interface ProductOption {
   name: string;
 }
 
+// Forma cruda de una fila del select de listOrders() de abajo — reflejo
+// exacto de esas columnas, no de Order completo. `amount`/`unit_cost` etc.
+// vienen como `numeric` de Postgres, que PostgREST puede serializar como
+// string; por eso se admiten los dos y se normalizan con Number() al mapear.
+interface SalesOrderRow {
+  id: string;
+  created_at: string;
+  payment_method: PaymentMethod | null;
+  total_amount: number | string;
+  created_by: string | null;
+  status: OrderStatus;
+  order_items: {
+    quantity: number | string;
+    unit_price: number | string;
+    unit_cost: number | string;
+    product_id: string | null;
+    products: { id: string; name: string } | null;
+  }[];
+  order_payments: { method: PaymentMethod; amount: number | string }[];
+}
+
+// _productIds viaja junto a la fila solo para el filtro por producto de más
+// abajo (join anidado que PostgREST no puede filtrar del lado del server);
+// se descarta antes de retornar, nunca sale de este archivo.
+type SalesReportRowInternal = SalesReportRow & { _productIds: (string | null)[] };
+
 @Injectable({ providedIn: 'root' })
 export class SalesReportQueryService {
   private readonly client = inject(SupabaseService).client;
@@ -56,10 +82,18 @@ export class SalesReportQueryService {
     // Mapa id → nombre de usuario para resolver en JS
     const userMap = await this.buildUserMap();
 
-    let rows: SalesReportRow[] = (data ?? []).map((row: any) => {
-      const items: any[] = row.order_items ?? [];
+    // Supabase infiere el tipo de esta consulta a partir de la lista de
+    // columnas del select (a diferencia de otros métodos del proyecto que
+    // seleccionan con `*` y por eso el cliente no puede tipar el join tan
+    // fino): products(id, name) queda inferido como array por la forma en
+    // que Postgrest describe la relación, pero en runtime la fila SIEMPRE
+    // trae un solo producto por línea (product_id es una FK simple) — por
+    // eso el cast pasa por `unknown`, como pide TS cuando el tipo inferido
+    // no coincide estructuralmente con la forma real de los datos.
+    let rows: SalesReportRowInternal[] = ((data ?? []) as unknown as SalesOrderRow[]).map((row) => {
+      const items = row.order_items ?? [];
       const productNames = items
-        .map((it: any) => it.products?.name ?? null)
+        .map((it) => it.products?.name ?? null)
         .filter(Boolean) as string[];
 
       const summary =
@@ -69,38 +103,36 @@ export class SalesReportQueryService {
             ? productNames.join(', ')
             : `${productNames[0]}, ${productNames[1]} (+${productNames.length - 2} más)`;
 
-      const payments: SalesReportPaymentLine[] = (row.order_payments ?? []).map((p: any) => ({
-        method: p.method as PaymentMethod,
+      const payments: SalesReportPaymentLine[] = (row.order_payments ?? []).map((p) => ({
+        method: p.method,
         amount: Number(p.amount),
       }));
 
       // Costo y ganancia se suman desde las líneas, cada una con su costo ya
       // congelado al vender (spec 002, RF-1): no dependen de qué diga hoy
       // products.cost.
-      const cost = items.reduce((acc: number, it: any) => acc + Number(it.unit_cost) * Number(it.quantity), 0);
+      const cost = items.reduce((acc, it) => acc + Number(it.unit_cost) * Number(it.quantity), 0);
       const total = Number(row.total_amount);
 
       return {
         id: row.id,
         created_at: row.created_at,
-        user_name: userMap.get(row.created_by) ?? null,
+        user_name: userMap.get(row.created_by ?? '') ?? null,
         products_summary: summary,
         payments,
         payment_methods: [...new Set(payments.map((p) => p.method))],
         total_amount: total,
         cost,
         profit: total - cost,
-        item_count: items.reduce((acc: number, it: any) => acc + Number(it.quantity), 0),
-        status: row.status as OrderStatus,
-        _productIds: items.map((it: any) => it.product_id as string | null),
-      } as SalesReportRow & { _productIds: (string | null)[] };
+        item_count: items.reduce((acc, it) => acc + Number(it.quantity), 0),
+        status: row.status,
+        _productIds: items.map((it) => it.product_id),
+      };
     });
 
     // Filtro de producto aplicado en JS (join anidado)
     if (filters.productId) {
-      rows = rows.filter((r) =>
-        (r as any)._productIds?.includes(filters.productId),
-      );
+      rows = rows.filter((r) => r._productIds.includes(filters.productId));
     }
 
     // El filtro por método también se aplica acá: con pago dividido la
@@ -112,10 +144,8 @@ export class SalesReportQueryService {
       rows = rows.filter((r) => r.payment_methods.some((m) => wanted.has(m)));
     }
 
-    // Limpia el campo interno antes de retornar
-    rows.forEach((r) => delete (r as any)._productIds);
-
-    return rows;
+    // _productIds era solo para el filtro de arriba, nunca sale de acá.
+    return rows.map(({ _productIds, ...r }) => r);
   }
 
   // Devuelve un mapa profile.id → name para todos los usuarios del negocio.

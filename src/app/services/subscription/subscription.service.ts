@@ -120,7 +120,7 @@ export class SubscriptionService {
     if (error) throw error;
   }
 
-  nextEndDate(currentEndDate: string, months: number = 1): string {
+  nextEndDate(currentEndDate: string, months = 1): string {
     const d = new Date(currentEndDate);
     d.setMonth(d.getMonth() + months);
     return d.toISOString().slice(0, 10);

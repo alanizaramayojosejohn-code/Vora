@@ -12,9 +12,12 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <!-- Imagen -->
     <div class="md:col-span-2">
-      <label class="block text-sm font-medium text-foreground-muted mb-1">
+      <!-- <p>, no <label>: no rotula UN control puntual, es el título de todo el
+           bloque de imagen (preview + el input real, que ya tiene su propia
+           etiqueta "Cambiar/Elegir imagen" envolviéndolo más abajo). -->
+      <p class="block text-sm font-medium text-foreground-muted mb-1">
         Imagen <span class="text-foreground-faint">(opcional)</span>
-      </label>
+      </p>
       <div class="flex items-start gap-4">
         <div class="w-24 h-24 rounded-xl border border-border-subtle bg-elevated overflow-hidden flex items-center justify-center flex-shrink-0">
           @if (compressing()) {
@@ -44,7 +47,7 @@
               </button>
             } @else if (showExistingImage()) {
               <button type="button" (click)="removeExistingImage()"
-                      class="px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 rounded-lg transition">
+                      class="px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger-wash rounded-lg transition">
                 Quitar imagen
               </button>
             }
@@ -68,13 +71,13 @@
     <div class="md:col-span-2">
       <label for="name" class="block text-sm font-medium text-foreground-muted mb-1">Nombre</label>
       <input id="name" type="text" formControlName="name"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <div class="md:col-span-2">
       <label for="description" class="block text-sm font-medium text-foreground-muted mb-1">Descripción <span class="text-foreground-faint">(opcional)</span></label>
       <textarea id="description" rows="2" formControlName="description"
-                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint resize-none"></textarea>
+                class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint resize-none"></textarea>
     </div>
 
     <div>
@@ -91,12 +94,12 @@
         }
       </div>
       @if (showCreateCategory()) {
-        <div class="bg-elevated border border-primary/30 rounded-xl p-3 space-y-2" [formGroup]="categoryForm">
+        <div class="bg-elevated border border-primary-line rounded-xl p-3 space-y-2" [formGroup]="categoryForm">
           <p class="text-xs font-semibold text-primary">Nueva categoría</p>
           <input type="text" formControlName="name" placeholder="Nombre de la categoría"
-                 class="w-full px-3 py-1.5 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+                 class="w-full px-3 py-1.5 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
           <input type="text" formControlName="description" placeholder="Descripción (opcional)"
-                 class="w-full px-3 py-1.5 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+                 class="w-full px-3 py-1.5 bg-input text-foreground text-sm border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
           @if (createCategoryError(); as err) {
             <p class="text-xs text-danger">{{ err }}</p>
           }
@@ -114,7 +117,7 @@
         </div>
       } @else {
         <select id="category_id" formControlName="category_id"
-                class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary">
           <option value="">— Sin categoría —</option>
           @for (cat of allCategories(); track cat.id) {
             <option [value]="cat.id">{{ cat.name }}</option>
@@ -126,19 +129,19 @@
     <div>
       <label for="provider" class="block text-sm font-medium text-foreground-muted mb-1">Proveedor <span class="text-foreground-faint">(opcional)</span></label>
       <input id="provider" type="text" formControlName="provider"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="price" class="block text-sm font-medium text-foreground-muted mb-1">Precio</label>
       <input id="price" type="number" min="0" step="0.01" formControlName="price"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
     </div>
 
     <div>
       <label for="cost" class="block text-sm font-medium text-foreground-muted mb-1">Costo</label>
       <input id="cost" type="number" min="0" step="0.01" formControlName="cost"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
     </div>
 
     <div class="md:col-span-2">
@@ -148,7 +151,7 @@
                  [checked]="hasStock()"
                  (change)="toggleHasStock($any($event.target).checked)"
                  class="sr-only peer" />
-          <div class="w-11 h-6 bg-muted peer-checked:bg-primary rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40"></div>
+          <div class="w-11 h-6 bg-muted peer-checked:bg-primary rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary-edge"></div>
           <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></div>
         </div>
         <span class="text-sm font-medium text-foreground-muted">Gestionar stock</span>
@@ -168,19 +171,19 @@
           @if (isEdit()) { Stock } @else { Stock inicial }
         </label>
         <input id="stock" type="number" min="0" step="1" formControlName="stock"
-               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+               class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
       </div>
     }
   </div>
 
   @if (errorMessage(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">
       {{ msg }}
     </div>
   }
 
   <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
-    <button type="button" (click)="cancel.emit()"
+    <button type="button" (click)="cancelled.emit()"
             class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
       Cancelar
     </button>

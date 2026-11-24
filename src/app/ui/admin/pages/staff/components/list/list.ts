@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { Employee } from '../../../../../../models/employee.model';
+import { initials as computeInitials } from '../../../../../../utilities/initials';
 import { SkeletonRowsComponent } from '../../../../../shared/skeleton-rows.component';
 
 @Component({
@@ -32,7 +33,7 @@ export class StaffListComponent {
     switch (this.sort()) {
       case 'salary': return 'Sueldo ↓';
       case 'hired': return 'Ingreso reciente';
-      default: return 'Nombre A→Z';
+      case 'name': return 'Nombre A→Z';
     }
   });
 
@@ -51,7 +52,7 @@ export class StaffListComponent {
       case 'hired':
         list = [...list].sort((a, b) => b.hired_at.localeCompare(a.hired_at));
         break;
-      default:
+      case 'name':
         list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     }
     return list;
@@ -65,9 +66,6 @@ export class StaffListComponent {
   toggleSortMenu(): void { this.sortMenuOpen.update((o) => !o); }
 
   initials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '?';
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return computeInitials(name, '?');
   }
 }

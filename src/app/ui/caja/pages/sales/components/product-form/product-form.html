@@ -6,7 +6,7 @@
   </div>
 
   @if (availableProducts().length === 0) {
-    <div class="text-sm text-warning bg-warning/10 border border-warning/20 rounded-lg px-3 py-2">
+    <div class="text-sm text-warning bg-warning-wash border border-warning-line rounded-lg px-3 py-2">
       No hay productos disponibles. Agrega stock o registra nuevos productos en Productos.
     </div>
   }
@@ -15,7 +15,7 @@
     <div class="md:col-span-2">
       <label for="product_id" class="block text-sm font-medium text-foreground-muted mb-1">Producto</label>
       <select id="product_id" formControlName="product_id"
-              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary">
         <option value="" disabled>Selecciona un producto…</option>
         @for (product of availableProducts(); track product.id) {
           <option [value]="product.id">
@@ -29,7 +29,7 @@
       <label for="quantity" class="block text-sm font-medium text-foreground-muted mb-1">Cantidad</label>
       <input id="quantity" type="number" min="1" step="1" formControlName="quantity"
              [max]="selectedProduct()?.has_stock ? (selectedProduct()?.stock ?? null) : null"
-             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
+             class="w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary font-mono text-sm placeholder:text-foreground-faint" />
       @if (selectedProduct(); as p) {
         @if (p.has_stock) {
           <p class="text-xs text-foreground-subtle mt-1">Stock actual: {{ p.stock }}.</p>
@@ -44,7 +44,7 @@
         Cliente <span class="text-foreground-faint">(opcional)</span>
       </label>
       <select id="client_id" formControlName="client_id"
-              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              class="select-field w-full px-3 py-2 bg-input text-foreground border border-border-subtle rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary">
         <option value="">— Venta sin cliente —</option>
         @for (client of clients(); track client.id) {
           <option [value]="client.id">{{ client.ci }} · {{ client.name }}</option>
@@ -60,13 +60,13 @@
   }
 
   @if (errorMessage(); as msg) {
-    <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+    <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">
       {{ msg }}
     </div>
   }
 
   <div class="flex justify-end gap-3 pt-2 border-t border-border-subtle">
-    <button type="button" (click)="cancel.emit()"
+    <button type="button" (click)="cancelled.emit()"
             class="px-4 py-2 text-sm font-medium text-foreground-muted hover:bg-muted rounded-lg transition">
       Cancelar
     </button>

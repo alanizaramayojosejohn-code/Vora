@@ -19,7 +19,7 @@
   <app-caja-sales-list
     [sales]="paginatedOrders()"
     [loading]="loading()"
-    (cancel)="handleCancel($event)"
+    (cancelled)="handleCancel($event)"
     (invoice)="showInvoice($event)" />
 
   <!-- Pagination -->
@@ -52,20 +52,23 @@
 
 <!-- Invoice modal -->
 @if (invoiceOrder(); as order) {
-  <app-order-invoice [order]="order" (close)="closeInvoice()" />
+  <app-order-invoice [order]="order" (closed)="closeInvoice()" />
 }
 
-<!-- Cancel modal -->
+<!-- Cancel modal. El backdrop cierra al click; la salida por teclado real es
+     el botón "Cancelar/Confirmar" del footer, un <button> enfocable. -->
 @if (cancelling(); as order) {
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
   <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
        (click)="!cancellingSubmitting() && abortCancel()">
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
     <div class="w-full max-w-md bg-elevated backdrop-blur-xl border border-border-subtle rounded-2xl shadow-2xl shadow-black/20 overflow-hidden"
          role="dialog" aria-modal="true"
          (click)="$event.stopPropagation()">
 
       <!-- Header -->
       <div class="px-7 pt-7 pb-5 flex flex-col items-center text-center gap-4">
-        <div class="w-16 h-16 rounded-2xl bg-danger/10 text-danger flex items-center justify-center">
+        <div class="w-16 h-16 rounded-2xl bg-danger-wash text-danger flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
           </svg>
@@ -99,16 +102,16 @@
 
         <!-- Reason (required) -->
         <div>
-          <label class="block text-xs font-semibold text-foreground-muted mb-1.5">
+          <label for="cancel-reason" class="block text-xs font-semibold text-foreground-muted mb-1.5">
             Motivo de cancelación <span class="text-danger">*</span>
           </label>
-          <textarea rows="3"
+          <textarea id="cancel-reason" rows="3"
                     [value]="cancelReason()"
                     (input)="cancelReason.set($any($event.target).value)"
                     (blur)="cancelReasonTouched.set(true)"
                     placeholder="Ej: Error en el pedido, cliente canceló, cobro duplicado…"
                     [disabled]="cancellingSubmitting()"
-                    class="w-full px-3 py-2 bg-input text-foreground text-sm border rounded-lg outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none placeholder:text-foreground-faint transition disabled:opacity-60"
+                    class="w-full px-3 py-2 bg-input text-foreground text-sm border rounded-lg outline-none focus:ring-2 focus:ring-primary-line focus:border-primary resize-none placeholder:text-foreground-faint transition disabled:opacity-60"
                     [class.border-danger]="cancelReasonTouched() && !cancelReason().trim()"
                     [class.border-border-subtle]="!cancelReasonTouched() || cancelReason().trim()">
           </textarea>
@@ -118,7 +121,7 @@
         </div>
 
         @if (cancellingError(); as err) {
-          <div class="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">{{ err }}</div>
+          <div class="text-sm text-danger bg-danger-wash border border-danger-line rounded-lg px-3 py-2">{{ err }}</div>
         }
       </div>
 

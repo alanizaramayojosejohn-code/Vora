@@ -1,33 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../../services/auth/auth.service';
-import { ThemeModeToggleComponent } from '../../shared/theme-mode-toggle.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AmbientGlowComponent } from '../../shared/ambient-glow.component';
 import { RouteViewComponent } from '../../shared/route-view.component';
-import { MenuToggleComponent } from '../../shared/menu-toggle.component';
+import { SidebarComponent } from '../../shared/sidebar.component';
+import { SidebarNavGroup } from '../../shared/sidebar-nav.model';
 
 @Component({
   selector: 'app-saas-container',
-  imports: [MenuToggleComponent, RouteViewComponent, RouterLink, RouterLinkActive, ThemeModeToggleComponent],
+  imports: [AmbientGlowComponent, SidebarComponent, RouteViewComponent],
   templateUrl: './component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SaasContainerComponent {
-  private readonly router = inject(Router);
-  protected readonly auth = inject(AuthService);
-
   readonly audienceLabel = 'SaaS';
-  readonly sidebarOpen = signal(false);
 
-  readonly initials = computed(() => {
-    const name = this.auth.profile()?.name?.trim() ?? '';
-    if (!name) return '··';
-    const parts = name.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  });
-
-  async logout(): Promise<void> {
-    await this.auth.logout();
-    await this.router.navigateByUrl('/login');
-  }
+  readonly navGroups: SidebarNavGroup[] = [
+    { label: 'Plataforma', items: [
+        { route: '/saas/home', label: 'Inicio', icon: 'home', exact: true },
+        { route: '/saas/businesses', label: 'Negocios', icon: 'building' },
+        { route: '/saas/subscriptions', label: 'Facturación', icon: 'credit-card' },
+    ]},
+  ];
 }
